@@ -9,6 +9,7 @@ public class ChatAppDbContext : DbContext
 {
     public DbSet<ChatRoom> ChatRooms { get; } = null!;
     public DbSet<User> Users { get; } = null!;
+    public DbSet<ChatMessage> Messages { get; } = null!;
 
     public ChatAppDbContext(DbContextOptions options)
      : base(options) { }
