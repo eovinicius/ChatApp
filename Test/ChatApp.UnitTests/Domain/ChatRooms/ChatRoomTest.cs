@@ -8,14 +8,16 @@ namespace ChatApp.UnitTests.Domain.ChatRooms;
 public class ChatRoomTest
 {
     [Fact]
-    public void Deveria_criar_sala_publica_sem_senha()
+    public void Deveria_criar_sala_publica()
     {
+        // Arrange
         var name = "sala";
         var user = new User("John Doe");
-        var isPrivate = false;
 
-        var room = ChatRoom.Create(name, user, isPrivate);
+        // Act
+        var room = ChatRoomFactory.CreatePublicRoom(name, user);
 
+        // Assert
         room.Should().NotBeNull();
         room.Id.Should().NotBe(Guid.Empty);
         room.Members.Should().HaveCount(1);
@@ -30,11 +32,10 @@ public class ChatRoomTest
         // Arrange
         var user = new User("John Doe");
         var name = "sala";
-        var isPrivate = true;
         var senha = "123";
 
         // Act
-        var room = ChatRoom.Create(name, user, isPrivate, senha);
+        var room = ChatRoomFactory.CreatePrivateRoom(name, user, senha);
 
         // Assert
         room.Should().NotBeNull();
@@ -52,14 +53,11 @@ public class ChatRoomTest
         // Arrange
         var user = new User("John Doe");
         var name = "sala";
-        var isPrivate = false;
-        var senha = "123";
-
 
         var user2 = new User("jose");
 
         // Act
-        var room = ChatRoom.Create(name, user, isPrivate, senha);
+        var room = ChatRoomFactory.CreatePublicRoom(name, user);
         room.Join(user2);
 
         // Assert
@@ -76,10 +74,8 @@ public class ChatRoomTest
         var user = new User("John Doe");
         var user2 = new User("jose");
         var name = "sala";
-        var isPrivate = false;
-        var senha = "123";
 
-        var room = ChatRoom.Create(name, user, isPrivate, senha);
+        var room = ChatRoomFactory.CreatePublicRoom(name, user);
         room.Join(user2);
 
         // Act
