@@ -29,16 +29,18 @@ public class LeaveRoomCommandHandler : ICommandHandler<LeaveRoomCommand>
         var user = await _userRepository.GetById(_userContext.UserId, cancellationToken);
         if (user is null)
         {
-            return Result.Failure(Error.None);
+            return Result.Failure(Error.NullValue);
         }
 
         var room = await _chatRoomRepository.GetById(request.RoomId, cancellationToken);
         if (room is null)
         {
-            return Result.Failure(Error.None);
+            return Result.Failure(Error.NullValue);
         }
 
         room.Leave(user);
+
+        await _chatRoomRepository.Update(room, cancellationToken);
 
         if (room.IsEmpty())
         {
@@ -46,7 +48,6 @@ public class LeaveRoomCommandHandler : ICommandHandler<LeaveRoomCommand>
         }
 
         await _unitOfWork.Commit(cancellationToken);
-
         return Result.Success();
     }
 }
