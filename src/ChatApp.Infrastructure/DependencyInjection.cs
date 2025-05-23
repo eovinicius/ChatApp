@@ -31,6 +31,7 @@ public static class DependencyInjection
 
         services.AddScoped<IChatRoomRepository, ChatRoomRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
     }
 
