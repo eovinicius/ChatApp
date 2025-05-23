@@ -1,0 +1,21 @@
+services:
+  chatapp.api:
+    image: ${DOCKER_REGISTRY-}chatappapi
+    container_name: Chatapp.Api
+    build:
+      context: .
+      dockerfile: src/Chatapp.Api/Dockerfile
+    depends_on:
+      - chatapp-db
+
+  chatapp-db:
+    image: postgres:latest
+    container_name: Chatapp.Db
+    environment:
+      - POSTGRES_DB=chatapp
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./.containers/database:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
