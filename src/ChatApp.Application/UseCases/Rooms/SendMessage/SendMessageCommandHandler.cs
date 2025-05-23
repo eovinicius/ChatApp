@@ -29,18 +29,18 @@ internal sealed class SendMessageCommandHandler : ICommandHandler<SendMessageCom
         var user = await _userRepository.GetById(_userContext.UserId, cancellationToken);
         if (user is null)
         {
-            return Result.Failure<Guid>(Error.None);
+            return Result.Failure<Guid>(Error.NullValue);
         }
 
         var room = await _chatRoomRepository.GetById(request.RoomId, cancellationToken);
         if (room is null)
         {
-            return Result.Failure<Guid>(Error.None);
+            return Result.Failure<Guid>(Error.NullValue);
         }
 
         if (!room.IsUserInRoom(user.Id))
         {
-            return Result.Failure<Guid>(Error.None);
+            return Result.Failure<Guid>(Error.NullValue);
         }
 
         var message = ChatMessage.Create(room.Id, user.Id, request.Message);
