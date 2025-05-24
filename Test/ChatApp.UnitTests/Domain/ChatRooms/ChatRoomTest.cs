@@ -12,7 +12,7 @@ public class ChatRoomTest
     {
         // Arrange
         var name = "sala";
-        var user = new User("John Doe");
+        var user = new User("John Doe", "username", "password");
 
         // Act
         var room = ChatRoomFactory.CreatePublicRoom(name, user);
@@ -30,7 +30,7 @@ public class ChatRoomTest
     public void Deveria_criar_sala_privada_com_senha()
     {
         // Arrange
-        var user = new User("John Doe");
+        var user = new User("John Doe", "username", "password");
         var name = "sala";
         var senha = "123";
 
@@ -51,10 +51,10 @@ public class ChatRoomTest
     public void Deveria_adicionar_usuario_quando_entrar_na_sala_publica()
     {
         // Arrange
-        var user = new User("John Doe");
+        var user = new User("John Doe", "username", "password");
         var name = "sala";
 
-        var user2 = new User("jose");
+        var user2 = new User("jose", "username", "password");
 
         // Act
         var room = ChatRoomFactory.CreatePublicRoom(name, user);
@@ -71,8 +71,8 @@ public class ChatRoomTest
     public void Deveria_remover_usuario_da_lista_de_membros_ao_sair_da_sala()
     {
         // Arrange
-        var user = new User("John Doe");
-        var user2 = new User("jose");
+        var user = new User("John Doe", "username", "password");
+        var user2 = new User("jose", "username", "password");
         var name = "sala";
 
         var room = ChatRoomFactory.CreatePublicRoom(name, user);

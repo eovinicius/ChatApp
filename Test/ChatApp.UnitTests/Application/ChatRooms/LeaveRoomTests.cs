@@ -45,9 +45,9 @@ public class LeaveRoomTests
     public async Task Deve_remover_usuario_quando_sair_da_sala()
     {
         // Arrange
-        var room = ChatRoom.Create("sala", new User("John Doe"), true, "1234");
+        var room = ChatRoom.Create("sala", new User("John Doe", "username", "password"), true, "1234");
 
-        var user = new User("George");
+        var user = new User("George", "username", "password");
         room.Join(user);
 
         _userContextMock.UserId.Returns(user.Id);
@@ -68,7 +68,7 @@ public class LeaveRoomTests
     public async Task Deve_deletar_sala_quando_ultimo_membro_sair()
     {
         // Arrange
-        var ownerMember = new User("John Doe");
+        var ownerMember = new User("John Doe", "username", "password");
         var room = ChatRoom.Create("sala", ownerMember, true, "1234");
 
         _userContextMock.UserId.Returns(ownerMember.Id);
@@ -89,7 +89,7 @@ public class LeaveRoomTests
     public async Task Deve_retornar_erro_quando_usuario_nao_existe()
     {
         // Arrange
-        var user = new User("John Doe");
+        var user = new User("John Doe", "username", "password");
         _userContextMock.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns((User?)null);
 
@@ -107,7 +107,7 @@ public class LeaveRoomTests
     public async Task Deve_retornar_erro_quando_sala_nao_existe()
     {
         // Arrange
-        var user = new User("John Doe");
+        var user = new User("John Doe", "username", "password");
         _userContextMock.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
         _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns((ChatRoom?)null);

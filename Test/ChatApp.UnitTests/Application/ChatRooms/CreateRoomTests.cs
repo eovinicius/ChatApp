@@ -43,7 +43,7 @@ public class CreateRoomTests
     public async Task Handle_deve_criar_sala_publica()
     {
         // Arrange
-        var user = new User("John Doe");
+        var user = new User("John Doe", "username", "password");
         _userContextMock.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
 
@@ -61,7 +61,7 @@ public class CreateRoomTests
     public async Task Handle_deve_criar_sala_privada_com_senha()
     {
         // Arrange
-        var user = new User("John Doe");
+        var user = new User("John Doe", "username", "password");
         _userContextMock.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
 
@@ -80,7 +80,7 @@ public class CreateRoomTests
     public async Task Deveria_retornar_erro_quando_usuario_nao_existe()
     {
         // Arrange
-        var user = new User("John Doe");
+        var user = new User("John Doe", "username", "password");
         _userContextMock.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns((User?)null);
 
