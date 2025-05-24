@@ -4,5 +4,5 @@ namespace ChatApp.Application.Abstractions.Authentication;
 
 public interface IAuthenticationService
 {
-    Task<string?> GenereteToken(User user);
+    string? GenerateToken(User user);
 }
