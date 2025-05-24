@@ -18,4 +18,9 @@ public class UserRepository : IUserRepository
     {
         return await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
     }
+
+    public async Task<User?> GetByUsername(string username)
+    {
+        return await _dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
+    }
 }
