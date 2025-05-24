@@ -4,6 +4,7 @@ namespace ChatApp.Domain.Repositories;
 
 public interface IUserRepository
 {
-    Task<User?> GetById(Guid userId, CancellationToken cancellationToken);
-    Task<User?> GetByUsername(string username);
+    Task Add(User user, CancellationToken cancellationToken = default);
+    Task<User?> GetById(Guid userId, CancellationToken cancellationToken = default);
+    Task<User?> GetByUsername(string username, CancellationToken cancellationToken = default);
 }
