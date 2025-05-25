@@ -18,11 +18,12 @@ public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, s
     private readonly IHashService _hashService;
     private readonly IAuthenticationService _authenticationService;
 
-    public RegisterUserCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, IHashService hashService)
+    public RegisterUserCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, IHashService hashService, IAuthenticationService authenticationService)
     {
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _hashService = hashService;
+        _authenticationService = authenticationService;
     }
 
     public async Task<Result<string?>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -39,6 +40,8 @@ public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, s
         var user = new User(request.Name, request.Username, passwordHash);
 
         await _userRepository.Add(user, cancellationToken);
+
+        await _unitOfWork.Commit(cancellationToken);
 
         var token = _authenticationService.GenerateToken(user);
 
