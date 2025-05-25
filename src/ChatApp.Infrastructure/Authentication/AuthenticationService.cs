@@ -32,7 +32,7 @@ public class AuthenticationService : IAuthenticationService
             ]),
             Expires = DateTime.UtcNow.AddHours(1),
             SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes("382130921319238012309")),
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes("rV0xK+6G8xZJ3m9rTqMev2Yn1w+8WpFlvT5X8NVa1jJU=")),
                 SecurityAlgorithms.HmacSha256Signature)
         };
 
