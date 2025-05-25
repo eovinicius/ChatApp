@@ -7,12 +7,12 @@ namespace ChatApp.Infrastructure;
 
 public class ChatAppDbContext : DbContext
 {
-    public DbSet<ChatRoom> ChatRooms { get; } = null!;
-    public DbSet<User> Users { get; } = null!;
-    public DbSet<ChatMessage> Messages { get; } = null!;
+    public DbSet<ChatRoom> ChatRooms { get; set; } = null!;
+    public DbSet<User> Users { get; set; } = null!;
+    public DbSet<ChatMessage> Messages { get; set; } = null!;
 
     public ChatAppDbContext(DbContextOptions options)
-     : base(options) { }
+        : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
