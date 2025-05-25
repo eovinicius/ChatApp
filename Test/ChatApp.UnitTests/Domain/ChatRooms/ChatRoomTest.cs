@@ -68,6 +68,26 @@ public class ChatRoomTest
     }
 
     [Fact]
+    public void Nao_deveria_permitir_entrada_usuarios_quando_limite_for_atigindo()
+    {
+        // Arrange
+        var chatRoom = ChatRoomFactory.CreatePublicRoom("sala", new User("john Doe", "user", "123"));
+
+        for (int i = 0; i < 50; i++)
+        {
+            var user = new User("user", "user", "123");
+            chatRoom.Join(user);
+        }
+
+        // Act
+        var user2 = new User("user", "user", "123");
+        chatRoom.Join(user2);
+
+        // Assert
+        chatRoom.Members.Should().HaveCount(50);
+    }
+
+    [Fact]
     public void Deveria_remover_usuario_da_lista_de_membros_ao_sair_da_sala()
     {
         // Arrange
