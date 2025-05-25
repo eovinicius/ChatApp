@@ -71,17 +71,19 @@ public class ChatRoomTest
     public void Nao_deveria_permitir_entrada_usuarios_quando_limite_for_atigindo()
     {
         // Arrange
-        var chatRoom = ChatRoomFactory.CreatePublicRoom("sala", new User("John Doe", "username", "password"));
+        var chatRoom = ChatRoomFactory.CreatePublicRoom("full room", new User("John Doe", "username", "password"));
 
-        for (int i = 0; i < 50; i++)
+        const int maxMembers = 50;
+
+        for (int i = 0; i < maxMembers; i++)
         {
             var user = new User("John Doe", "username", "password");
             chatRoom.Join(user);
         }
 
         // Act
-        var user2 = new User("John Doe", "username", "password");
-        chatRoom.Join(user2);
+        var extraUser = new User("John Doe", "username", "password");
+        chatRoom.Join(extraUser);
 
         // Assert
         chatRoom.Members.Should().HaveCount(50);
