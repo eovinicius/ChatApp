@@ -10,6 +10,7 @@ public sealed class ChatRoom
     public Guid OwnerId { get; private set; }
     public bool IsPrivate { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public int MaxMembers { get; private set; }
     private readonly List<ChatRoomUser> _members;
     public IReadOnlyCollection<ChatRoomUser> Members => _members.AsReadOnly();
 
@@ -20,10 +21,11 @@ public sealed class ChatRoom
         Id = Guid.NewGuid();
         Name = name;
         Password = password ?? string.Empty;
-        OwnerId = ownerId;
+        OwnerId = ownerId; 
         IsPrivate = isPrivate;
         CreatedAt = DateTime.UtcNow;
         _members = [];
+        MaxMembers = 50;
     }
 
     public static ChatRoom Create(string name, User user, bool isPrivate, string? password = null)
@@ -37,6 +39,9 @@ public sealed class ChatRoom
     public void Join(User user)
     {
         if (IsUserInRoom(user.Id))
+            return;
+
+        if (MaxMembersReached())
             return;
 
         var chatRoomUser = new ChatRoomUser(Id, user.Id);
@@ -54,13 +59,10 @@ public sealed class ChatRoom
 
     public bool IsEmpty() => !_members.Any();
 
-    public bool ValidatePassword(string? password)
-    {
-        return Password == password;
-    }
+    public bool ValidatePassword(string? password) => Password == password;
 
-    public bool IsUserInRoom(Guid userId)
-    {
-        return _members.Any(x => x.UserId == userId);
-    }
+    public bool IsUserInRoom(Guid userId) => _members.Any(x => x.UserId == userId);
+
+    private bool MaxMembersReached() => _members.Count >= MaxMembers;
+
 }
