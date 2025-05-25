@@ -10,6 +10,8 @@ public class ChatRoomUserConfiguration : IEntityTypeConfiguration<ChatRoomUser>
 {
     public void Configure(EntityTypeBuilder<ChatRoomUser> builder)
     {
+        builder.ToTable("Members");
+
         builder.HasKey(cru => new { cru.ChatRoomId, cru.UserId });
 
         builder.Property(cru => cru.JoinedAt)
@@ -19,7 +21,7 @@ public class ChatRoomUserConfiguration : IEntityTypeConfiguration<ChatRoomUser>
             .IsRequired();
 
         builder.HasOne<ChatRoom>()
-            .WithMany("_members")
+            .WithMany(c => c.Members) // usa a propriedade pública
             .HasForeignKey(cru => cru.ChatRoomId)
             .OnDelete(DeleteBehavior.Cascade);
 
