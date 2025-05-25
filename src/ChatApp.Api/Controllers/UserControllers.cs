@@ -4,6 +4,7 @@ using ChatApp.Application.UseCases.Users.RegisterUser;
 
 using MediatR;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Api.Controllers;
@@ -24,12 +25,12 @@ public class UserControllers : ControllerBase
     {
         var command = new RegisterUserCommand(request.Name, request.Username, request.Password);
 
-        var id = await _sender.Send(command);
+        var result = await _sender.Send(command);
 
         return CreatedAtAction(
             nameof(Register),
-            new { id },
-            new { id });
+            new { result.Value },
+            new { result.Value });
     }
 }
 
