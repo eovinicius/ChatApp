@@ -48,10 +48,7 @@ public sealed class JoinRoomCommandHanlder : ICommandHandler<JoinRoomCommand>
             return Result.Failure(Error.NullValue);
         }
 
-        if (!room.IsUserInRoom(user.Id))
-        {
-            room.Join(user);
-        }
+        room.Join(user);
 
         await _chatRoomRepository.Update(room, cancellationToken);
 
