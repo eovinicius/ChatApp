@@ -93,7 +93,7 @@ public class JoinRoomTests
         var result = await _handler.Handle(Command, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.IsSuccess.Should().BeFalse();
         await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
         await _chatRoomRepositoryMock.DidNotReceive().Update(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
     }
@@ -111,7 +111,7 @@ public class JoinRoomTests
         var result = await _handler.Handle(Command, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.IsSuccess.Should().BeFalse();
         await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
         await _chatRoomRepositoryMock.DidNotReceive().Update(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
     }
@@ -130,7 +130,7 @@ public class JoinRoomTests
         var result = await _handler.Handle(Command, CancellationToken.None);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
+        result.IsSuccess.Should().BeFalse();
         await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
         await _chatRoomRepositoryMock.DidNotReceive().Update(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
     }
