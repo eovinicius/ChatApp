@@ -1,5 +1,6 @@
 using ChatApp.Application;
 using ChatApp.Infrastructure;
+using ChatApp.Infrastructure.Services;
 
 using Microsoft.OpenApi.Models;
 
@@ -61,6 +62,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// app.MapHub();
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();
