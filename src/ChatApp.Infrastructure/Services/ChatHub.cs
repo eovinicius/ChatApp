@@ -5,27 +5,20 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.Infrastructure.Services;
 
-public class ChatHub : Hub<IChatHub>, IChatHub
+public class ChatHub : Hub
 {
-    private readonly IHubContext<ChatHub> _hubContext;
-
-    public ChatHub(IHubContext<ChatHub> hubContext)
+    public async Task JoinRoom(string roomName)
     {
-        _hubContext = hubContext;
+        await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
     }
 
-    public override Task OnConnectedAsync()
+    public async Task LeaveRoom(string roomName)
     {
-        return base.OnConnectedAsync();
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
     }
 
-    public Task JoinGroup(User user, string groupName)
+    public async Task SendMessage(string roomName, string user, string message)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task SendMessageAsync(string user, string message)
-    {
-        return _hubContext.Clients.All.SendAsync("ReceiveMessage", user, message);
+        await Clients.Group(roomName).SendAsync("ReceiveMessage", user, message);
     }
 }
