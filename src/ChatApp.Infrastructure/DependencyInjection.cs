@@ -1,4 +1,7 @@
-﻿using ChatApp.Application.Abstractions.Authentication;
+﻿using System.Security.Claims;
+using System.Text;
+
+using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Services;
 using ChatApp.Domain.Repositories;
@@ -7,9 +10,11 @@ using ChatApp.Infrastructure.Data;
 using ChatApp.Infrastructure.Repositories;
 using ChatApp.Infrastructure.Services;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ChatApp.Infrastructure;
 
@@ -41,7 +46,8 @@ public static class DependencyInjection
 
     private static void AddServicesProviders(IServiceCollection services)
     {
-        services.AddScoped<IChatHub, ChatHub>();
+        services.AddScoped<IHashService, HashService>();
+        services.AddSingleton<IChatHub, SignalRChatRoomNotifier>();
         services.AddSignalR();
     }
 
@@ -50,6 +56,16 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
-        services.AddScoped<IHashService, HashService>();
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("rV0xK+6G8xZJ3m9rTqMev2Yn1w+8WpFlvT5X8NVa1jJU=")),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            NameClaimType = ClaimTypes.NameIdentifier,
+            RoleClaimType = ClaimTypes.Role,
+        });
+
     }
 }
