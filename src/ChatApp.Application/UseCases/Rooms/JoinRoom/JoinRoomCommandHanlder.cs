@@ -54,7 +54,7 @@ public sealed class JoinRoomCommandHanlder : ICommandHandler<JoinRoomCommand>
 
         await _unitOfWork.Commit(cancellationToken);
 
-        await _chatHub.JoinGroup(user, room.Id.ToString());
+        await _chatHub.JoinGroup(room.Id.ToString(), user.Id.ToString(), cancellationToken);
 
         return Result.Success();
     }
