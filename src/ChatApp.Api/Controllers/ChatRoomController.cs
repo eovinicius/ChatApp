@@ -19,8 +19,8 @@ public class ChatRoomController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateChatRoom([FromBody] CreateChatRoomRequest request)
     {
-        var id = await _sender.Send(new CreateChatroomCommand(request.RoomName, request.IsPrivate, request.Password));
-        return CreatedAtAction(nameof(CreateChatRoom), new { id }, id);
+        var result = await _sender.Send(new CreateChatroomCommand(request.RoomName, request.IsPrivate, request.Password));
+        return CreatedAtAction(nameof(CreateChatRoom), new { result }, result);
     }
 
     public sealed class CreateChatRoomRequest
