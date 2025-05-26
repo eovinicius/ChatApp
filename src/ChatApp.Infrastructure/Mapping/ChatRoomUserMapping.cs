@@ -21,7 +21,7 @@ public class ChatRoomUserConfiguration : IEntityTypeConfiguration<ChatRoomUser>
             .IsRequired();
 
         builder.HasOne<ChatRoom>()
-            .WithMany(c => c.Members) // usa a propriedade pública
+            .WithMany(c => c.Members)
             .HasForeignKey(cru => cru.ChatRoomId)
             .OnDelete(DeleteBehavior.Cascade);
 
