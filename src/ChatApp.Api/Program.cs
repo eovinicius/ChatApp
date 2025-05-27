@@ -8,10 +8,11 @@ using Microsoft.OpenApi.Models;
 
 using Serilog;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog((context, loggerConfig) =>
-    loggerConfig.ReadFrom.Configuration(context.Configuration));
+// builder.Host.UseSerilog((context, loggerConfig) =>
+//     loggerConfig.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddCors();
 
@@ -84,15 +85,14 @@ app.UseRateLimiter();
 
 app.UseCustomExceptionHandler();
 
-app.UseSerilogRequestLogging();
+// app.UseSerilogRequestLogging();
+
 
 app.UseCors();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
-
-app.UseRequestContextLogging();
 
 app.MapControllers();
 
