@@ -87,7 +87,6 @@ app.UseCustomExceptionHandler();
 
 // app.UseSerilogRequestLogging();
 
-
 app.UseCors();
 
 app.UseAuthentication();
