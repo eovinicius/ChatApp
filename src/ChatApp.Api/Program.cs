@@ -1,8 +1,10 @@
+using ChatApp.Api.Extensions;
 using ChatApp.Application;
 using ChatApp.Infrastructure;
-using ChatApp.Infrastructure.Services;
 
 using Microsoft.OpenApi.Models;
+
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,18 +52,26 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    app.ApplyMigrations();
 }
 
-app.UseCors();
-
 app.UseHttpsRedirection();
+
+app.UseRateLimiter();
+
+app.UseCustomExceptionHandler();
+
+app.UseSerilogRequestLogging();
+
+app.UseCors();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.MapControllers();
+app.UseRequestContextLogging();
 
-app.MapHub<ChatHub>("/chatHub");
+app.MapControllers();
 
 app.Run();
