@@ -1,3 +1,5 @@
+using System.Threading.RateLimiting;
+
 using ChatApp.Api.Extensions;
 using ChatApp.Application;
 using ChatApp.Infrastructure;
@@ -8,10 +10,15 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSerilog((context, loggerConfig) =>
+    loggerConfig.ReadFrom.Configuration(context.Configuration));
+
 builder.Services.AddCors();
 
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddControllers();
 
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -44,6 +51,21 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+});
+
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("default", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.User.Identity?.Name ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromSeconds(30),
+                QueueLimit = 0,
+            }));
+
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
 var app = builder.Build();
