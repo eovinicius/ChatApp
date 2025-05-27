@@ -30,8 +30,8 @@ public class ChatRoomMapping : IEntityTypeConfiguration<ChatRoom>
         builder.Property(c => c.CreatedAt)
             .IsRequired();
 
-        builder.Metadata
-            .FindNavigation(nameof(ChatRoom.Members))!
-            .SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder
+            .Navigation(c => c.Members)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }
