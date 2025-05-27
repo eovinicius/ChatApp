@@ -29,19 +29,19 @@ public class LoggingBehavior<TRequest, TResponse>
 
         try
         {
-            _logger.LogInformation("Executing request {RequestName}", requestName);
+            _logger.LogInformation("{RequestName} - Executing request", requestName);
 
             var result = await next(cancellationToken);
 
             if (result.IsSuccess)
             {
-                _logger.LogInformation("Request {RequestName} processed successfully", requestName);
+                _logger.LogInformation("{RequestName} - Request processed successfully", requestName);
             }
             else
             {
                 using (LogContext.PushProperty("Error", result.Error, true))
                 {
-                    _logger.LogError("Request {RequestName} processed with error", requestName);
+                    _logger.LogError("{RequestName} - Request failed", requestName);
                 }
             }
 
