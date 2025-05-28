@@ -21,11 +21,10 @@ jobs:
 
       - name: Restaurar dependências
         run: |
-          dotnet restore src/ChatApp.API/ChatApp.API.csproj
-          dotnet restore tests/ChatApp.Tests/ChatApp.Tests.csproj
+          dotnet restore
 
       - name: Compilar projeto principal
-        run: dotnet build src/ChatApp.API/ChatApp.API.csproj --configuration Release --no-restore
+        run: dotnet build src/ChatApp.Api/ChatApp.Api.csproj --no-restore
 
       - name: Executar testes
         run: dotnet test tests/ChatApp.Tests/ChatApp.Tests.csproj --no-build --verbosity normal
