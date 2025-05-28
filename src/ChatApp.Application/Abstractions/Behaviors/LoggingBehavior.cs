@@ -49,7 +49,7 @@ public class LoggingBehavior<TRequest, TResponse>
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Request {RequestName} processing failed", requestName);
+            _logger.LogError(exception, "{RequestName} Request processing failed", requestName);
 
             throw;
         }
