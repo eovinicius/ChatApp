@@ -24,7 +24,7 @@ jobs:
           dotnet restore
 
       - name: Compilar projeto principal
-        run: dotnet build src/ChatApp.Api/ChatApp.Api.csproj --no-restore
+        run: dotnet build .\ChatApp.sln
 
       - name: Executar testes
-        run: dotnet test test/ChatApp.UnitTests/ChatApp.UnitTests.csproj --no-build --verbosity normal
+        run: dotnet test .\ChatApp.sln
