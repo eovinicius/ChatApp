@@ -27,4 +27,4 @@ jobs:
         run: dotnet build src/ChatApp.Api/ChatApp.Api.csproj --no-restore
 
       - name: Executar testes
-        run: dotnet test tests/ChatApp.Tests/ChatApp.Tests.csproj --no-build --verbosity normal
+        run: dotnet test test/ChatApp.UnitTests/ChatApp.UnitTests.csproj --no-build --verbosity normal
