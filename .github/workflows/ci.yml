@@ -24,7 +24,7 @@ jobs:
           dotnet restore
 
       - name: Compilar projeto principal
-        run: dotnet build .\ChatApp.sln
+        run: dotnet build ChatApp.sln
 
       - name: Executar testes
-        run: dotnet test .\ChatApp.sln
+        run: dotnet test ChatApp.sln
