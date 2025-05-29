@@ -21,7 +21,7 @@ public sealed class ChatRoom
         Id = Guid.NewGuid();
         Name = name;
         Password = password ?? string.Empty;
-        OwnerId = ownerId; 
+        OwnerId = ownerId;
         IsPrivate = isPrivate;
         CreatedAt = DateTime.UtcNow;
         _members = [];
@@ -57,6 +57,13 @@ public sealed class ChatRoom
         _members.Remove(chatRoomUser);
     }
 
+    public void SetMemberAsAdministrator(User user)
+    {
+        var chatRoomUser = Members.FirstOrDefault(x => x.UserId == user.Id);
+        if (chatRoomUser is null) return;
+
+        chatRoomUser.PromoteToAdmin();
+    }
     public bool IsEmpty() => !_members.Any();
 
     public bool ValidatePassword(string? password) => Password == password;

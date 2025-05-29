@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Text;
+using System.Threading.RateLimiting;
 
 using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
@@ -11,6 +12,8 @@ using ChatApp.Infrastructure.Repositories;
 using ChatApp.Infrastructure.Services;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +30,7 @@ public static class DependencyInjection
         AddPersistence(services, configuration);
         AddAuthentication(services);
         AddServicesProviders(services);
+        AddRateLimiter(services);
         return services;
     }
 
@@ -66,6 +70,22 @@ public static class DependencyInjection
             NameClaimType = ClaimTypes.NameIdentifier,
             RoleClaimType = ClaimTypes.Role,
         });
+    }
 
+    private static void AddRateLimiter(IServiceCollection services)
+    {
+        services.AddRateLimiter(options =>
+        {
+            options.AddPolicy("default", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.User.Identity?.Name ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 10,
+                        Window = TimeSpan.FromSeconds(30),
+                        QueueLimit = 0,
+                    }));
+
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        });
     }
 }
