@@ -13,7 +13,7 @@ using NSubstitute;
 
 namespace ChatApp.UnitTests.Application.ChatRooms;
 
-public class CreateRoomTests
+public class CreateRoomCommandHandlerTests
 {
     private static readonly CreateChatroomCommand Command = new("sala", false);
 
@@ -23,7 +23,7 @@ public class CreateRoomTests
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IUserContext _userContextMock;
     private readonly IChatHub _chatHubMock;
-    public CreateRoomTests()
+    public CreateRoomCommandHandlerTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
         _chatRoomRepositoryMock = Substitute.For<IChatRoomRepository>();

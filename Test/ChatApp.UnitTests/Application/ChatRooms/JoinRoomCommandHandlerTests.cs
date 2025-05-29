@@ -12,7 +12,7 @@ using NSubstitute;
 
 namespace ChatApp.UnitTests.Application.ChatRooms;
 
-public class JoinRoomTests
+public class JoinRoomCommandHandlerTests
 {
 
     private static readonly JoinRoomCommand Command = new(Guid.NewGuid(), "123");
@@ -23,7 +23,7 @@ public class JoinRoomTests
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IUserContext _userContextMock;
     private readonly IChatHub _chatHubMock;
-    public JoinRoomTests()
+    public JoinRoomCommandHandlerTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
         _chatRoomRepositoryMock = Substitute.For<IChatRoomRepository>();
