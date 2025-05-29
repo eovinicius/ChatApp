@@ -79,21 +79,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
-builder.Services.AddRateLimiter(options =>
-{
-    options.AddPolicy("default", httpContext => RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: httpContext.User.Identity?.Name ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
-            factory: _ => new FixedWindowRateLimiterOptions
-            {
-                PermitLimit = 10,
-                Window = TimeSpan.FromSeconds(30),
-                QueueLimit = 0,
-            }));
-
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-});
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
