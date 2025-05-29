@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-using ChatApp.Application.Abstractions.Authentication;
+﻿using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Services;
 using ChatApp.Application.UseCases.Rooms.LeaveRoom;
@@ -15,7 +13,7 @@ using NSubstitute;
 
 namespace ChatApp.UnitTests.Application.ChatRooms;
 
-public class LeaveRoomTests
+public class LeaveRoomCommandHandlerTests
 {
 
     private static readonly LeaveRoomCommand Command = new(Guid.NewGuid());
@@ -26,7 +24,7 @@ public class LeaveRoomTests
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IUserContext _userContextMock;
     private readonly IChatHub _chatHubMock;
-    public LeaveRoomTests()
+    public LeaveRoomCommandHandlerTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
         _chatRoomRepositoryMock = Substitute.For<IChatRoomRepository>();
