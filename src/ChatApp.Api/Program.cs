@@ -1,16 +1,9 @@
-using System.Threading.RateLimiting;
-
 using ChatApp.Api.Extensions;
 using ChatApp.Application;
 using ChatApp.Infrastructure;
 
 using CorrelationId;
 using CorrelationId.DependencyInjection;
-
-using Microsoft.OpenApi.Models;
-
-using Serilog;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,22 +15,7 @@ builder.Services.AddDefaultCorrelationId(options =>
     options.IncludeInResponse = true;
 });
 
-builder.Host.UseSerilog((context, loggerConfig) =>
-    loggerConfig
-        // .ReadFrom.Configuration(context.Configuration)
-        .MinimumLevel.Information()
-        .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
-        .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
-        .Enrich.WithCorrelationId()
-        .Enrich.FromLogContext()
-        .WriteTo.Console(outputTemplate:
-            "[{Timestamp:HH:mm:ss} {Level:u3}] (CorrID: {CorrelationId}) {Message:lj}{NewLine}{Exception}")
-        .WriteTo.File(
-            path: "logs/log-.txt",
-            rollingInterval: RollingInterval.Day,
-            outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] (CorrID: {CorrelationId}) {Message:lj}{NewLine}{Exception}")
-);
-
+builder.UseSerilogCustom();
 
 builder.Services.AddCors();
 
