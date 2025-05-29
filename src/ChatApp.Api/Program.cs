@@ -51,33 +51,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
 
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "ChatApp API", Version = "v1" });
-
-    c.AddSecurityDefinition("Token", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        In = ParameterLocation.Header,
-        Description = "Insira o token JWT aqui",
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Token"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
+builder.Services.AddCustomSwagger();
 
 var app = builder.Build();
 
