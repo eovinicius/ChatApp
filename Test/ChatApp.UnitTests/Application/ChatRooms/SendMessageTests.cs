@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.UseCases.Rooms.SendMessage;
@@ -11,11 +9,9 @@ using FluentAssertions;
 
 using NSubstitute;
 
-using Xunit;
-
 namespace ChatApp.UnitTests.Application.ChatRooms;
 
-public class SendMessage
+public class SendMessageTests
 {
     private static readonly SendMessageCommand Command = new(Guid.NewGuid(), "Olá, Mundo!");
 
@@ -26,7 +22,7 @@ public class SendMessage
     private readonly IChatMessageRepository _chatMessageRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
 
-    public SendMessage()
+    public SendMessageTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
         _userContext = Substitute.For<IUserContext>();
