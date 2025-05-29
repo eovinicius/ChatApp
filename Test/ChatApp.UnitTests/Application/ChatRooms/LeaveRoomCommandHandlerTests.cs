@@ -53,9 +53,10 @@ public class LeaveRoomCommandHandlerTests
         _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(room);
 
         // Act
-        await _handler.Handle(Command, CancellationToken.None);
+        var result = await _handler.Handle(Command, CancellationToken.None);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
         room.Members.Should().HaveCount(1);
         room.Members.Should().NotContain(x => x.UserId == user.Id);
         await _chatRoomRepositoryMock.Received(1).Update(room, Arg.Any<CancellationToken>());
@@ -74,10 +75,11 @@ public class LeaveRoomCommandHandlerTests
         _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(room);
 
         // Act
-        await _handler.Handle(Command, CancellationToken.None);
+        var result = await _handler.Handle(Command, CancellationToken.None);
 
         // Assert
         room.Members.Should().HaveCount(0);
+        result.IsSuccess.Should().BeTrue();
         await _chatRoomRepositoryMock.Received(1).Delete(room, Arg.Any<CancellationToken>());
         await _chatRoomRepositoryMock.Received(1).Update(room, Arg.Any<CancellationToken>());
         await _unitOfWorkMock.Received(1).Commit(Arg.Any<CancellationToken>());
