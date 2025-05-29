@@ -86,7 +86,7 @@ public class LeaveRoomTests
     }
 
     [Fact]
-    public async Task Deve_retornar_erro_quando_usuario_nao_existe()
+    public async Task Deve_retornar_erro_quando_usuario_nao_existir()
     {
         // Arrange
         var user = new User("John Doe", "username", "password");
@@ -104,7 +104,7 @@ public class LeaveRoomTests
     }
 
     [Fact]
-    public async Task Deve_retornar_erro_quando_sala_nao_existe()
+    public async Task Deve_retornar_erro_quando_sala_nao_existir()
     {
         // Arrange
         var user = new User("John Doe", "username", "password");

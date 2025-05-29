@@ -77,7 +77,7 @@ public class CreateRoomTests
     }
 
     [Fact]
-    public async Task Deveria_retornar_erro_quando_usuario_nao_existe()
+    public async Task Deveria_retornar_erro_quando_usuario_nao_existir()
     {
         // Arrange
         var user = new User("John Doe", "username", "password");

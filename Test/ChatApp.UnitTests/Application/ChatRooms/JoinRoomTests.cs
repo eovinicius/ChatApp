@@ -82,7 +82,7 @@ public class JoinRoomTests
     }
 
     [Fact]
-    public async Task Deve_retornar_erro_quando_usuario_nao_existe()
+    public async Task Deve_retornar_erro_quando_usuario_nao_existir()
     {
         // Arrange
         var newMember = new User("John Doe", "username", "password");
@@ -99,7 +99,7 @@ public class JoinRoomTests
     }
 
     [Fact]
-    public async Task Deve_retornar_erro_quando_sala_nao_existe()
+    public async Task Deve_retornar_erro_quando_sala_nao_existir()
     {
         // Arrange
         var newMember = new User("John Doe", "username", "password");
