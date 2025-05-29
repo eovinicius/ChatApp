@@ -14,4 +14,9 @@ public sealed class ChatRoomUser
         JoinedAt = DateTime.UtcNow;
         IsAdmin = false;
     }
+
+    public void PromoteToAdmin()
+    {
+        IsAdmin = true;
+    }
 }
