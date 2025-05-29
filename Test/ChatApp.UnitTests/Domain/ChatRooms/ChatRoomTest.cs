@@ -108,4 +108,21 @@ public class ChatRoomTest
         room.Members.Should().OnlyContain(m => m.UserId == user.Id);
         room.Members.Any(m => m.UserId == user2.Id).Should().BeFalse();
     }
+
+    [Fact]
+    public void Deveria_permitir_ao_dono_da_sala_definir_membro_como_admin()
+    {
+        // Arrange
+        var user = new User("John Doe", "username", "password");
+        var room = ChatRoomFactory.CreatePublicRoom("sala", new User("Geroge", "username", "password"));
+
+        room.Join(user);
+        // Act
+        room.SetMemberAsAdministrator(user);
+
+        // Assert
+        var member = room.Members.FirstOrDefault(x => x.UserId == user.Id);
+        member.Should().NotBeNull("o usuário deve ser membro da sala");
+        member.IsAdmin.Should().BeTrue("o usuário deve ser admin");
+    }
 }
