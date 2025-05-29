@@ -7,7 +7,7 @@ using ChatApp.Domain.Repositories;
 
 namespace ChatApp.Application.UseCases.Rooms.SendMessage;
 
-internal sealed class SendMessageCommandHandler : ICommandHandler<SendMessageCommand, Guid>
+public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageCommand, Guid>
 {
     private readonly IUserRepository _userRepository;
     private readonly IUserContext _userContext;
