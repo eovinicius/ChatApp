@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-using ChatApp.Application.Abstractions.Authentication;
+﻿using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Services;
 using ChatApp.Application.UseCases.Rooms.LeaveRoom;
