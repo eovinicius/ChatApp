@@ -86,7 +86,7 @@ public class ChatRoomTest
         chatRoom.Join(extraUser);
 
         // Assert
-        chatRoom.Members.Should().HaveCount(50);
+        chatRoom.Members.Should().HaveCount(maxMembers);
     }
 
     [Fact]
