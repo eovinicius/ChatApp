@@ -134,4 +134,31 @@ public class JoinRoomCommandHandlerTests
         await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
         await _chatRoomRepositoryMock.DidNotReceive().Update(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task Nao_deveria_permitir_entrada_usuarios_quando_limite_for_atigindo()
+    {
+        // Arrange
+        var ownerUser = new User("John Doe", "username", "password");
+        var chatRoom = ChatRoom.Create("full room", ownerUser, false);
+        int maxMembers = chatRoom.MaxMembers;
+
+        for (int i = 0; i < maxMembers; i++)
+        {
+            var user = new User($"User {i}", "username", "password");
+            chatRoom.Join(user);
+        }
+
+        _userContextMock.UserId.Returns(Guid.NewGuid());
+        _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(chatRoom);
+
+        // Act
+        var result = await _handler.Handle(Command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        chatRoom.Members.Should().HaveCount(maxMembers);
+        await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
+        await _chatRoomRepositoryMock.DidNotReceive().Update(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
+    }
 }
