@@ -64,7 +64,7 @@ public class SendMessageCommandHandlerTests
     {
         // Arrange
         _userContext.UserId.Returns(Guid.NewGuid());
-        _userRepositoryMock.GetById(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns((User)null);
+        _userRepositoryMock.GetById(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns((User?)null);
 
         // Act
         var result = await _handler.Handle(Command, CancellationToken.None);
@@ -84,7 +84,7 @@ public class SendMessageCommandHandlerTests
 
         _userContext.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
-        _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns((ChatRoom)null);
+        _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns((ChatRoom?)null);
 
         // Act
         var result = await _handler.Handle(Command, CancellationToken.None);

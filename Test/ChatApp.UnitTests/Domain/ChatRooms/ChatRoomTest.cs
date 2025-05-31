@@ -73,7 +73,7 @@ public class ChatRoomTest
         // Arrange
         var chatRoom = ChatRoomFactory.CreatePublicRoom("full room", new User("John Doe", "username", "password"));
 
-        const int maxMembers = 50;
+        int maxMembers = chatRoom.MaxMembers;
 
         for (int i = 0; i < maxMembers; i++)
         {
@@ -86,7 +86,7 @@ public class ChatRoomTest
         chatRoom.Join(extraUser);
 
         // Assert
-        chatRoom.Members.Should().HaveCount(50);
+        chatRoom.Members.Should().HaveCount(maxMembers);
     }
 
     [Fact]
