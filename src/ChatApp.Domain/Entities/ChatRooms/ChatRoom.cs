@@ -64,6 +64,7 @@ public sealed class ChatRoom
 
         chatRoomUser.PromoteToAdmin();
     }
+
     public bool IsEmpty() => !_members.Any();
 
     public bool ValidatePassword(string? password) => Password == password;
