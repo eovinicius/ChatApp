@@ -28,7 +28,7 @@ public class LoginCommnadHandler : ICommandHandler<LoginCommand, string>
             return Result.Failure<string>(Error.NullValue);
         }
 
-        if (_hashService.Compare(request.Password, user.Password))
+        if (!_hashService.Compare(request.Password, user.Password))
         {
             return Result.Failure<string>(Error.NullValue);
         }
