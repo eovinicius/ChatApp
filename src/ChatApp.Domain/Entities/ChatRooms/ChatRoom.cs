@@ -1,4 +1,6 @@
-﻿using ChatApp.Domain.Entities.Users;
+﻿using System.Net.Http.Headers;
+
+using ChatApp.Domain.Entities.Users;
 
 namespace ChatApp.Domain.Entities.ChatRooms;
 
@@ -44,9 +46,14 @@ public sealed class ChatRoom
         if (MaxMembersReached())
             return;
 
-        var chatRoomUser = new ChatRoomUser(Id, user.Id);
+        var chatRoomUser = ChatRoomUser.Create(Id, user.Id);
 
         _members.Add(chatRoomUser);
+    }
+
+    public void JoinAnonymously(string guestName)
+    {
+        _members.Add(ChatRoomUser.CreateAnonymous(Id, guestName));
     }
 
     public void Leave(User user)
