@@ -1,6 +1,3 @@
-
-using System.Net;
-
 using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Messaging;
