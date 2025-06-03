@@ -6,13 +6,13 @@ using ChatApp.Domain.Repositories;
 
 namespace ChatApp.Application.UseCases.Users.Login;
 
-public class LoginCommnadHandler : ICommandHandler<LoginCommand, string>
+public class LoginCommandHandler : ICommandHandler<LoginCommand, string>
 {
     private readonly IUserRepository _userRepository;
     private readonly IAuthenticationService _authenticationService;
     private readonly IHashService _hashService;
 
-    public LoginCommnadHandler(IUserRepository userRepository, IAuthenticationService authenticationService, IHashService hashService)
+    public LoginCommandHandler(IUserRepository userRepository, IAuthenticationService authenticationService, IHashService hashService)
     {
         _userRepository = userRepository;
         _authenticationService = authenticationService;
