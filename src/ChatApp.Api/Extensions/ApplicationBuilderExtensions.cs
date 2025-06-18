@@ -1,5 +1,5 @@
 ﻿using ChatApp.Api.Middlewares;
-using ChatApp.Infrastructure;
+using ChatApp.Infrastructure.Database.EntityFramework;
 
 using Microsoft.EntityFrameworkCore;
 
