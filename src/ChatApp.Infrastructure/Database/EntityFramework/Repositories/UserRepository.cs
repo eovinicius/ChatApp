@@ -3,7 +3,7 @@ using ChatApp.Domain.Repositories;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatApp.Infrastructure.Repositories;
+namespace ChatApp.Infrastructure.Database.EntityFramework.Repositories;
 
 public class UserRepository : IUserRepository
 {

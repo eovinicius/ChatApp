@@ -1,8 +1,7 @@
-
 using ChatApp.Domain.Entities.ChatRooms;
 using ChatApp.Domain.Repositories;
 
-namespace ChatApp.Infrastructure.Repositories;
+namespace ChatApp.Infrastructure.Database.EntityFramework.Repositories;
 
 public class ChatMessageRepository : IChatMessageRepository
 {
