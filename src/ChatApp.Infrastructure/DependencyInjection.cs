@@ -7,6 +7,7 @@ using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Services;
 using ChatApp.Domain.Repositories;
 using ChatApp.Infrastructure.Authentication;
+using ChatApp.Infrastructure.Database.EntityFramework;
 using ChatApp.Infrastructure.Database.EntityFramework.Data;
 using ChatApp.Infrastructure.Database.EntityFramework.Repositories;
 using ChatApp.Infrastructure.Services;

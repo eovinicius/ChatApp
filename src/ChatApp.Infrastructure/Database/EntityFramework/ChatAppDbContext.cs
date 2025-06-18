@@ -3,7 +3,7 @@ using ChatApp.Domain.Entities.Users;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatApp.Infrastructure;
+namespace ChatApp.Infrastructure.Database.EntityFramework;
 
 public class ChatAppDbContext : DbContext
 {
