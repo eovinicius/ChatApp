@@ -8,10 +8,8 @@ public static class SerilogExtensions
     {
         builder.Host.UseSerilog((context, loggerConfig) =>
         {
-            var configuration = context.Configuration;
-
             loggerConfig
-                .ReadFrom.Configuration(configuration);
+                .ReadFrom.Configuration(context.Configuration);
         });
     }
 }
