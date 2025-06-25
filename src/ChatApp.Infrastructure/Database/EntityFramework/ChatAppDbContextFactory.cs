@@ -1,3 +1,5 @@
+using ChatApp.Infrastructure.Database.EntityFramework;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 

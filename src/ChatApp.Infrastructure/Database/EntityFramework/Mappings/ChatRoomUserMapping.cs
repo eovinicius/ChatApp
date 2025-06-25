@@ -4,7 +4,7 @@ using ChatApp.Domain.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace ChatApp.Infrastructure.Mapping;
+namespace ChatApp.Infrastructure.Database.EntityFramework.Mappings;
 
 public class ChatRoomUserConfiguration : IEntityTypeConfiguration<ChatRoomUser>
 {

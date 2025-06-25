@@ -1,6 +1,6 @@
 using ChatApp.Application.Abstractions.Data;
 
-namespace ChatApp.Infrastructure.Data;
+namespace ChatApp.Infrastructure.Database.EntityFramework.Data;
 
 public class UnitOfWork : IUnitOfWork
 {
