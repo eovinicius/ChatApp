@@ -24,7 +24,7 @@ jobs:
 
       - name: Restaurar dependências
         run: |
-          dotnet restore
+          dotnet restore --no-cache ChatApp.sln
 
       - name: Compilar projeto principal
         run: dotnet build --no-restore ChatApp.sln
