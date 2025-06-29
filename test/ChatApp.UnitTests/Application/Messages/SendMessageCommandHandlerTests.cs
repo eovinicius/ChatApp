@@ -9,7 +9,7 @@ using FluentAssertions;
 
 using NSubstitute;
 
-namespace ChatApp.UnitTests.Application.ChatRooms;
+namespace ChatApp.UnitTests.Application.Messages;
 
 public class SendMessageCommandHandlerTests
 {
