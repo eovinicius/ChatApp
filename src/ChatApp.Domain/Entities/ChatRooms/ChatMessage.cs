@@ -11,6 +11,9 @@ public sealed class ChatMessage
     public DateTime SentAt { get; private set; }
     public bool IsEdited { get; private set; }
 
+    private const int MessageEditTimeLimitInHours = 6;
+    private const int MessageDeleteTimeLimitInHours = 24;
+
     private ChatMessage() { }
 
     public ChatMessage(Guid chatRoomId, Guid userId, string content)
@@ -27,28 +30,27 @@ public sealed class ChatMessage
         return new ChatMessage(chatRoomId, userId, content);
     }
 
-    public bool CanBeDeletedBy(Guid userId, DateTime utcNow, int timeLimitInHours)
+    public bool CanBeDeletedBy(Guid userId, DateTime utcNow)
     {
         if (SenderId != userId)
             return false;
 
-        if (SentAt < utcNow.AddHours(-timeLimitInHours))
+        if (!IsWithinTimeLimit(utcNow, MessageDeleteTimeLimitInHours))
             return false;
 
         return true;
     }
 
-    public Result Update(string newContent, Guid userId, DateTime utcNow, int timeLimitInHours = 6)
+    public Result Edit(string newContent, Guid userId, DateTime utcNow)
     {
-        if (!CanBeEditBy(userId, utcNow, timeLimitInHours))
-        {
+        if (SenderId != userId)
             return Result.Failure(Error.None);
-        }
+
+        if (!IsWithinTimeLimit(utcNow, MessageEditTimeLimitInHours))
+            return Result.Failure(Error.None);
 
         if (string.IsNullOrWhiteSpace(newContent))
-        {
             return Result.Failure(Error.None);
-        }
 
         Content = newContent;
         IsEdited = true;
@@ -56,14 +58,8 @@ public sealed class ChatMessage
         return Result.Success();
     }
 
-    public bool CanBeEditBy(Guid userId, DateTime utcNow, int timeLimitInHours = 6)
+    private bool IsWithinTimeLimit(DateTime utcNow, int limitInHours)
     {
-        if (SenderId != userId)
-            return false;
-
-        if (SentAt < utcNow.AddHours(-timeLimitInHours))
-            return false;
-
-        return true;
+        return SentAt >= utcNow.AddHours(-limitInHours);
     }
 }

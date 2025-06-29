@@ -9,7 +9,6 @@ namespace ChatApp.Application.UseCases.Messages.DeleteMessage;
 
 public class DeleteMessageCommandHandler : ICommandHandler<DeleteMessageCommand>
 {
-    private const int MessageDeletionTimeLimitInHours = 6;
     private readonly IChatMessageRepository _messageRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserContext _userContext;
@@ -39,7 +38,7 @@ public class DeleteMessageCommandHandler : ICommandHandler<DeleteMessageCommand>
             return Result.Failure(Error.None);
         }
 
-        if (!message.CanBeDeletedBy(currentUserId, _dateTimeProvider.UtcNow, MessageDeletionTimeLimitInHours))
+        if (!message.CanBeDeletedBy(currentUserId, _dateTimeProvider.UtcNow))
         {
             return Result.Failure(Error.None);
         }

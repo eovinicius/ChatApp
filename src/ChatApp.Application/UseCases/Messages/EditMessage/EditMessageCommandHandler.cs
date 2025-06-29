@@ -1,4 +1,3 @@
-
 using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Clock;
 using ChatApp.Application.Abstractions.Data;
@@ -10,7 +9,6 @@ namespace ChatApp.Application.UseCases.Messages.EditMessage;
 
 public class EditMessageCommandHandler : ICommandHandler<EditMessageCommand>
 {
-    private const int MessageEditTimeLimitInHours = 6;
     private readonly IChatMessageRepository _messageRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserContext _userContext;
@@ -34,7 +32,7 @@ public class EditMessageCommandHandler : ICommandHandler<EditMessageCommand>
             return Result.Failure(Error.None);
         }
 
-        var result = message.Update(request.Content, currentUserId, _dateTimeProvider.UtcNow, MessageEditTimeLimitInHours);
+        var result = message.Edit(request.Content, currentUserId, _dateTimeProvider.UtcNow);
 
         if (result.IsFailure)
         {
