@@ -1,6 +1,6 @@
 using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
-using ChatApp.Application.UseCases.Rooms.SendMessage;
+using ChatApp.Application.UseCases.Messages.SendMessage;
 using ChatApp.Domain.Entities.ChatRooms;
 using ChatApp.Domain.Entities.Users;
 using ChatApp.Domain.Repositories;
