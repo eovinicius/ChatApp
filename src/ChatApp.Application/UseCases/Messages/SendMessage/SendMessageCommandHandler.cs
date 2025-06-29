@@ -5,7 +5,7 @@ using ChatApp.Domain.Abstractions;
 using ChatApp.Domain.Entities.ChatRooms;
 using ChatApp.Domain.Repositories;
 
-namespace ChatApp.Application.UseCases.Rooms.SendMessage;
+namespace ChatApp.Application.UseCases.Messages.SendMessage;
 
 public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageCommand, Guid>
 {
