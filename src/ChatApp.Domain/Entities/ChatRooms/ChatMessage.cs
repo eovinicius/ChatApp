@@ -44,13 +44,13 @@ public sealed class ChatMessage
     public Result Edit(string newContent, Guid userId, DateTime utcNow)
     {
         if (SenderId != userId)
-            return Result.Failure(Error.None);
+            return Result.Failure(Error.NullValue);
 
         if (!IsWithinTimeLimit(utcNow, MessageEditTimeLimitInHours))
-            return Result.Failure(Error.None);
+            return Result.Failure(Error.NullValue);
 
         if (string.IsNullOrWhiteSpace(newContent))
-            return Result.Failure(Error.None);
+            return Result.Failure(Error.NullValue);
 
         Content = newContent;
         IsEdited = true;
