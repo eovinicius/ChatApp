@@ -1,4 +1,3 @@
-
 using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Clock;
 using ChatApp.Application.Abstractions.Data;
@@ -45,7 +44,7 @@ public class DeleteMessageCommandHandler : ICommandHandler<DeleteMessageCommand>
             return Result.Failure(Error.None);
         }
 
-        await _messageRepository.Delete(message, cancellationToken);
+        _messageRepository.Delete(message, cancellationToken);
 
         await _unitOfWork.Commit(cancellationToken);
 
