@@ -2,6 +2,7 @@ using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.UseCases.Messages.SendMessage;
 using ChatApp.Domain.Entities.ChatRooms;
+using ChatApp.Domain.Entities.Messages;
 using ChatApp.Domain.Entities.Users;
 using ChatApp.Domain.Repositories;
 
@@ -9,11 +10,14 @@ using FluentAssertions;
 
 using NSubstitute;
 
+
 namespace ChatApp.UnitTests.Application.Messages;
 
 public class SendMessageCommandHandlerTests
 {
-    private static readonly SendMessageCommand Command = new(Guid.NewGuid(), "Olá, Mundo!");
+    private static readonly SendMessageCommand Command = new(
+        Guid.NewGuid(),
+        new("text", "Hello World"));
 
     private readonly SendMessageCommandHandler _handler;
     private readonly IUserRepository _userRepositoryMock;

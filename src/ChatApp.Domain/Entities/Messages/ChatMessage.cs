@@ -1,13 +1,13 @@
 using ChatApp.Domain.Abstractions;
 
-namespace ChatApp.Domain.Entities.ChatRooms;
+namespace ChatApp.Domain.Entities.Messages;
 
 public sealed class ChatMessage
 {
     public Guid Id { get; private set; }
     public Guid ChatRoomId { get; private set; }
     public Guid SenderId { get; private set; }
-    public string Content { get; private set; }
+    public MessageContent Content { get; private set; }
     public DateTime SentAt { get; private set; }
     public bool IsEdited { get; private set; }
 
@@ -16,7 +16,7 @@ public sealed class ChatMessage
 
     private ChatMessage() { }
 
-    public ChatMessage(Guid chatRoomId, Guid userId, string content)
+    public ChatMessage(Guid chatRoomId, Guid userId, MessageContent content)
     {
         Id = Guid.NewGuid();
         ChatRoomId = chatRoomId;
@@ -25,9 +25,11 @@ public sealed class ChatMessage
         SentAt = DateTime.UtcNow;
     }
 
-    public static ChatMessage Create(Guid chatRoomId, Guid userId, string content)
+    public static ChatMessage Create(Guid chatRoomId, Guid userId, string messageType, string messageData)
     {
-        return new ChatMessage(chatRoomId, userId, content);
+        var message = MessageContentFactory.Create(messageType, messageData);
+
+        return new ChatMessage(chatRoomId, userId, message);
     }
 
     public bool CanBeDeletedBy(Guid userId, DateTime utcNow)
@@ -41,7 +43,7 @@ public sealed class ChatMessage
         return true;
     }
 
-    public Result Edit(string newContent, Guid userId, DateTime utcNow)
+    public Result Edit(string messageData, Guid userId, DateTime utcNow)
     {
         if (SenderId != userId)
             return Result.Failure(Error.NullValue);
@@ -49,10 +51,15 @@ public sealed class ChatMessage
         if (!IsWithinTimeLimit(utcNow, MessageEditTimeLimitInHours))
             return Result.Failure(Error.NullValue);
 
-        if (string.IsNullOrWhiteSpace(newContent))
+        if (!IsTextMessage)
+        {
+            return Result.Failure(Error.NullValue);
+        }
+
+        if (string.IsNullOrWhiteSpace(messageData))
             return Result.Failure(Error.NullValue);
 
-        Content = newContent;
+        Content = new TextContent(messageData);
         IsEdited = true;
 
         return Result.Success();
@@ -62,4 +69,7 @@ public sealed class ChatMessage
     {
         return SentAt >= utcNow.AddHours(-limitInHours);
     }
+
+    private bool IsTextMessage => Content.Type == MessageContentType.Text;
+
 }

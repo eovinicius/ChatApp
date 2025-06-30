@@ -2,7 +2,7 @@ using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Messaging;
 using ChatApp.Domain.Abstractions;
-using ChatApp.Domain.Entities.ChatRooms;
+using ChatApp.Domain.Entities.Messages;
 using ChatApp.Domain.Repositories;
 
 namespace ChatApp.Application.UseCases.Messages.SendMessage;
@@ -43,7 +43,7 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
             return Result.Failure<Guid>(Error.NullValue);
         }
 
-        var message = ChatMessage.Create(room.Id, user.Id, request.Message);
+        var message = ChatMessage.Create(room.Id, user.Id, request.Content.Type, request.Content.Data);
 
         await _chatMessageRepository.Add(message, cancellationToken);
 

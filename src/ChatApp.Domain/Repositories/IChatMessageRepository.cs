@@ -1,4 +1,4 @@
-using ChatApp.Domain.Entities.ChatRooms;
+using ChatApp.Domain.Entities.Messages;
 
 namespace ChatApp.Domain.Repositories;
 

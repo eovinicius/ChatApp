@@ -1,4 +1,4 @@
-using ChatApp.Domain.Entities.ChatRooms;
+using ChatApp.Domain.Entities.Messages;
 
 using FluentAssertions;
 
@@ -12,17 +12,18 @@ public class ChatMessageTest
         // Arrange
         var senderId = Guid.NewGuid();
         var chatRoomId = Guid.NewGuid();
-        var messageContent = "Hello World";
+        var contentType = "text";
+        var contentData = "hello world";
 
         // Act
-        var chatMessage = ChatMessage.Create(chatRoomId, senderId, messageContent);
+        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData);
 
         // Assert
         chatMessage.Should().NotBeNull();
         chatMessage.Id.Should().NotBe(Guid.Empty);
         chatMessage.ChatRoomId.Should().Be(chatRoomId);
         chatMessage.SenderId.Should().Be(senderId);
-        chatMessage.Content.Should().Be(messageContent);
+        chatMessage.Content.Type.Should().Be(MessageContentType.Text);
         chatMessage.SentAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
         chatMessage.IsEdited.Should().BeFalse();
     }
@@ -33,15 +34,16 @@ public class ChatMessageTest
         // Arrange
         var senderId = Guid.NewGuid();
         var chatRoomId = Guid.NewGuid();
-        var messageContent = "Hello World";
-        var chatMessage = ChatMessage.Create(chatRoomId, senderId, messageContent);
+        var contentType = "text";
+        var contentData = "hello world";
+        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData);
 
         // Act
         var newContent = "Hello Universe";
         chatMessage.Edit(newContent, senderId, DateTime.UtcNow);
 
         // Assert
-        chatMessage.Content.Should().Be(newContent);
+        chatMessage.Content.Type.Should().Be(MessageContentType.Text);
         chatMessage.IsEdited.Should().BeTrue();
     }
 
@@ -51,8 +53,9 @@ public class ChatMessageTest
         // Arrange
         var senderId = Guid.NewGuid();
         var chatRoomId = Guid.NewGuid();
-        var messageContent = "Hello World";
-        var chatMessage = ChatMessage.Create(chatRoomId, senderId, messageContent);
+        var contentType = "text";
+        var contentData = "hello world";
+        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData);
         var otherUserId = Guid.NewGuid();
 
         // Act
@@ -60,7 +63,7 @@ public class ChatMessageTest
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        chatMessage.Content.Should().Be(messageContent);
+        chatMessage.Content.Type.Should().Be(MessageContentType.Text);
         chatMessage.IsEdited.Should().BeFalse();
     }
 
@@ -70,8 +73,9 @@ public class ChatMessageTest
         // Arrange
         var senderId = Guid.NewGuid();
         var chatRoomId = Guid.NewGuid();
-        var messageContent = "Hello World";
-        var chatMessage = ChatMessage.Create(chatRoomId, senderId, messageContent);
+        var contentType = "text";
+        var contentData = "hello world";
+        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData);
 
         // Act
         var canDelete = chatMessage.CanBeDeletedBy(senderId, DateTime.UtcNow);
@@ -86,8 +90,9 @@ public class ChatMessageTest
         // Arrange
         var senderId = Guid.NewGuid();
         var chatRoomId = Guid.NewGuid();
-        var messageContent = "Hello World";
-        var chatMessage = ChatMessage.Create(chatRoomId, senderId, messageContent);
+        var contentType = "text";
+        var contentData = "hello world";
+        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData);
         var otherUserId = Guid.NewGuid();
 
         // Act

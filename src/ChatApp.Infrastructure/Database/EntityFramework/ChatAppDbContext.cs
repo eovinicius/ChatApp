@@ -1,4 +1,5 @@
 using ChatApp.Domain.Entities.ChatRooms;
+using ChatApp.Domain.Entities.Messages;
 using ChatApp.Domain.Entities.Users;
 
 using Microsoft.EntityFrameworkCore;
