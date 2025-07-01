@@ -1,5 +1,6 @@
 using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
+using ChatApp.Application.Abstractions.Storage;
 using ChatApp.Application.UseCases.Messages.SendMessage;
 using ChatApp.Domain.Entities.ChatRooms;
 using ChatApp.Domain.Entities.Messages;
@@ -25,6 +26,7 @@ public class SendMessageCommandHandlerTests
     private readonly IChatRoomRepository _chatRoomRepositoryMock;
     private readonly IChatMessageRepository _chatMessageRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
+    private readonly IFileStorage _fileStorage;
 
     public SendMessageCommandHandlerTests()
     {
@@ -33,13 +35,16 @@ public class SendMessageCommandHandlerTests
         _chatRoomRepositoryMock = Substitute.For<IChatRoomRepository>();
         _chatMessageRepositoryMock = Substitute.For<IChatMessageRepository>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
+        _fileStorage = Substitute.For<IFileStorage>();
+
 
         _handler = new SendMessageCommandHandler(
             _userRepositoryMock,
             _userContext,
             _chatRoomRepositoryMock,
             _chatMessageRepositoryMock,
-            _unitOfWorkMock
+            _unitOfWorkMock,
+            _fileStorage
         );
     }
 

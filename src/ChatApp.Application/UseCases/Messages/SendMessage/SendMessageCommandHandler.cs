@@ -1,6 +1,7 @@
 using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Messaging;
+using ChatApp.Application.Abstractions.Storage;
 using ChatApp.Domain.Abstractions;
 using ChatApp.Domain.Entities.Messages;
 using ChatApp.Domain.Repositories;
@@ -13,15 +14,17 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
     private readonly IUserContext _userContext;
     private readonly IChatRoomRepository _chatRoomRepository;
     private readonly IChatMessageRepository _chatMessageRepository;
+    private readonly IFileStorage _fileStorage;
     private readonly IUnitOfWork _unitOfWork;
 
-    public SendMessageCommandHandler(IUserRepository userRepository, IUserContext userContext, IChatRoomRepository chatRoomRepository, IChatMessageRepository chatMessageRepository, IUnitOfWork unitOfWork)
+    public SendMessageCommandHandler(IUserRepository userRepository, IUserContext userContext, IChatRoomRepository chatRoomRepository, IChatMessageRepository chatMessageRepository, IUnitOfWork unitOfWork, IFileStorage fileStorage)
     {
         _userRepository = userRepository;
         _userContext = userContext;
         _chatRoomRepository = chatRoomRepository;
         _chatMessageRepository = chatMessageRepository;
         _unitOfWork = unitOfWork;
+        _fileStorage = fileStorage;
     }
 
     public async Task<Result<Guid>> Handle(SendMessageCommand request, CancellationToken cancellationToken)
@@ -44,6 +47,17 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
         }
 
         var message = ChatMessage.Create(room.Id, user.Id, request.Content.Type, request.Content.Data);
+
+        if (MessageContentType.From(request.Content.Type) != MessageContentType.Text)
+        {
+            var fileName = Path.GetFileName(request.Content.Data);
+
+            var uploadedFilePath = await _fileStorage.UploadAsync(Stream.Null, fileName, cancellationToken);
+
+            message.SetFilePath(uploadedFilePath);
+        }
+
+        await _unitOfWork.Commit(cancellationToken);
 
         await _chatMessageRepository.Add(message, cancellationToken);
 
