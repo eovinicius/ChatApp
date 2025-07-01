@@ -72,4 +72,13 @@ public sealed class ChatMessage
 
     private bool IsTextMessage => Content.Type == MessageContentType.Text;
 
+    public void SetFilePath(string filePath)
+    {
+        Content = Content switch
+        {
+            ImageContent => new ImageContent(filePath),
+            AudioContent => new AudioContent(filePath),
+            _ => throw new InvalidOperationException("só pode ser usado em mensagens de imagem ou áudio."),
+        };
+    }
 }
