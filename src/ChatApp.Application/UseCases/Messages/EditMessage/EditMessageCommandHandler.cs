@@ -13,17 +13,25 @@ public class EditMessageCommandHandler : ICommandHandler<EditMessageCommand>
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserContext _userContext;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IUserRepository _userRepository;
 
-    public EditMessageCommandHandler(IChatMessageRepository messageRepository, IUnitOfWork unitOfWork, IUserContext userContext)
+    public EditMessageCommandHandler(IChatMessageRepository messageRepository, IUnitOfWork unitOfWork, IUserContext userContext, IUserRepository userRepository)
     {
         _messageRepository = messageRepository;
         _unitOfWork = unitOfWork;
         _userContext = userContext;
+        _userRepository = userRepository;
     }
 
     public async Task<Result> Handle(EditMessageCommand request, CancellationToken cancellationToken)
     {
         var currentUserId = _userContext.UserId;
+
+        var user = await _userRepository.GetById(currentUserId, cancellationToken);
+        if (user is null)
+        {
+            return Result.Failure<Guid>(Error.NullValue);
+        }
 
         var message = await _messageRepository.GetById(request.MessageId, cancellationToken);
 
