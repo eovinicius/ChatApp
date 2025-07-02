@@ -50,10 +50,10 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
             return Result.Failure<Guid>(Error.NullValue);
         }
 
-        await _chatMessageRepository.Add(chatMessage, cancellationToken);
+        // await _chatMessageRepository.Add(chatMessage, cancellationToken);
 
         await _unitOfWork.Commit(cancellationToken);
 
-        return Result.Success(chatMessage.Id);
+        return Result.Success(Guid.NewGuid());
     }
 }
