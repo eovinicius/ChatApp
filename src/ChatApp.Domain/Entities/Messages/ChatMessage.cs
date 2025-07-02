@@ -25,11 +25,9 @@ public sealed class ChatMessage
         SentAt = sendAt;
     }
 
-    public static ChatMessage Create(Guid chatRoomId, Guid userId, string messageType, string messageData, DateTime sendAt)
+    public static ChatMessage Create(Guid chatRoomId, Guid userId, MessageContent content, DateTime sendAt)
     {
-        var message = MessageContent.Create(messageType, messageData);
-
-        return new ChatMessage(chatRoomId, userId, message, sendAt);
+        return new ChatMessage(chatRoomId, userId, content, sendAt);
     }
 
     public bool CanBeDeletedBy(Guid userId, DateTime utcNow)
