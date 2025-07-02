@@ -1,4 +1,5 @@
 using ChatApp.Application.Abstractions.Authentication;
+using ChatApp.Application.Abstractions.Clock;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Storage;
 using ChatApp.Application.UseCases.Messages.SendMessage;
@@ -26,7 +27,8 @@ public class SendMessageCommandHandlerTests
     private readonly IChatRoomRepository _chatRoomRepositoryMock;
     private readonly IChatMessageRepository _chatMessageRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly IFileStorage _fileStorage;
+    private readonly IFileStorage _fileStorageMock;
+    private readonly IDateTimeProvider _dateTimeProviderMock;
 
     public SendMessageCommandHandlerTests()
     {
@@ -35,8 +37,8 @@ public class SendMessageCommandHandlerTests
         _chatRoomRepositoryMock = Substitute.For<IChatRoomRepository>();
         _chatMessageRepositoryMock = Substitute.For<IChatMessageRepository>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
-        _fileStorage = Substitute.For<IFileStorage>();
-
+        _fileStorageMock = Substitute.For<IFileStorage>();
+        _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
 
         _handler = new SendMessageCommandHandler(
             _userRepositoryMock,
@@ -44,7 +46,8 @@ public class SendMessageCommandHandlerTests
             _chatRoomRepositoryMock,
             _chatMessageRepositoryMock,
             _unitOfWorkMock,
-            _fileStorage
+            _fileStorageMock,
+            _dateTimeProviderMock
         );
     }
 
@@ -56,6 +59,7 @@ public class SendMessageCommandHandlerTests
         var room = ChatRoom.Create("sala", user, false);
 
         _userContext.UserId.Returns(user.Id);
+        _dateTimeProviderMock.UtcNow.Returns(DateTime.UtcNow);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
         _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(room);
 

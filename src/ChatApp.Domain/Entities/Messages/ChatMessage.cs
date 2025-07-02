@@ -16,20 +16,20 @@ public sealed class ChatMessage
 
     private ChatMessage() { }
 
-    public ChatMessage(Guid chatRoomId, Guid userId, MessageContent content)
+    public ChatMessage(Guid chatRoomId, Guid userId, MessageContent content, DateTime sendAt)
     {
         Id = Guid.NewGuid();
         ChatRoomId = chatRoomId;
         SenderId = userId;
         Content = content;
-        SentAt = DateTime.UtcNow;
+        SentAt = sendAt;
     }
 
-    public static ChatMessage Create(Guid chatRoomId, Guid userId, string messageType, string messageData)
+    public static ChatMessage Create(Guid chatRoomId, Guid userId, string messageType, string messageData, DateTime sendAt)
     {
-        var message = MessageContentFactory.Create(messageType, messageData);
+        var message = MessageContent.Create(messageType, messageData);
 
-        return new ChatMessage(chatRoomId, userId, message);
+        return new ChatMessage(chatRoomId, userId, message, sendAt);
     }
 
     public bool CanBeDeletedBy(Guid userId, DateTime utcNow)
@@ -43,11 +43,8 @@ public sealed class ChatMessage
         return true;
     }
 
-    public Result Edit(string messageData, Guid userId, DateTime utcNow)
+    public Result Edit(string newContent, DateTime utcNow)
     {
-        if (SenderId != userId)
-            return Result.Failure(Error.NullValue);
-
         if (!IsWithinTimeLimit(utcNow, MessageEditTimeLimitInHours))
             return Result.Failure(Error.NullValue);
 
@@ -56,10 +53,10 @@ public sealed class ChatMessage
             return Result.Failure(Error.NullValue);
         }
 
-        if (string.IsNullOrWhiteSpace(messageData))
+        if (string.IsNullOrWhiteSpace(newContent))
             return Result.Failure(Error.NullValue);
 
-        Content = new TextContent(messageData);
+        Content = new TextContent(newContent);
         IsEdited = true;
 
         return Result.Success();

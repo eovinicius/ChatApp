@@ -14,9 +14,10 @@ public class ChatMessageTest
         var chatRoomId = Guid.NewGuid();
         var contentType = "text";
         var contentData = "hello world";
+        var currentUtcTime = DateTime.UtcNow;
 
         // Act
-        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData);
+        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData, currentUtcTime);
 
         // Assert
         chatMessage.Should().NotBeNull();
@@ -36,35 +37,16 @@ public class ChatMessageTest
         var chatRoomId = Guid.NewGuid();
         var contentType = "text";
         var contentData = "hello world";
-        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData);
+        var currentUtcTime = DateTime.UtcNow;
+        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData, currentUtcTime);
 
         // Act
         var newContent = "Hello Universe";
-        chatMessage.Edit(newContent, senderId, DateTime.UtcNow);
+        chatMessage.Edit(newContent, DateTime.UtcNow);
 
         // Assert
         chatMessage.Content.Type.Should().Be(MessageContentType.Text);
         chatMessage.IsEdited.Should().BeTrue();
-    }
-
-    [Fact]
-    public void Nao_deveria_editar_mensagem_de_chat_por_outro_usuario()
-    {
-        // Arrange
-        var senderId = Guid.NewGuid();
-        var chatRoomId = Guid.NewGuid();
-        var contentType = "text";
-        var contentData = "hello world";
-        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData);
-        var otherUserId = Guid.NewGuid();
-
-        // Act
-        var result = chatMessage.Edit("New Content", otherUserId, DateTime.UtcNow);
-
-        // Assert
-        result.IsFailure.Should().BeTrue();
-        chatMessage.Content.Type.Should().Be(MessageContentType.Text);
-        chatMessage.IsEdited.Should().BeFalse();
     }
 
     [Fact]
@@ -75,7 +57,8 @@ public class ChatMessageTest
         var chatRoomId = Guid.NewGuid();
         var contentType = "text";
         var contentData = "hello world";
-        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData);
+        var currentUtcTime = DateTime.UtcNow;
+        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData, currentUtcTime);
 
         // Act
         var canDelete = chatMessage.CanBeDeletedBy(senderId, DateTime.UtcNow);
@@ -92,7 +75,8 @@ public class ChatMessageTest
         var chatRoomId = Guid.NewGuid();
         var contentType = "text";
         var contentData = "hello world";
-        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData);
+        var currentUtcTime = DateTime.UtcNow;
+        var chatMessage = ChatMessage.Create(chatRoomId, senderId, contentType, contentData, currentUtcTime);
         var otherUserId = Guid.NewGuid();
 
         // Act

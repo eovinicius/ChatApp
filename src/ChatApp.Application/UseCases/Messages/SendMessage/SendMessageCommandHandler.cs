@@ -1,4 +1,5 @@
 using ChatApp.Application.Abstractions.Authentication;
+using ChatApp.Application.Abstractions.Clock;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Messaging;
 using ChatApp.Application.Abstractions.Storage;
@@ -16,8 +17,9 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
     private readonly IChatMessageRepository _chatMessageRepository;
     private readonly IFileStorage _fileStorage;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
-    public SendMessageCommandHandler(IUserRepository userRepository, IUserContext userContext, IChatRoomRepository chatRoomRepository, IChatMessageRepository chatMessageRepository, IUnitOfWork unitOfWork, IFileStorage fileStorage)
+    public SendMessageCommandHandler(IUserRepository userRepository, IUserContext userContext, IChatRoomRepository chatRoomRepository, IChatMessageRepository chatMessageRepository, IUnitOfWork unitOfWork, IFileStorage fileStorage, IDateTimeProvider dateTimeProvider)
     {
         _userRepository = userRepository;
         _userContext = userContext;
@@ -25,6 +27,7 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
         _chatMessageRepository = chatMessageRepository;
         _unitOfWork = unitOfWork;
         _fileStorage = fileStorage;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<Result<Guid>> Handle(SendMessageCommand request, CancellationToken cancellationToken)
@@ -46,7 +49,9 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
             return Result.Failure<Guid>(Error.NullValue);
         }
 
-        var message = ChatMessage.Create(room.Id, user.Id, request.Content.Type, request.Content.Data);
+        var currentUtcTime = _dateTimeProvider.UtcNow;
+
+        var message = ChatMessage.Create(room.Id, user.Id, request.Content.Type, request.Content.Data, currentUtcTime);
 
         if (MessageContentType.From(request.Content.Type) != MessageContentType.Text)
         {
@@ -56,8 +61,6 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
 
             message.SetFilePath(uploadedFilePath);
         }
-
-        await _unitOfWork.Commit(cancellationToken);
 
         await _chatMessageRepository.Add(message, cancellationToken);
 

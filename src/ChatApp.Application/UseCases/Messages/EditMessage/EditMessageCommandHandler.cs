@@ -32,7 +32,12 @@ public class EditMessageCommandHandler : ICommandHandler<EditMessageCommand>
             return Result.Failure(Error.None);
         }
 
-        var result = message.Edit(request.Content.Data, currentUserId, _dateTimeProvider.UtcNow);
+        if (message.SenderId != currentUserId)
+        {
+            return Result.Failure(Error.NullValue);
+        }
+
+        var result = message.Edit(request.Content.Data, _dateTimeProvider.UtcNow);
 
         if (result.IsFailure)
         {
