@@ -5,6 +5,7 @@ public sealed record MessageContentType
     public static readonly MessageContentType Text = new("text");
     public static readonly MessageContentType Image = new("image");
     public static readonly MessageContentType Audio = new("audio");
+    public static readonly MessageContentType Video = new("video");
 
     public string Value { get; }
 

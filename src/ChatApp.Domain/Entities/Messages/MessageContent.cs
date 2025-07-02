@@ -11,6 +11,7 @@ public abstract class MessageContent
             "text" => new TextContent(data),
             "image" => new ImageContent(data),
             "audio" => new AudioContent(data),
+            "video" => new VideoContent(data),
             _ => throw new NotSupportedException($"Tipo '{type}' não suportado.")
         };
     }
