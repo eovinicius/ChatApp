@@ -4,7 +4,6 @@ using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Messaging;
 using ChatApp.Application.Abstractions.Storage;
 using ChatApp.Domain.Abstractions;
-using ChatApp.Domain.Entities.Messages;
 using ChatApp.Domain.Repositories;
 
 namespace ChatApp.Application.UseCases.Messages.SendMessage;
@@ -32,7 +31,9 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
 
     public async Task<Result<Guid>> Handle(SendMessageCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetById(_userContext.UserId, cancellationToken);
+        var currentUserId = _userContext.UserId;
+
+        var user = await _userRepository.GetById(currentUserId, cancellationToken);
         if (user is null)
         {
             return Result.Failure<Guid>(Error.NullValue);
@@ -49,23 +50,10 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
             return Result.Failure<Guid>(Error.NullValue);
         }
 
-        var currentUtcTime = _dateTimeProvider.UtcNow;
-
-        var message = ChatMessage.Create(room.Id, user.Id, request.Content.Type, request.Content.Data, currentUtcTime);
-
-        if (MessageContentType.From(request.Content.Type) != MessageContentType.Text)
-        {
-            var fileName = Path.GetFileName(request.Content.Data);
-
-            var uploadedFilePath = await _fileStorage.UploadAsync(Stream.Null, fileName, cancellationToken);
-
-            message.SetFilePath(uploadedFilePath);
-        }
-
-        await _chatMessageRepository.Add(message, cancellationToken);
+        await _chatMessageRepository.Add(chatMessage, cancellationToken);
 
         await _unitOfWork.Commit(cancellationToken);
 
-        return Result.Success(message.Id);
+        return Result.Success(chatMessage.Id);
     }
 }
