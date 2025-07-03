@@ -46,6 +46,11 @@ public sealed class CreateChatroomCommandHandler : ICommandHandler<CreateChatroo
 
         await _chatHub.JoinGroup(chatRoom.Id.ToString(), user.Name, cancellationToken);
 
+        await _chatHub.SendMessageToGroup(
+            chatRoom.Id.ToString(),
+            $"{user.Name} has created the room {chatRoom.Name}",
+            cancellationToken);
+
         return chatRoom.Id;
     }
 }
