@@ -26,7 +26,7 @@ public class SignalRChatRoomNotifier : IChatHub
             .SendAsync("UserLeft", user);
     }
 
-    public async Task SendMessage(string roomId, string message, CancellationToken cancellationToken)
+    public async Task SendMessageToGroup(string roomId, string message, CancellationToken cancellationToken)
     {
         await _hubContext.Clients.Group(roomId).SendAsync("ReceiveMessage", roomId, message);
     }

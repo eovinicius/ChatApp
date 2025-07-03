@@ -24,7 +24,7 @@ public class ChatMessageTest
         chatMessage.Id.Should().NotBe(Guid.Empty);
         chatMessage.ChatRoomId.Should().Be(chatRoomId);
         chatMessage.SenderId.Should().Be(senderId);
-        chatMessage.Content.Type.Should().Be(MessageContentType.Text);
+        chatMessage.Content.Type.Should().Be(ContentType.Text);
         chatMessage.SentAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
         chatMessage.IsEdited.Should().BeFalse();
     }
@@ -45,7 +45,7 @@ public class ChatMessageTest
         chatMessage.Edit(newContent, DateTime.UtcNow);
 
         // Assert
-        chatMessage.Content.Type.Should().Be(MessageContentType.Text);
+        chatMessage.Content.Type.Should().Be(ContentType.Text);
         chatMessage.IsEdited.Should().BeTrue();
     }
 
