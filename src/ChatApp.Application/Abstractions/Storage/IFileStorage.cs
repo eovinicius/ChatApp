@@ -1,7 +1,8 @@
 namespace ChatApp.Application.Abstractions.Storage;
 
-public interface IFileStorage
+public interface IFileStorageService
 {
-    Task<string> Upload(Stream file, string fileName, CancellationToken cancellationToken = default);
-    Task DeleteAsync(string filePath, CancellationToken cancellationToken = default);
+    Task Upload(Stream stream, string key, string contentType, CancellationToken cancellationToken = default);
+    string GeneratePresignedUrl(string key, TimeSpan expiration);
+    Task Delete(string key, CancellationToken cancellationToken = default);
 }
