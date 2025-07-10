@@ -26,6 +26,7 @@ public class GetMessagesByRoomQueryHandler : IQueryHandler<GetMessagesByRoomQuer
         const string sql = """
             SELECT
                 content AS Content,
+                content_type AS ContentType,
                 sender_id AS SenderId,
                 send_at AS SentAt
             FROM chat_messages

@@ -1,3 +1,3 @@
 namespace ChatApp.Application.UseCases.Messages.GetMessagesByRoom;
 
-public record GetMessagesByRoomResponse(string Content, Guid SenderId, DateTime SentAt) { }
+public record GetMessagesByRoomResponse(string Content, string ContentType, Guid SenderId, DateTime SentAt) { }
