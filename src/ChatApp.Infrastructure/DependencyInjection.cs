@@ -5,12 +5,14 @@ using System.Threading.RateLimiting;
 using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Services;
+using ChatApp.Application.Abstractions.Storage;
 using ChatApp.Domain.Repositories;
 using ChatApp.Infrastructure.Authentication;
 using ChatApp.Infrastructure.Database.EntityFramework;
 using ChatApp.Infrastructure.Database.EntityFramework.Data;
 using ChatApp.Infrastructure.Database.EntityFramework.Repositories;
 using ChatApp.Infrastructure.Services;
+using ChatApp.Infrastructure.Storage;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -54,6 +56,7 @@ public static class DependencyInjection
         services.AddScoped<IHashService, HashService>();
         services.AddSingleton<IChatHub, SignalRChatRoomNotifier>();
         services.AddSignalR();
+        services.AddScoped<IFileStorageService, S3FileStorageService>();
     }
 
     private static void AddAuthentication(IServiceCollection services)
