@@ -19,7 +19,8 @@ public class SendMessageCommandHandlerTests
 {
     private static readonly SendMessageCommand Command = new(
         Guid.NewGuid(),
-        new("text", "Hello World"));
+        "Hello, world!",
+        "Text");
 
     private readonly SendMessageCommandHandler _handler;
     private readonly IUserRepository _userRepositoryMock;
@@ -27,7 +28,6 @@ public class SendMessageCommandHandlerTests
     private readonly IChatRoomRepository _chatRoomRepositoryMock;
     private readonly IChatMessageRepository _chatMessageRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly IFileStorage _fileStorageMock;
     private readonly IDateTimeProvider _dateTimeProviderMock;
 
     public SendMessageCommandHandlerTests()
@@ -37,7 +37,6 @@ public class SendMessageCommandHandlerTests
         _chatRoomRepositoryMock = Substitute.For<IChatRoomRepository>();
         _chatMessageRepositoryMock = Substitute.For<IChatMessageRepository>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
-        _fileStorageMock = Substitute.For<IFileStorage>();
         _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
 
         _handler = new SendMessageCommandHandler(
@@ -46,7 +45,6 @@ public class SendMessageCommandHandlerTests
             _chatRoomRepositoryMock,
             _chatMessageRepositoryMock,
             _unitOfWorkMock,
-            _fileStorageMock,
             _dateTimeProviderMock
         );
     }

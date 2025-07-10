@@ -1,6 +1,4 @@
-﻿using System.Net.Http.Headers;
-
-using ChatApp.Domain.Entities.Users;
+﻿using ChatApp.Domain.Entities.Users;
 
 namespace ChatApp.Domain.Entities.ChatRooms;
 
@@ -40,7 +38,7 @@ public sealed class ChatRoom
 
     public void Join(User user)
     {
-        if (IsUserInRoom(user.Id))
+        if (IsUserInRoom(user))
             return;
 
         if (MaxMembersReached())
@@ -76,7 +74,7 @@ public sealed class ChatRoom
 
     public bool ValidatePassword(string? password) => Password == password;
 
-    public bool IsUserInRoom(Guid userId) => _members.Any(x => x.UserId == userId);
+    public bool IsUserInRoom(User user) => _members.Any(x => x.UserId == user.Id);
 
     private bool MaxMembersReached() => _members.Count >= MaxMembers;
 
