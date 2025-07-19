@@ -13,7 +13,7 @@ using NSubstitute;
 
 namespace ChatApp.UnitTests.Application.ChatRooms;
 
-public class LeaveRoomCommandHandlerTests
+public class LeaveRoomTests
 {
 
     private static readonly LeaveRoomCommand Command = new(Guid.NewGuid());
@@ -24,7 +24,7 @@ public class LeaveRoomCommandHandlerTests
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IUserContext _userContextMock;
     private readonly IChatHub _chatHubMock;
-    public LeaveRoomCommandHandlerTests()
+    public LeaveRoomTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
         _chatRoomRepositoryMock = Substitute.For<IChatRoomRepository>();

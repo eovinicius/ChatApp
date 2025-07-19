@@ -15,7 +15,7 @@ using NSubstitute;
 
 namespace ChatApp.UnitTests.Application.Messages;
 
-public class SendMessageCommandHandlerTests
+public class SendMessageTests
 {
     private static readonly SendMessageCommand Command = new(
         Guid.NewGuid(),
@@ -30,7 +30,7 @@ public class SendMessageCommandHandlerTests
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IDateTimeProvider _dateTimeProviderMock;
 
-    public SendMessageCommandHandlerTests()
+    public SendMessageTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
         _userContext = Substitute.For<IUserContext>();

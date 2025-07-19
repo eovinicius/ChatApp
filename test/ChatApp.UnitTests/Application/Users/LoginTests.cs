@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Services;
 using ChatApp.Application.UseCases.Users.Login;
@@ -10,9 +8,9 @@ using FluentAssertions;
 
 using NSubstitute;
 
-namespace ChatApp.UnitTests.Application.ChatRooms;
+namespace ChatApp.UnitTests.Application.Users;
 
-public class LoginCommandHandlerTests
+public class LoginTests
 {
     private static readonly LoginCommand Command = new("username", "password");
 
@@ -21,7 +19,7 @@ public class LoginCommandHandlerTests
     private readonly IHashService _hashServiceMock;
     private readonly IAuthenticationService _authenticationServiceMock;
 
-    public LoginCommandHandlerTests()
+    public LoginTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
         _authenticationServiceMock = Substitute.For<IAuthenticationService>();
