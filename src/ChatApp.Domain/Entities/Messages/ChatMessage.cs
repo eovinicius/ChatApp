@@ -32,9 +32,12 @@ public class ChatMessage
         return new ChatMessage(chatRoomId, contentType, content, senderId, sendAt);
     }
 
-    public bool CanBeDeletedBy(Guid userId, DateTime utcNow)
+    public bool CanBeDeletedBy(Guid userId, Guid roomId, DateTime utcNow)
     {
         if (SenderId != userId)
+            return false;
+
+        if (ChatRoomId != roomId)
             return false;
 
         if (!IsWithinTimeLimit(utcNow, MessageDeleteTimeLimitInHours))
