@@ -56,13 +56,14 @@ public class ChatMessageTest
         // Arrange
         var senderId = Guid.NewGuid();
         var chatRoomId = Guid.NewGuid();
+        var roomId = chatRoomId;
         var contentType = ContentType.Text;
         var contentData = "hello world";
         var currentUtcTime = DateTime.UtcNow;
         var chatMessage = ChatMessage.Create(chatRoomId, contentType, contentData, senderId, currentUtcTime);
 
         // Act
-        var canDelete = chatMessage.CanBeDeletedBy(senderId, DateTime.UtcNow);
+        var canDelete = chatMessage.CanBeDeletedBy(senderId, roomId, DateTime.UtcNow);
 
         // Assert
         canDelete.Should().BeTrue();
@@ -74,6 +75,7 @@ public class ChatMessageTest
         // Arrange
         var senderId = Guid.NewGuid();
         var chatRoomId = Guid.NewGuid();
+        var roomId = chatRoomId;
         var contentType = ContentType.Text;
         var contentData = "hello world";
         var currentUtcTime = DateTime.UtcNow;
@@ -81,7 +83,7 @@ public class ChatMessageTest
         var otherUserId = Guid.NewGuid();
 
         // Act
-        var canDelete = chatMessage.CanBeDeletedBy(otherUserId, DateTime.UtcNow);
+        var canDelete = chatMessage.CanBeDeletedBy(otherUserId, roomId, DateTime.UtcNow);
 
         // Assert
         canDelete.Should().BeFalse();
