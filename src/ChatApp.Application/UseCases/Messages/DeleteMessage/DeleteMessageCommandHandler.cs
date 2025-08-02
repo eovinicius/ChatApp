@@ -36,19 +36,19 @@ public class DeleteMessageCommandHandler : ICommandHandler<DeleteMessageCommand>
 
         if (user is null)
         {
-            return Result.Failure(Error.None);
+            return Result.Failure(Error.NullValue);
         }
 
         var message = await _messageRepository.GetById(request.MessageId, cancellationToken);
 
         if (message is null)
         {
-            return Result.Failure(Error.None);
+            return Result.Failure(Error.NullValue);
         }
 
         if (!message.CanBeDeletedBy(currentUserId, request.RoomId, _dateTimeProvider.UtcNow))
         {
-            return Result.Failure(Error.None);
+            return Result.Failure(Error.NullValue);
         }
 
         _messageRepository.Delete(message, cancellationToken);
