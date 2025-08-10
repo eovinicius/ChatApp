@@ -1,24 +1,23 @@
 using ChatApp.Application.Abstractions.Services;
-using ChatApp.Domain.Entities.Users;
 
 using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.Infrastructure.Services;
 
-public class ChatHub : Hub
+public class ChatHub : Hub<IChatHub>
 {
-    public async Task JoinRoom(string roomName)
+    public async Task JoinRoom(string roodId)
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
+        await Groups.AddToGroupAsync(Context.ConnectionId, roodId);
     }
 
-    public async Task LeaveRoom(string roomName)
+    public async Task LeaveRoom(string roomId)
     {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
     }
 
     public async Task SendMessage(string roomName, string user, string message)
     {
-        await Clients.Group(roomName).SendAsync("ReceiveMessage", user, message);
+        await Clients.Group(roomName).SendMessageToGroup(roomName, $"{user}: {message}");
     }
 }
