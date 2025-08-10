@@ -3,26 +3,26 @@ using Amazon.S3.Model;
 
 using ChatApp.Application.Abstractions.Storage;
 
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace ChatApp.Infrastructure.Storage;
 
-public class S3FileStorageService : IFileStorageService
+internal class S3FileStorageService : IFileStorageService
 {
     private readonly IAmazonS3 _s3;
-    private readonly string _bucket;
+    private readonly AmazonS3Settings _settings;
 
-    public S3FileStorageService(IAmazonS3 s3, IConfiguration config)
+    public S3FileStorageService(IAmazonS3 s3, IOptions<AmazonS3Settings> options)
     {
         _s3 = s3;
-        _bucket = config["AwsS3:BucketName"] ?? throw new ArgumentNullException("AwsS3:BucketName", "S3 bucket name configuration is missing.");
+        _settings = options.Value ?? throw new ArgumentNullException(nameof(options));
     }
 
     public async Task Upload(Stream stream, string key, string contentType, CancellationToken cancellationToken = default)
     {
         var request = new PutObjectRequest
         {
-            BucketName = _bucket,
+            BucketName = _settings.BucketName,
             Key = key,
             InputStream = stream,
             ContentType = contentType
@@ -36,7 +36,7 @@ public class S3FileStorageService : IFileStorageService
     {
         var request = new GetPreSignedUrlRequest
         {
-            BucketName = _bucket,
+            BucketName = _settings.BucketName,
             Key = key,
             Verb = HttpVerb.GET,
             Expires = DateTime.UtcNow.Add(expiration)
@@ -49,7 +49,7 @@ public class S3FileStorageService : IFileStorageService
     {
         var request = new DeleteObjectRequest
         {
-            BucketName = _bucket,
+            BucketName = _settings.BucketName,
             Key = key
         };
 
