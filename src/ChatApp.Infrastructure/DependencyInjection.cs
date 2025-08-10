@@ -32,7 +32,7 @@ public static class DependencyInjection
     {
         AddPersistence(services, configuration);
         AddAuthentication(services);
-        AddServicesProviders(services);
+        AddServicesProviders(services, configuration);
         AddRateLimiter(services);
         return services;
     }
@@ -51,12 +51,14 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
     }
 
-    private static void AddServicesProviders(IServiceCollection services)
+    private static void AddServicesProviders(IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IHashService, HashService>();
         services.AddSingleton<IChatHub, SignalRChatRoomNotifier>();
         services.AddSignalR();
-        services.AddScoped<IFileStorageService, S3FileStorageService>();
+        services
+            .Configure<AmazonS3Settings>(configuration.GetRequiredSection("AwsSettings:S3"))
+            .AddScoped<IFileStorageService, S3FileStorageService>();
     }
 
     private static void AddAuthentication(IServiceCollection services)
