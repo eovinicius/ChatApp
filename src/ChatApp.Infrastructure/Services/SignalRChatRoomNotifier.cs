@@ -1,5 +1,5 @@
-
 using ChatApp.Application.Abstractions.Services;
+using ChatApp.Infrastructure.RealTime;
 
 using Microsoft.AspNetCore.SignalR;
 
