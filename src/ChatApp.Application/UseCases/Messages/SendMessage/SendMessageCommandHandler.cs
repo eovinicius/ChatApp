@@ -17,7 +17,13 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
 
-    public SendMessageCommandHandler(IUserRepository userRepository, IUserContext userContext, IChatRoomRepository chatRoomRepository, IChatMessageRepository chatMessageRepository, IUnitOfWork unitOfWork, IDateTimeProvider dateTimeProvider)
+    public SendMessageCommandHandler(
+        IUserRepository userRepository,
+        IUserContext userContext,
+        IChatRoomRepository chatRoomRepository,
+        IChatMessageRepository chatMessageRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider)
     {
         _userRepository = userRepository;
         _userContext = userContext;
