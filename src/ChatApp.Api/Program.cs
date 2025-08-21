@@ -7,12 +7,6 @@ using CorrelationId.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(5000);
-    options.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps());
-});
-
 builder.Services.AddDefaultCorrelationId(options =>
 {
     options.AddToLoggingScope = true;
