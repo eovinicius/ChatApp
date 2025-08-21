@@ -13,6 +13,10 @@ using ChatApp.Infrastructure.Database.EntityFramework.Data;
 using ChatApp.Infrastructure.Database.EntityFramework.Repositories;
 using ChatApp.Infrastructure.Services;
 using ChatApp.Infrastructure.Storage;
+using Amazon;
+using Amazon.S3;
+using Amazon.Runtime;
+using ChatApp.Infrastructure.Database;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -21,6 +25,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using ChatApp.Application.Abstractions.Clock;
 
 namespace ChatApp.Infrastructure;
 
@@ -39,9 +44,8 @@ public static class DependencyInjection
 
     private static void AddPersistence(IServiceCollection services, IConfiguration configuration)
     {
-        // var connectionString = configuration.GetConnectionString("Database") ??
-        //                        throw new ArgumentNullException(nameof(configuration));
-        var connectionString = "Host=localhost;Port=5432;Database=chatapp;Username=postgres;Password=postgres;";
+        var connectionString = configuration.GetConnectionString("ConnectionStrings:Database")
+                       ?? "Host=chatapp-db;Port=5432;Database=chatapp;Username=postgres;Password=postgres;";
 
         services.AddDbContext<ChatAppDbContext>(options => options.UseNpgsql(connectionString));
 
@@ -49,6 +53,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
     }
 
     private static void AddServicesProviders(IServiceCollection services, IConfiguration configuration)
@@ -56,9 +61,30 @@ public static class DependencyInjection
         services.AddScoped<IHashService, HashService>();
         services.AddSingleton<IChatHub, SignalRChatRoomNotifier>();
         services.AddSignalR();
-        services
-            .Configure<AmazonS3Settings>(configuration.GetRequiredSection("AwsSettings:S3"))
-            .AddScoped<IFileStorageService, S3FileStorageService>();
+
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+
+        // Amazon S3 settings and client registration
+        var s3Section = configuration.GetRequiredSection("AwsSettings:S3");
+        services.Configure<AmazonS3Settings>(s3Section);
+
+        var s3Settings = s3Section.Get<AmazonS3Settings>() ?? new AmazonS3Settings();
+        if (!string.IsNullOrEmpty(s3Settings.Region))
+        {
+            var regionEndpoint = RegionEndpoint.GetBySystemName(s3Settings.Region);
+
+            if (!string.IsNullOrEmpty(s3Settings.AccessKey) && !string.IsNullOrEmpty(s3Settings.SecretKey))
+            {
+                var creds = new BasicAWSCredentials(s3Settings.AccessKey, s3Settings.SecretKey);
+                services.AddSingleton<IAmazonS3>(_ => new AmazonS3Client(creds, regionEndpoint));
+            }
+            else
+            {
+                services.AddSingleton<IAmazonS3>(_ => new AmazonS3Client(regionEndpoint));
+            }
+        }
+
+        services.AddScoped<IFileStorageService, S3FileStorageService>();
     }
 
     private static void AddAuthentication(IServiceCollection services)
