@@ -9,7 +9,7 @@ public class ChatMessage
     public string Content { get; private set; }
     public Guid SenderId { get; private set; }
     public DateTime SentAt { get; private set; }
-    public DateTime EditedAt { get; private set; }
+    public DateTime? EditedAt { get; private set; }
     public ContentType ContentType { get; private set; }
 
     private const int MessageEditTimeLimitInHours = 6;
@@ -65,7 +65,7 @@ public class ChatMessage
         return Result.Success();
     }
 
-    public bool IsEdited => EditedAt > SentAt;
+    public bool IsEdited => EditedAt.HasValue && EditedAt.Value > SentAt;
 
     private bool IsWithinTimeLimit(DateTime utcNow, int limitInHours)
     {
