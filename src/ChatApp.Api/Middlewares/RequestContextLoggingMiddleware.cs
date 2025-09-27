@@ -18,7 +18,6 @@ public class RequestContextLoggingMiddleware
 
     public async Task Invoke(HttpContext context)
     {
-        // Preferir o ID resolvido pelo middleware do pacote CorrelationId
         var correlationId = _correlationAccessor.CorrelationContext?.CorrelationId
             ?? (context.Request.Headers.TryGetValue(HeaderKey, out var cid)
                 ? cid.ToString()
