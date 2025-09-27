@@ -24,4 +24,9 @@ public static class ApplicationBuilderExtensions
     {
         app.UseMiddleware<RequestContextLoggingMiddleware>();
     }
+
+    public static void UseIpAddressLogging(this IApplicationBuilder app)
+    {
+        app.UseMiddleware<IPAddressLoggingMiddleware>();
+    }
 }
