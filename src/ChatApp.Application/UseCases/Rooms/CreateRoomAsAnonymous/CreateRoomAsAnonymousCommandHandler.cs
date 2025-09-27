@@ -12,6 +12,15 @@ public sealed class CreateRoomAsAnonymousCommandHandler : ICommandHandler<Create
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IChatHub _chatHub;
+
+    public CreateRoomAsAnonymousCommandHandler(IChatRoomRepository chatRoomRepository, IUserRepository userRepository, IUnitOfWork unitOfWork, IChatHub chatHub)
+    {
+        _chatRoomRepository = chatRoomRepository;
+        _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
+        _chatHub = chatHub;
+    }
+
     public Task<Result<Guid>> Handle(CreateRoomAsAnonymousCommand request, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
