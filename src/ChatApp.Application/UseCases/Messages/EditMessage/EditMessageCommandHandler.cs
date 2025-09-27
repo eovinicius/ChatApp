@@ -15,12 +15,13 @@ public class EditMessageCommandHandler : ICommandHandler<EditMessageCommand>
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IUserRepository _userRepository;
 
-    public EditMessageCommandHandler(IChatMessageRepository messageRepository, IUnitOfWork unitOfWork, IUserContext userContext, IUserRepository userRepository)
+    public EditMessageCommandHandler(IChatMessageRepository messageRepository, IUnitOfWork unitOfWork, IUserContext userContext, IUserRepository userRepository, IDateTimeProvider dateTimeProvider)
     {
         _messageRepository = messageRepository;
         _unitOfWork = unitOfWork;
         _userContext = userContext;
         _userRepository = userRepository;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<Result> Handle(EditMessageCommand request, CancellationToken cancellationToken)
