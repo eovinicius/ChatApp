@@ -1,9 +1,7 @@
-using ChatApp.Infrastructure.Database.EntityFramework;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace ChatApp.Infrastructure;
+namespace ChatApp.Infrastructure.Database.EntityFramework;
 
 public class ChatAppDbContextFactory : IDesignTimeDbContextFactory<ChatAppDbContext>
 {
