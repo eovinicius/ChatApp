@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ChatApp.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class initialCreate : Migration
+    public partial class creating_tables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -33,10 +33,12 @@ namespace ChatApp.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ChatRoom = table.Column<Guid>(type: "uuid", nullable: false),
-                    SenderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ChatRoomId = table.Column<Guid>(type: "uuid", nullable: false),
                     Content = table.Column<string>(type: "text", nullable: false),
-                    SentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    SenderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    EditedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ContentType = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -63,6 +65,7 @@ namespace ChatApp.Infrastructure.Migrations
                 {
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     ChatRoomId = table.Column<Guid>(type: "uuid", nullable: false),
+                    GuestName = table.Column<string>(type: "text", nullable: true),
                     JoinedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsAdmin = table.Column<bool>(type: "boolean", nullable: false)
                 },
