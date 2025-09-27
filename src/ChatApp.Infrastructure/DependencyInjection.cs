@@ -44,7 +44,7 @@ public static class DependencyInjection
 
     private static void AddPersistence(IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("ConnectionStrings:Database")
+        var connectionString = configuration.GetConnectionString("Database")
                        ?? "Host=chatapp-db;Port=5432;Database=chatapp;Username=postgres;Password=postgres;";
 
         services.AddDbContext<ChatAppDbContext>(options => options.UseNpgsql(connectionString));
