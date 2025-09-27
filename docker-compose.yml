@@ -7,9 +7,6 @@ services:
       dockerfile: src/ChatApp.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:
-      chatapp-db:
-        condition: service_healthy
     ports:
       - "80:80"
 
@@ -20,12 +17,7 @@ services:
       - POSTGRES_DB=chatapp
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    volumes:
-      - ./.containers/database:/var/lib/postgresql/data
+    # volumes:
+    #   - ./.containers/database:/var/lib/postgresql/data
     ports:
       - 5432:5432
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d chatapp"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
