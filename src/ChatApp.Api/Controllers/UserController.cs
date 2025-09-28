@@ -22,9 +22,6 @@ public sealed class UserController : ControllerBase
     }
 
     [HttpPost("register")]
-    [EnableRateLimiting("default")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<Result<IActionResult>> Register([FromBody] UserRegisterRequest request)
     {
         var command = new RegisterUserCommand(
