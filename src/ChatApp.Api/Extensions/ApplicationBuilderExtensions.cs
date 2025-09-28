@@ -36,7 +36,7 @@ public static class ApplicationBuilderExtensions
     {
         app.UseSerilogRequestLogging(options =>
         {
-            options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms [cid: {CorrelationId}]";
+            options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
 
             options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
             {
