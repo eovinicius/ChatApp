@@ -4,6 +4,7 @@ using ChatApp.Infrastructure;
 
 using CorrelationId;
 using CorrelationId.DependencyInjection;
+
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,11 +53,7 @@ app.UseCustomExceptionHandler();
 
 app.UseRequestContextLogging();
 
-// Loga cada requisição HTTP com método, rota, status e tempo de execução
-app.UseSerilogRequestLogging(options =>
-{
-    options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
-});
+app.UseHttpRequestLogging();
 
 app.UseCors();
 
