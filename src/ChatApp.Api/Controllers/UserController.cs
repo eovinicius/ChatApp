@@ -22,7 +22,7 @@ public sealed class UserController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<Result<IActionResult>> Register([FromBody] UserRegisterRequest request)
+    public async Task<IActionResult> Register([FromBody] UserRegisterRequest request)
     {
         var command = new RegisterUserCommand(
             request.Name,
@@ -31,10 +31,12 @@ public sealed class UserController : ControllerBase
 
         var result = await _sender.Send(command);
 
-        return CreatedAtAction(
-            nameof(Register),
-            new { id = result.Value },
-            result);
+        if (result.IsFailure)
+        {
+            return BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+        }
+
+        return Ok(new { token = result.Value });
     }
 }
 
