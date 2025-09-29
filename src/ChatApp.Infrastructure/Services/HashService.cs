@@ -4,7 +4,7 @@ namespace ChatApp.Infrastructure.Services;
 
 public class HashService : IHashService
 {
-    private const int SaltSize = 16;
+    private const int SaltSize = 12;
     public string Hash(string password)
     {
         var salt = BCrypt.Net.BCrypt.GenerateSalt(SaltSize);
