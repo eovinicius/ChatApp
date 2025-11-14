@@ -1,4 +1,6 @@
-﻿using ChatApp.Domain.Abstractions;
+﻿using System.Diagnostics;
+
+using ChatApp.Domain.Abstractions;
 
 using MediatR;
 
@@ -27,6 +29,8 @@ public class LoggingBehavior<TRequest, TResponse>
     {
         var requestName = request.GetType().Name;
 
+        var sw = Stopwatch.StartNew();
+
         try
         {
             _logger.LogInformation("{RequestName} - Executing request", requestName);
@@ -35,13 +39,13 @@ public class LoggingBehavior<TRequest, TResponse>
 
             if (result.IsSuccess)
             {
-                _logger.LogInformation("{RequestName} - Request processed successfully", requestName);
+                _logger.LogInformation("{RequestName} - Request processed successfully in {ElapsedMilliseconds}ms", requestName, sw.ElapsedMilliseconds);
             }
             else
             {
                 using (LogContext.PushProperty("Error", result.Error, true))
                 {
-                    _logger.LogError("{RequestName} - Request failed", requestName);
+                    _logger.LogError("{RequestName} - Request failed in {ElapsedMilliseconds}ms", requestName, sw.ElapsedMilliseconds);
                 }
             }
 
@@ -49,8 +53,8 @@ public class LoggingBehavior<TRequest, TResponse>
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "{RequestName} Request processing failed", requestName);
-
+            sw.Stop();
+            _logger.LogError(exception, "{RequestName} - Request processing failed after {ElapsedMilliseconds}ms", requestName, sw.ElapsedMilliseconds);
             throw;
         }
     }
