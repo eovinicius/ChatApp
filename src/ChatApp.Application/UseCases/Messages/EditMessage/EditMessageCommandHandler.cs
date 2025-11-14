@@ -38,7 +38,7 @@ public class EditMessageCommandHandler : ICommandHandler<EditMessageCommand>
 
         if (message is null)
         {
-            return Result.Failure(Error.None);
+            return Result.Failure(Error.NullValue);
         }
 
         if (message.SenderId != currentUserId)
