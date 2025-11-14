@@ -19,7 +19,16 @@ builder.Services.AddDefaultCorrelationId(options =>
 
 builder.UseSerilogCustom();
 
-builder.Services.AddCors();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "http://localhost:4200")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -47,20 +56,25 @@ if (app.Environment.IsDevelopment())
 
 app.UseCorrelationId();
 
-app.UseRateLimiter();
-
 app.UseCustomExceptionHandler();
 
 app.UseRequestContextLogging();
 
-app.UseHttpRequestLogging();
+app.UseSerilogRequestLogging(options =>
+{
+    options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.00} ms";
+});
 
 app.UseCors();
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<ChatApp.Infrastructure.RealTime.ChatHub>("/chatHub");
 
 app.Run();
