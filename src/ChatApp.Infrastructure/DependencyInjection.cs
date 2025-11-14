@@ -36,7 +36,7 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         AddPersistence(services, configuration);
-        AddAuthentication(services);
+        AddAuthentication(services, configuration);
         AddServicesProviders(services, configuration);
         AddRateLimiter(services);
         return services;
@@ -44,14 +44,20 @@ public static class DependencyInjection
 
     private static void AddPersistence(IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("Database")
-                       ?? "Host=chatapp-db;Port=5432;Database=chatapp;Username=postgres;Password=postgres;";
+        var connectionString = configuration.GetConnectionString("Database");
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException(
+                "Connection string 'Database' não configurada. Configure em appsettings.json ou variáveis de ambiente.");
+        }
 
         services.AddDbContext<ChatAppDbContext>(options => options.UseNpgsql(connectionString));
 
         services.AddScoped<IChatRoomRepository, ChatRoomRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
+        services.AddScoped<IAuditRepository, AuditRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
     }
@@ -87,16 +93,19 @@ public static class DependencyInjection
         services.AddScoped<IFileStorageService, S3FileStorageService>();
     }
 
-    private static void AddAuthentication(IServiceCollection services)
+    private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
     {
         services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
 
+        var jwtSecretKey = configuration.GetSection("JwtSettings:SecretKey").Value
+            ?? throw new InvalidOperationException("JwtSettings:SecretKey não configurado no appsettings.json");
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("rV0xK+6G8xZJ3m9rTqMev2Yn1w+8WpFlvT5X8NVa1jJU=")),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
             ValidateIssuer = false,
             ValidateAudience = false,
             NameClaimType = ClaimTypes.NameIdentifier,
