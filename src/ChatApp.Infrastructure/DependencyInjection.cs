@@ -57,7 +57,6 @@ public static class DependencyInjection
         services.AddScoped<IChatRoomRepository, ChatRoomRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
-        services.AddScoped<IAuditRepository, AuditRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
     }
