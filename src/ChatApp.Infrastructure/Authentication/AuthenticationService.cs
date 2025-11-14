@@ -32,7 +32,8 @@ public class AuthenticationService : IAuthenticationService
             ]),
             Expires = DateTime.UtcNow.AddHours(1),
             SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes("rV0xK+6G8xZJ3m9rTqMev2Yn1w+8WpFlvT5X8NVa1jJU=")),
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("JwtSettings:SecretKey").Value 
+                    ?? throw new InvalidOperationException("JwtSettings:SecretKey não configurado"))),
                 SecurityAlgorithms.HmacSha256Signature)
         };
 
