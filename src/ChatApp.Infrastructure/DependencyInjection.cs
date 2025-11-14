@@ -70,7 +70,6 @@ public static class DependencyInjection
 
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
-        // Amazon S3 settings and client registration
         var s3Section = configuration.GetRequiredSection("AwsSettings:S3");
         services.Configure<AmazonS3Settings>(s3Section);
 
