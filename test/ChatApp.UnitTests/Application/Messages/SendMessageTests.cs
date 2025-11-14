@@ -1,7 +1,6 @@
 using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Clock;
 using ChatApp.Application.Abstractions.Data;
-using ChatApp.Application.Abstractions.Storage;
 using ChatApp.Application.UseCases.Messages.SendMessage;
 using ChatApp.Domain.Entities.ChatRooms;
 using ChatApp.Domain.Entities.Messages;
