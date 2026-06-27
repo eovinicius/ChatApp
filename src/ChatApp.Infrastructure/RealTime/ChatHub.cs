@@ -1,25 +1,32 @@
-using ChatApp.Application.Abstractions.Services;
-using ChatApp.Domain.Entities.Users;
+using System.Security.Claims;
 
+using ChatApp.Application.Abstractions.Services;
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.Infrastructure.RealTime;
 
+[Authorize]
 public class ChatHub : Hub<IChatHub>
 {
-    public async Task JoinRoom(User user, string roomId)
+    public async Task JoinRoom(string roomId)
     {
+        var userName = Context.User?.FindFirstValue(ClaimTypes.Name) ?? "Anônimo";
         await Groups.AddToGroupAsync(Context.ConnectionId, $"chat_{roomId}");
-        await Clients.Group($"chat_{roomId}").JoinGroup(roomId, user.Name);
-    }
-    public async Task LeaveRoom(User user, string roomId)
-    {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"chat_{roomId}");
-        await Clients.Group($"chat_{roomId}").LeftGroup(roomId, user.Name);
+        await Clients.Group($"chat_{roomId}").JoinGroup(roomId, userName);
     }
 
-    public async Task SendMessage(string roomId, User user, string message)
+    public async Task LeaveRoom(string roomId)
     {
-        await Clients.Group($"chat_{roomId}").SendMessageToGroup(roomId, $"{user}: {message}");
+        var userName = Context.User?.FindFirstValue(ClaimTypes.Name) ?? "Anônimo";
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"chat_{roomId}");
+        await Clients.Group($"chat_{roomId}").LeftGroup(roomId, userName);
+    }
+
+    public async Task SendMessage(string roomId, string message)
+    {
+        var userName = Context.User?.FindFirstValue(ClaimTypes.Name) ?? "Anônimo";
+        await Clients.Group($"chat_{roomId}").SendMessageToGroup(roomId, $"{userName}: {message}");
     }
 }
