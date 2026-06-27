@@ -47,13 +47,14 @@ public static class DependencyInjection
     {
         var connectionString = configuration.GetConnectionString("Database");
 
-        if (string.IsNullOrWhiteSpace(connectionString))
+        services.AddDbContext<ChatAppDbContext>(options =>
         {
-            throw new InvalidOperationException(
-                "Connection string 'Database' não configurada. Configure em appsettings.json ou variáveis de ambiente.");
-        }
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new InvalidOperationException(
+                    "Connection string 'Database' não configurada. Configure em appsettings.json ou variáveis de ambiente.");
 
-        services.AddDbContext<ChatAppDbContext>(options => options.UseNpgsql(connectionString));
+            options.UseNpgsql(connectionString);
+        });
 
         services.AddScoped<IChatRoomRepository, ChatRoomRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
