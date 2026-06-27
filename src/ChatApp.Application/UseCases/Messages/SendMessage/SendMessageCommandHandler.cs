@@ -3,7 +3,9 @@ using ChatApp.Application.Abstractions.Clock;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Messaging;
 using ChatApp.Domain.Abstractions;
+using ChatApp.Domain.Entities.ChatRooms;
 using ChatApp.Domain.Entities.Messages;
+using ChatApp.Domain.Entities.Users;
 using ChatApp.Domain.Repositories;
 
 namespace ChatApp.Application.UseCases.Messages.SendMessage;
@@ -40,18 +42,18 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
         var user = await _userRepository.GetById(currentUserId, cancellationToken);
         if (user is null)
         {
-            return Result.Failure<Guid>(Error.NullValue);
+            return Result.Failure<Guid>(UserErrors.NotFound);
         }
 
         var room = await _chatRoomRepository.GetById(request.RoomId, cancellationToken);
         if (room is null)
         {
-            return Result.Failure<Guid>(Error.NullValue);
+            return Result.Failure<Guid>(ChatRoomErrors.NotFound);
         }
 
         if (!room.IsUserInRoom(user))
         {
-            return Result.Failure<Guid>(Error.NullValue);
+            return Result.Failure<Guid>(ChatRoomErrors.NotMember);
         }
 
         var chatMessage = ChatMessage.Create(

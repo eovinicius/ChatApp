@@ -29,7 +29,7 @@ public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, s
 
         if (userAlreadyExists is not null)
         {
-            return Result.Failure<string?>(Error.NullValue);
+            return Result.Failure<string?>(UserErrors.UsernameAlreadyTaken);
         }
 
         var passwordHash = _hashService.Hash(request.Password);

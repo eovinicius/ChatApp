@@ -49,15 +49,13 @@ public class ChatMessage
     public Result Edit(string newContent, DateTime utcNow)
     {
         if (!IsWithinTimeLimit(utcNow, MessageEditTimeLimitInHours))
-            return Result.Failure(Error.NullValue);
+            return Result.Failure(ChatMessageErrors.EditWindowExpired);
 
         if (!IsTextMessage)
-        {
-            return Result.Failure(Error.NullValue);
-        }
+            return Result.Failure(ChatMessageErrors.NotTextMessage);
 
         if (string.IsNullOrWhiteSpace(newContent))
-            return Result.Failure(Error.NullValue);
+            return Result.Failure(ChatMessageErrors.EmptyContent);
 
         Content = newContent;
         EditedAt = utcNow;
