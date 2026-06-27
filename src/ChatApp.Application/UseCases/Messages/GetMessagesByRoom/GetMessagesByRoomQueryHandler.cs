@@ -6,21 +6,18 @@ using ChatApp.Domain.Entities.ChatRooms;
 using ChatApp.Domain.Entities.Users;
 using ChatApp.Domain.Repositories;
 
-using Dapper;
-
-
 namespace ChatApp.Application.UseCases.Messages.GetMessagesByRoom;
 
 public class GetMessagesByRoomQueryHandler : IQueryHandler<GetMessagesByRoomQuery, IEnumerable<GetMessagesByRoomResponse>>
 {
-    private readonly ISqlConnectionFactory _sqlConnectionFactory;
+    private readonly IMessageDao _messageDao;
     private readonly IUserContext _userContext;
     private readonly IUserRepository _userRepository;
     private readonly IChatRoomRepository _chatRoomRepository;
 
-    public GetMessagesByRoomQueryHandler(ISqlConnectionFactory sqlConnectionFactory, IUserContext userContext, IUserRepository userRepository, IChatRoomRepository chatRoomRepository)
+    public GetMessagesByRoomQueryHandler(IMessageDao messageDao, IUserContext userContext, IUserRepository userRepository, IChatRoomRepository chatRoomRepository)
     {
-        _sqlConnectionFactory = sqlConnectionFactory;
+        _messageDao = messageDao;
         _userContext = userContext;
         _userRepository = userRepository;
         _chatRoomRepository = chatRoomRepository;
@@ -49,25 +46,7 @@ public class GetMessagesByRoomQueryHandler : IQueryHandler<GetMessagesByRoomQuer
             return Result.Failure<IEnumerable<GetMessagesByRoomResponse>>(ChatRoomErrors.NotMember);
         }
 
-        var connection = _sqlConnectionFactory.CreateConnection();
-
-        const string sql = """
-            SELECT
-                content AS Content,
-                content_type AS ContentType,
-                sender_id AS SenderId,
-                send_at AS SentAt
-            FROM chat_messages
-            WHERE room_id = @RoomId
-                AND (@Before IS NULL OR send_at < @Before)
-            ORDER BY send_at DESC
-            LIMIT @Take
-            """;
-
-        var messages = await connection.QueryAsync<GetMessagesByRoomResponse>(
-            sql,
-            new { RoomId = request.RoomId, Take = request.Take, Before = request.Before }
-        );
+        var messages = await _messageDao.GetByRoom(request.RoomId, request.Before, request.Take, cancellationToken);
 
         return Result.Success(messages);
     }

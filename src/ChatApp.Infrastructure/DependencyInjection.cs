@@ -17,6 +17,7 @@ using Amazon;
 using Amazon.S3;
 using Amazon.Runtime;
 using ChatApp.Infrastructure.Database;
+using ChatApp.Infrastructure.Database.Repositories;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -59,6 +60,7 @@ public static class DependencyInjection
         services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
+        services.AddScoped<IMessageDao, MessageDao>();
     }
 
     private static void AddServicesProviders(IServiceCollection services, IConfiguration configuration)

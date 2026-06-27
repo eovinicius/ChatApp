@@ -16,20 +16,20 @@ public class GetMessagesByRoomTests
     private static readonly GetMessagesByRoomQuery Query = new(Guid.NewGuid(), null, 10);
 
     private readonly GetMessagesByRoomQueryHandler _handler;
-    private readonly ISqlConnectionFactory _sqlConnectionFactoryMock;
+    private readonly IMessageDao _messageDaoMock;
     private readonly IUserContext _userContextMock;
     private readonly IUserRepository _userRepositoryMock;
     private readonly IChatRoomRepository _chatRoomRepositoryMock;
 
     public GetMessagesByRoomTests()
     {
-        _sqlConnectionFactoryMock = Substitute.For<ISqlConnectionFactory>();
+        _messageDaoMock = Substitute.For<IMessageDao>();
         _userContextMock = Substitute.For<IUserContext>();
         _userRepositoryMock = Substitute.For<IUserRepository>();
         _chatRoomRepositoryMock = Substitute.For<IChatRoomRepository>();
 
         _handler = new GetMessagesByRoomQueryHandler(
-            _sqlConnectionFactoryMock,
+            _messageDaoMock,
             _userContextMock,
             _userRepositoryMock,
             _chatRoomRepositoryMock);
@@ -47,7 +47,7 @@ public class GetMessagesByRoomTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        _sqlConnectionFactoryMock.DidNotReceive().CreateConnection();
+        await _messageDaoMock.DidNotReceive().GetByRoom(Arg.Any<Guid>(), Arg.Any<DateTime?>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class GetMessagesByRoomTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        _sqlConnectionFactoryMock.DidNotReceive().CreateConnection();
+        await _messageDaoMock.DidNotReceive().GetByRoom(Arg.Any<Guid>(), Arg.Any<DateTime?>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -84,6 +84,6 @@ public class GetMessagesByRoomTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        _sqlConnectionFactoryMock.DidNotReceive().CreateConnection();
+        await _messageDaoMock.DidNotReceive().GetByRoom(Arg.Any<Guid>(), Arg.Any<DateTime?>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
     }
 }
