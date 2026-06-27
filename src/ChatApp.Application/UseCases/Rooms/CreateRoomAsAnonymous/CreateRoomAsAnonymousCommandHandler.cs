@@ -2,6 +2,7 @@ using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Messaging;
 using ChatApp.Application.Abstractions.Services;
 using ChatApp.Domain.Abstractions;
+using ChatApp.Domain.Entities.ChatRooms;
 using ChatApp.Domain.Repositories;
 
 namespace ChatApp.Application.UseCases.Rooms.CreateRoomAsAnonymous;
@@ -9,20 +10,26 @@ namespace ChatApp.Application.UseCases.Rooms.CreateRoomAsAnonymous;
 public sealed class CreateRoomAsAnonymousCommandHandler : ICommandHandler<CreateRoomAsAnonymousCommand, Guid>
 {
     private readonly IChatRoomRepository _chatRoomRepository;
-    private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IChatHub _chatHub;
 
-    public CreateRoomAsAnonymousCommandHandler(IChatRoomRepository chatRoomRepository, IUserRepository userRepository, IUnitOfWork unitOfWork, IChatHub chatHub)
+    public CreateRoomAsAnonymousCommandHandler(IChatRoomRepository chatRoomRepository, IUnitOfWork unitOfWork, IChatHub chatHub)
     {
         _chatRoomRepository = chatRoomRepository;
-        _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _chatHub = chatHub;
     }
 
-    public Task<Result<Guid>> Handle(CreateRoomAsAnonymousCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(CreateRoomAsAnonymousCommand request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var room = ChatRoom.CreateAnonymous(request.RoomName, request.GuestName);
+
+        await _chatRoomRepository.Add(room, cancellationToken);
+
+        await _unitOfWork.Commit(cancellationToken);
+
+        await _chatHub.JoinGroup(room.Id.ToString(), request.GuestName, cancellationToken);
+
+        return Result.Success(room.Id);
     }
 }

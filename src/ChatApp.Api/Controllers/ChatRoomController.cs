@@ -1,4 +1,5 @@
 using ChatApp.Application.UseCases.Rooms.CreateRoom;
+using ChatApp.Application.UseCases.Rooms.CreateRoomAsAnonymous;
 using ChatApp.Domain.Abstractions;
 
 using MediatR;
@@ -37,11 +38,33 @@ public class ChatRoomController : ControllerBase
             new { id = result.Value });
     }
 
+    [HttpPost("anonymous")]
+    public async Task<IActionResult> CreateChatRoomAsAnonymous([FromBody] CreateChatRoomAsAnonymousRequest request)
+    {
+        var result = await _sender.Send(new CreateRoomAsAnonymousCommand(request.RoomName, request.GuestName));
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+        }
+
+        return CreatedAtAction(
+            nameof(CreateChatRoomAsAnonymous),
+            new { id = result.Value },
+            new { id = result.Value });
+    }
+
     public sealed class CreateChatRoomRequest
     {
         public string RoomName { get; set; }
         public string Password { get; set; }
         public bool IsPrivate { get; set; }
+    }
+
+    public sealed class CreateChatRoomAsAnonymousRequest
+    {
+        public string RoomName { get; set; }
+        public string GuestName { get; set; }
     }
 
 }

@@ -37,6 +37,13 @@ public sealed class ChatRoom
         return room;
     }
 
+    public static ChatRoom CreateAnonymous(string name, string guestName)
+    {
+        var room = new ChatRoom(name, Guid.Empty, isPrivate: false);
+        room.JoinAnonymously(guestName);
+        return room;
+    }
+
     public Result Join(User user)
     {
         if (IsUserInRoom(user))
