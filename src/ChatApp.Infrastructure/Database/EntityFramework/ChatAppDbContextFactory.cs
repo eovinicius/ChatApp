@@ -8,7 +8,9 @@ public class ChatAppDbContextFactory : IDesignTimeDbContextFactory<ChatAppDbCont
     public ChatAppDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<ChatAppDbContext>();
-        var connectionString = "Host=localhost;Port=5432;Database=chatapp;Username=postgres;Password=postgres;";
+        var connectionString =
+            Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
+            ?? "Host=localhost;Port=5432;Database=chatapp;Username=postgres;Password=postgres;";
         optionsBuilder.UseNpgsql(connectionString);
 
         return new ChatAppDbContext(optionsBuilder.Options);
