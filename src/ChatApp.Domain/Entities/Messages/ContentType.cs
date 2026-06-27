@@ -22,6 +22,7 @@ public sealed record ContentType
             "text" => Text,
             "image" => Image,
             "audio" => Audio,
+            "video" => Video,
             _ => throw new NotSupportedException($"Tipo de conteúdo '{value}' não suportado.")
         };
 }
