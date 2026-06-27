@@ -12,7 +12,7 @@ public class ChatMessage
     public DateTime? EditedAt { get; private set; }
     public ContentType ContentType { get; private set; }
 
-    private const int MessageEditTimeLimitInHours = 6;
+    private const int MessageEditTimeLimitInHours = 1;
     private const int MessageDeleteTimeLimitInHours = 24;
 
     private ChatMessage() { }
