@@ -100,12 +100,19 @@ public static class DependencyInjection
         var jwtSecretKey = configuration.GetSection("JwtSettings:SecretKey").Value
             ?? throw new InvalidOperationException("JwtSettings:SecretKey não configurado no appsettings.json");
 
+        var jwtIssuer = configuration.GetSection("JwtSettings:Issuer").Value
+            ?? throw new InvalidOperationException("JwtSettings:Issuer não configurado.");
+        var jwtAudience = configuration.GetSection("JwtSettings:Audience").Value
+            ?? throw new InvalidOperationException("JwtSettings:Audience não configurado.");
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
-            ValidateIssuer = false,
-            ValidateAudience = false,
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
             NameClaimType = ClaimTypes.NameIdentifier,
             RoleClaimType = ClaimTypes.Role,
         });
