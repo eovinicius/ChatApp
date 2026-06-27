@@ -78,3 +78,5 @@ app.MapControllers();
 app.MapHub<ChatApp.Infrastructure.RealTime.ChatHub>("/chatHub");
 
 app.Run();
+
+public partial class Program { }
