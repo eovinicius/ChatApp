@@ -35,7 +35,7 @@ public sealed class UserController : ControllerBase
 
         if (result.IsFailure)
         {
-            return BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: result.Error.Code, detail: result.Error.Name);
         }
 
         return Ok(new { token = result.Value });
@@ -52,7 +52,7 @@ public sealed class UserController : ControllerBase
 
         if (result.IsFailure)
         {
-            return BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: result.Error.Code, detail: result.Error.Name);
         }
 
         return Ok(new { token = result.Value });
