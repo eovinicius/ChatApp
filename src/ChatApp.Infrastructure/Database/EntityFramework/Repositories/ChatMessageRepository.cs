@@ -29,9 +29,9 @@ public class ChatMessageRepository : IChatMessageRepository
         return await _dbContext.Messages.FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
     }
 
-    public async Task Update(ChatMessage chatMessage, CancellationToken cancellationToken)
+    public Task Update(ChatMessage chatMessage, CancellationToken cancellationToken)
     {
         _dbContext.Messages.Update(chatMessage);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        return Task.CompletedTask;
     }
 }
