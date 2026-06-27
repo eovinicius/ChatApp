@@ -46,12 +46,26 @@ public class ExceptionHandlingMiddleware
     {
         return exception switch
         {
+            UnauthorizedAccessException => new ExceptionDetails(
+                StatusCodes.Status403Forbidden,
+                "Forbidden",
+                "Acesso negado",
+                "Você não tem permissão para realizar esta ação",
+                null),
+
+            ArgumentException argEx => new ExceptionDetails(
+                StatusCodes.Status400BadRequest,
+                "Bad Request",
+                "Argumento inválido",
+                argEx.Message,
+                null),
+
             _ => new ExceptionDetails(
-            StatusCodes.Status500InternalServerError,
-            "Server Error",
-            "Erro interno do servidor",
-            "Ocorreu um erro inesperado",
-            null)
+                StatusCodes.Status500InternalServerError,
+                "Server Error",
+                "Erro interno do servidor",
+                "Ocorreu um erro inesperado",
+                null)
         };
     }
 
