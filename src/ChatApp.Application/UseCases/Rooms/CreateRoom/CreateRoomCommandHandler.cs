@@ -16,19 +16,22 @@ public sealed class CreateChatroomCommandHandler : ICommandHandler<CreateChatroo
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserContext _userContext;
     private readonly IChatHub _chatHub;
+    private readonly IHashService _hashService;
 
     public CreateChatroomCommandHandler(
         IChatRoomRepository chatRoomRepository,
         IUnitOfWork unitOfWork,
         IUserContext userContext,
         IChatHub chatHub,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IHashService hashService)
     {
         _chatRoomRepository = chatRoomRepository;
         _unitOfWork = unitOfWork;
         _userContext = userContext;
         _chatHub = chatHub;
         _userRepository = userRepository;
+        _hashService = hashService;
     }
 
     public async Task<Result<Guid>> Handle(CreateChatroomCommand request, CancellationToken cancellationToken)
@@ -39,7 +42,9 @@ public sealed class CreateChatroomCommandHandler : ICommandHandler<CreateChatroo
             return Result.Failure<Guid>(UserErrors.NotFound);
         }
 
-        var roomResult = ChatRoom.Create(request.Name, user, request.IsPrivate, request.Password);
+        var hashedPassword = request.Password is not null ? _hashService.Hash(request.Password) : null;
+
+        var roomResult = ChatRoom.Create(request.Name, user, request.IsPrivate, hashedPassword);
         if (roomResult.IsFailure)
             return Result.Failure<Guid>(roomResult.Error);
 

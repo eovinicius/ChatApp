@@ -23,6 +23,8 @@ public class CreateRoomTests
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IUserContext _userContextMock;
     private readonly IChatHub _chatHubMock;
+    private readonly IHashService _hashServiceMock;
+
     public CreateRoomTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
@@ -30,13 +32,15 @@ public class CreateRoomTests
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _userContextMock = Substitute.For<IUserContext>();
         _chatHubMock = Substitute.For<IChatHub>();
+        _hashServiceMock = Substitute.For<IHashService>();
 
         _handler = new CreateChatroomCommandHandler(
             _chatRoomRepositoryMock,
             _unitOfWorkMock,
             _userContextMock,
             _chatHubMock,
-            _userRepositoryMock);
+            _userRepositoryMock,
+            _hashServiceMock);
     }
 
     [Fact]
@@ -66,6 +70,7 @@ public class CreateRoomTests
         var user = User.Create("John Doe", "username", "password").Value;
         _userContextMock.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+        _hashServiceMock.Hash("123").Returns("hashed_123");
 
         var command = new CreateChatroomCommand("sala", true, "123");
 
@@ -75,7 +80,8 @@ public class CreateRoomTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBe(Guid.Empty);
-        await _chatRoomRepositoryMock.Received(1).Add(Arg.Is<ChatRoom>(x => x.Name == command.Name && x.IsPrivate == command.IsPrivate && x.Password == command.Password), Arg.Any<CancellationToken>());
+        _hashServiceMock.Received(1).Hash("123");
+        await _chatRoomRepositoryMock.Received(1).Add(Arg.Is<ChatRoom>(x => x.Name == command.Name && x.IsPrivate == command.IsPrivate && x.Password == "hashed_123"), Arg.Any<CancellationToken>());
         await _unitOfWorkMock.Received(1).Commit(Arg.Any<CancellationToken>());
         await _chatHubMock.Received(1).JoinGroup(Arg.Any<string>(), user.Name, Arg.Any<CancellationToken>());
         await _chatHubMock.Received(1).SendMessageToGroup(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());

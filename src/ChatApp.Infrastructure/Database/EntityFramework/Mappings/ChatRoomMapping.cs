@@ -19,7 +19,7 @@ public class ChatRoomMapping : IEntityTypeConfiguration<ChatRoom>
 
         builder.Property(c => c.Password)
             .IsRequired()
-            .HasMaxLength(30);
+            .HasMaxLength(72);
 
         builder.Property(c => c.OwnerId)
             .IsRequired();

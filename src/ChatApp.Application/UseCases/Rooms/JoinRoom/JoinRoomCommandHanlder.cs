@@ -16,19 +16,22 @@ public sealed class JoinRoomCommandHanlder : ICommandHandler<JoinRoomCommand>
     private readonly IUserContext _userContext;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IChatHub _chatHub;
+    private readonly IHashService _hashService;
 
     public JoinRoomCommandHanlder(
         IChatRoomRepository chatRoomRepository,
         IUserContext userContext,
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
-        IChatHub chatHub)
+        IChatHub chatHub,
+        IHashService hashService)
     {
         _chatRoomRepository = chatRoomRepository;
         _userContext = userContext;
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _chatHub = chatHub;
+        _hashService = hashService;
     }
 
     public async Task<Result> Handle(JoinRoomCommand request, CancellationToken cancellationToken)
@@ -45,7 +48,7 @@ public sealed class JoinRoomCommandHanlder : ICommandHandler<JoinRoomCommand>
             return Result.Failure(ChatRoomErrors.NotFound);
         }
 
-        if (room.IsPrivate && !room.ValidatePassword(request.Password))
+        if (room.IsPrivate && (request.Password is null || !_hashService.Compare(request.Password, room.Password)))
         {
             return Result.Failure(ChatRoomErrors.InvalidPassword);
         }
