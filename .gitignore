@@ -6,6 +6,10 @@
 # docker files
 .containers
 
+# appsettings com segredos locais (usar env vars ou User Secrets em produção)
+**/appsettings.Development.json
+**/appsettings.Production.json
+
 # dotenv files
 .env
 
