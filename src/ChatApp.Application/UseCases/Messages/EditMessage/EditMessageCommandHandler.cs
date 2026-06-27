@@ -31,7 +31,7 @@ public class EditMessageCommandHandler : ICommandHandler<EditMessageCommand>
         var user = await _userRepository.GetById(currentUserId, cancellationToken);
         if (user is null)
         {
-            return Result.Failure<Guid>(Error.NullValue);
+            return Result.Failure(Error.NullValue);
         }
 
         var message = await _messageRepository.GetById(request.MessageId, cancellationToken);
