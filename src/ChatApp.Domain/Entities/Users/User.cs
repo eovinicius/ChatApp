@@ -2,9 +2,8 @@ using ChatApp.Domain.Abstractions;
 
 namespace ChatApp.Domain.Entities.Users;
 
-public sealed class User
+public sealed class User : AggregateRoot
 {
-    public Guid Id { get; private set; }
     public string Name { get; private set; }
     public string Username { get; private set; }
     public string Password { get; private set; }
@@ -12,8 +11,8 @@ public sealed class User
     private User() { }
 
     private User(string name, string username, string password)
+        : base(Guid.NewGuid())
     {
-        Id = Guid.NewGuid();
         Name = name;
         Username = username;
         Password = password;

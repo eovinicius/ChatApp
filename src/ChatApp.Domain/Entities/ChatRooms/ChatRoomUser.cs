@@ -1,6 +1,8 @@
+using ChatApp.Domain.Abstractions;
+
 namespace ChatApp.Domain.Entities.ChatRooms;
 
-public sealed class ChatRoomUser
+public sealed class ChatRoomUser : Entity
 {
     public Guid? UserId { get; private set; }
     public string? GuestName { get; private set; }

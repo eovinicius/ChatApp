@@ -8,7 +8,7 @@ public class EntityTest
 {
     private sealed class TestDomainEvent : IDomainEvent;
 
-    private sealed class TestEntity : Entity
+    private sealed class TestEntity : AggregateRoot
     {
         public TestEntity(Guid id) : base(id) { }
         public void Raise(IDomainEvent e) => RaiseDomainEvent(e);
