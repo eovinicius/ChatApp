@@ -20,6 +20,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(200);
 
+        builder.HasIndex(u => u.Username)
+            .IsUnique();
+
         builder.Property(u => u.Password)
             .IsRequired();
     }
