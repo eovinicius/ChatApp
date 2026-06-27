@@ -13,7 +13,7 @@ namespace ChatApp.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[EnableRateLimiting("default")]
+[EnableRateLimiting("auth")]
 public sealed class UserController : ControllerBase
 {
     private readonly ISender _sender;
