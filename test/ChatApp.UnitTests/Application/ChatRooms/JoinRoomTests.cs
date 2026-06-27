@@ -23,6 +23,8 @@ public class JoinRoomTests
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IUserContext _userContextMock;
     private readonly IChatHub _chatHubMock;
+    private readonly IHashService _hashServiceMock;
+
     public JoinRoomTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
@@ -30,14 +32,17 @@ public class JoinRoomTests
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _userContextMock = Substitute.For<IUserContext>();
         _chatHubMock = Substitute.For<IChatHub>();
+        _hashServiceMock = Substitute.For<IHashService>();
 
         _handler = new JoinRoomCommandHanlder(
             _chatRoomRepositoryMock,
             _userContextMock,
             _userRepositoryMock,
             _unitOfWorkMock,
-            _chatHubMock);
+            _chatHubMock,
+            _hashServiceMock);
     }
+
     [Fact]
     public async Task Deveria_adicionar_usuario_quando_entrar_na_sala_publica()
     {
@@ -66,10 +71,11 @@ public class JoinRoomTests
     {
         var ownerUser = User.Create("John Doe", "username", "password").Value;
         var newMember = User.Create("George", "username", "password").Value;
-        var room = ChatRoom.Create("sala", ownerUser, true, "123").Value;
+        var room = ChatRoom.Create("sala", ownerUser, true, "hashed_123").Value;
         _userContextMock.UserId.Returns(newMember.Id);
         _userRepositoryMock.GetById(newMember.Id, Arg.Any<CancellationToken>()).Returns(newMember);
         _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(room);
+        _hashServiceMock.Compare("123", "hashed_123").Returns(true);
 
         // Act
         var result = await _handler.Handle(Command, CancellationToken.None);
@@ -125,10 +131,11 @@ public class JoinRoomTests
     {
         // Arrange
         var newMember = User.Create("George", "username", "password").Value;
-        var room = ChatRoom.Create("sala", User.Create("John Doe", "username", "password").Value, true, "1234").Value;
+        var room = ChatRoom.Create("sala", User.Create("John Doe", "username", "password").Value, true, "hashed_1234").Value;
         _userContextMock.UserId.Returns(newMember.Id);
         _userRepositoryMock.GetById(newMember.Id, Arg.Any<CancellationToken>()).Returns(newMember);
         _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(room);
+        _hashServiceMock.Compare("123", "hashed_1234").Returns(false);
 
         // Act
         var result = await _handler.Handle(Command, CancellationToken.None);
