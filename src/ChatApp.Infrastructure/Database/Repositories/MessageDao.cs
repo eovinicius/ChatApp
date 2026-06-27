@@ -1,3 +1,5 @@
+using System.Data;
+
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.UseCases.Messages.GetMessagesByRoom;
 
@@ -20,20 +22,22 @@ public class MessageDao : IMessageDao
 
         const string sql = """
             SELECT
-                content AS Content,
-                content_type AS ContentType,
-                sender_id AS SenderId,
-                send_at AS SentAt
-            FROM chat_messages
-            WHERE room_id = @RoomId
-                AND (@Before IS NULL OR send_at < @Before)
-            ORDER BY send_at DESC
+                "Content" AS Content,
+                "ContentType" AS ContentType,
+                "SenderId" AS SenderId,
+                "SentAt" AS SentAt
+            FROM "Messages"
+            WHERE "ChatRoomId" = @RoomId
+                AND (@Before IS NULL OR "SentAt" < @Before)
+            ORDER BY "SentAt" DESC
             LIMIT @Take
             """;
 
-        return await connection.QueryAsync<GetMessagesByRoomResponse>(
-            sql,
-            new { RoomId = roomId, Take = take, Before = before }
-        );
+        var parameters = new DynamicParameters();
+        parameters.Add("RoomId", roomId);
+        parameters.Add("Take", take);
+        parameters.Add("Before", before, DbType.DateTimeOffset);
+
+        return await connection.QueryAsync<GetMessagesByRoomResponse>(sql, parameters);
     }
 }
