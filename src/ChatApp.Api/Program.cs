@@ -38,7 +38,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers();
 
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
 
 
@@ -69,7 +69,8 @@ app.UseSerilogRequestLogging(options =>
 
 app.UseCors();
 
-app.UseRateLimiter();
+if (!app.Environment.IsEnvironment("Testing"))
+    app.UseRateLimiter();
 
 app.UseAuthentication();
 
