@@ -14,7 +14,7 @@ namespace ChatApp.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[EnableRateLimiting("default")]
+[EnableRateLimiting("chat")]
 public class ChatRoomController : ControllerBase
 {
     private readonly ISender _sender;

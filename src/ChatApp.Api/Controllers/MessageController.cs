@@ -15,7 +15,7 @@ namespace ChatApp.Api.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-[EnableRateLimiting("default")]
+[EnableRateLimiting("chat")]
 public sealed class MessageController : ControllerBase
 {
     private readonly ISender _sender;
