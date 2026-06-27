@@ -25,5 +25,8 @@ public class ChatMessageMapping : IEntityTypeConfiguration<ChatMessage>
                 v => ContentType.From(v))
             .IsRequired()
             .HasColumnName("ContentType");
+
+        builder.HasIndex(m => new { m.ChatRoomId, m.SentAt });
+        builder.HasIndex(m => m.SenderId);
     }
 }
