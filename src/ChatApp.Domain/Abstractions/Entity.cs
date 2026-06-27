@@ -3,28 +3,27 @@ namespace ChatApp.Domain.Abstractions;
 public abstract class Entity
 {
     public Guid Id { get; init; }
-    public readonly List<IDomainEvent> DomainEvents;
+    private readonly List<IDomainEvent> _domainEvents = [];
 
     protected Entity(Guid id)
     {
         Id = id;
-        DomainEvents = [];
     }
 
     protected Entity() { }
 
     protected void RaiseDomainEvent(IDomainEvent domainEvent)
     {
-        DomainEvents.Add(domainEvent);
+        _domainEvents.Add(domainEvent);
     }
 
     public IReadOnlyList<IDomainEvent> GetDomainEvents()
     {
-        return DomainEvents.AsReadOnly();
+        return _domainEvents.AsReadOnly();
     }
 
     public void ClearDomainEvents()
     {
-        DomainEvents.Clear();
+        _domainEvents.Clear();
     }
 }
