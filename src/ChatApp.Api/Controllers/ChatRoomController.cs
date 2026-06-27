@@ -3,6 +3,7 @@ using ChatApp.Domain.Abstractions;
 
 using MediatR;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -19,6 +20,7 @@ public class ChatRoomController : ControllerBase
         _sender = sender;
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateChatRoom([FromBody] CreateChatRoomRequest request)
     {

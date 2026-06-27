@@ -44,7 +44,7 @@ public class EditMessageTests
         var user = new User("John Doe", "username", "password");
         var roomId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
-        var sentAt = DateTime.UtcNow.AddHours(-1);
+        var sentAt = DateTime.UtcNow.AddMinutes(-59);
         var message = new ChatMessage(roomId, ContentType.Text, "Original message", user.Id, sentAt);
 
         var command = new EditMessageCommand(messageId, new MessageContent("Text", "Edited message"), roomId);
