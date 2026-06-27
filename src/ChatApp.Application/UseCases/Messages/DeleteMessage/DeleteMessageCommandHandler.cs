@@ -53,12 +53,13 @@ public class DeleteMessageCommandHandler : ICommandHandler<DeleteMessageCommand>
 
         _messageRepository.Delete(message, cancellationToken);
 
-        await _unitOfWork.Commit(cancellationToken);
 
         if (message.ContentType != ContentType.Text)
         {
             await _fileStorageService.Delete(message.Content, cancellationToken);
         }
+    
+        await _unitOfWork.Commit(cancellationToken);
 
         return Result.Success();
     }
