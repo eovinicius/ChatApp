@@ -66,6 +66,6 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
 
         await _unitOfWork.Commit(cancellationToken);
 
-        return Result.Success(Guid.NewGuid());
+        return Result.Success(chatMessage.Id);
     }
 }
