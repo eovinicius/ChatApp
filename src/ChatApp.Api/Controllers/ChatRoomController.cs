@@ -83,7 +83,7 @@ public class ChatRoomController : ControllerBase
     public sealed class CreateChatRoomRequest
     {
         public string RoomName { get; set; }
-        public string Password { get; set; }
+        public string? Password { get; set; }
         public bool IsPrivate { get; set; }
     }
 
