@@ -2,6 +2,8 @@ using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Messaging;
 using ChatApp.Domain.Abstractions;
+using ChatApp.Domain.Entities.ChatRooms;
+using ChatApp.Domain.Entities.Users;
 using ChatApp.Domain.Repositories;
 
 using Dapper;
@@ -32,19 +34,19 @@ public class GetMessagesByRoomQueryHandler : IQueryHandler<GetMessagesByRoomQuer
 
         if (user is null)
         {
-            return Result.Failure<IEnumerable<GetMessagesByRoomResponse>>(Error.NullValue);
+            return Result.Failure<IEnumerable<GetMessagesByRoomResponse>>(UserErrors.NotFound);
         }
 
         var chatRoom = await _chatRoomRepository.GetById(request.RoomId, cancellationToken);
 
         if (chatRoom is null)
         {
-            return Result.Failure<IEnumerable<GetMessagesByRoomResponse>>(Error.NullValue);
+            return Result.Failure<IEnumerable<GetMessagesByRoomResponse>>(ChatRoomErrors.NotFound);
         }
 
         if (!chatRoom.IsUserInRoom(user))
         {
-            return Result.Failure<IEnumerable<GetMessagesByRoomResponse>>(Error.NullValue);
+            return Result.Failure<IEnumerable<GetMessagesByRoomResponse>>(ChatRoomErrors.NotMember);
         }
 
         var connection = _sqlConnectionFactory.CreateConnection();

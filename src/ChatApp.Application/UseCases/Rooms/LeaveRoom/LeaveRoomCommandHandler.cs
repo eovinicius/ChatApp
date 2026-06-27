@@ -3,6 +3,8 @@ using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Messaging;
 using ChatApp.Application.Abstractions.Services;
 using ChatApp.Domain.Abstractions;
+using ChatApp.Domain.Entities.ChatRooms;
+using ChatApp.Domain.Entities.Users;
 using ChatApp.Domain.Repositories;
 
 namespace ChatApp.Application.UseCases.Rooms.LeaveRoom;
@@ -29,13 +31,13 @@ public class LeaveRoomCommandHandler : ICommandHandler<LeaveRoomCommand>
         var user = await _userRepository.GetById(_userContext.UserId, cancellationToken);
         if (user is null)
         {
-            return Result.Failure(Error.NullValue);
+            return Result.Failure(UserErrors.NotFound);
         }
 
         var room = await _chatRoomRepository.GetById(request.RoomId, cancellationToken);
         if (room is null)
         {
-            return Result.Failure(Error.NullValue);
+            return Result.Failure(ChatRoomErrors.NotFound);
         }
 
         room.Leave(user);

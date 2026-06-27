@@ -3,6 +3,8 @@ using ChatApp.Application.Abstractions.Clock;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Messaging;
 using ChatApp.Domain.Abstractions;
+using ChatApp.Domain.Entities.Messages;
+using ChatApp.Domain.Entities.Users;
 using ChatApp.Domain.Repositories;
 
 namespace ChatApp.Application.UseCases.Messages.EditMessage;
@@ -31,19 +33,19 @@ public class EditMessageCommandHandler : ICommandHandler<EditMessageCommand>
         var user = await _userRepository.GetById(currentUserId, cancellationToken);
         if (user is null)
         {
-            return Result.Failure(Error.NullValue);
+            return Result.Failure(UserErrors.NotFound);
         }
 
         var message = await _messageRepository.GetById(request.MessageId, cancellationToken);
 
         if (message is null)
         {
-            return Result.Failure(Error.NullValue);
+            return Result.Failure(ChatMessageErrors.NotFound);
         }
 
         if (message.SenderId != currentUserId)
         {
-            return Result.Failure(Error.NullValue);
+            return Result.Failure(ChatMessageErrors.Unauthorized);
         }
 
         var result = message.Edit(request.Content.Data, _dateTimeProvider.UtcNow);

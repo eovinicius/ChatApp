@@ -2,6 +2,7 @@ using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Messaging;
 using ChatApp.Application.Abstractions.Services;
 using ChatApp.Domain.Abstractions;
+using ChatApp.Domain.Entities.Users;
 using ChatApp.Domain.Repositories;
 
 namespace ChatApp.Application.UseCases.Users.Login;
@@ -25,12 +26,12 @@ public class LoginCommandHandler : ICommandHandler<LoginCommand, string>
 
         if (user is null)
         {
-            return Result.Failure<string>(Error.NullValue);
+            return Result.Failure<string>(UserErrors.InvalidCredentials);
         }
 
         if (!_hashService.Compare(request.Password, user.Password))
         {
-            return Result.Failure<string>(Error.NullValue);
+            return Result.Failure<string>(UserErrors.InvalidCredentials);
         }
 
         var token = _authenticationService.GenerateToken(user);

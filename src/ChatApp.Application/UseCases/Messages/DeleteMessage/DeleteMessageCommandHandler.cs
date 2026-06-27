@@ -5,6 +5,7 @@ using ChatApp.Application.Abstractions.Messaging;
 using ChatApp.Application.Abstractions.Storage;
 using ChatApp.Domain.Abstractions;
 using ChatApp.Domain.Entities.Messages;
+using ChatApp.Domain.Entities.Users;
 using ChatApp.Domain.Repositories;
 
 namespace ChatApp.Application.UseCases.Messages.DeleteMessage;
@@ -36,19 +37,19 @@ public class DeleteMessageCommandHandler : ICommandHandler<DeleteMessageCommand>
 
         if (user is null)
         {
-            return Result.Failure(Error.NullValue);
+            return Result.Failure(UserErrors.NotFound);
         }
 
         var message = await _messageRepository.GetById(request.MessageId, cancellationToken);
 
         if (message is null)
         {
-            return Result.Failure(Error.NullValue);
+            return Result.Failure(ChatMessageErrors.NotFound);
         }
 
         if (!message.CanBeDeletedBy(currentUserId, request.RoomId, _dateTimeProvider.UtcNow))
         {
-            return Result.Failure(Error.NullValue);
+            return Result.Failure(ChatMessageErrors.Unauthorized);
         }
 
         _messageRepository.Delete(message, cancellationToken);

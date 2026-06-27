@@ -4,6 +4,7 @@ using ChatApp.Application.Abstractions.Messaging;
 using ChatApp.Application.Abstractions.Services;
 using ChatApp.Domain.Abstractions;
 using ChatApp.Domain.Entities.ChatRooms;
+using ChatApp.Domain.Entities.Users;
 using ChatApp.Domain.Repositories;
 
 namespace ChatApp.Application.UseCases.Rooms.CreateRoom;
@@ -35,7 +36,7 @@ public sealed class CreateChatroomCommandHandler : ICommandHandler<CreateChatroo
         var user = await _userRepository.GetById(_userContext.UserId, cancellationToken);
         if (user is null)
         {
-            return Result.Failure<Guid>(Error.NullValue);
+            return Result.Failure<Guid>(UserErrors.NotFound);
         }
 
         var chatRoom = ChatRoom.Create(request.Name, user, request.IsPrivate, request.Password);
