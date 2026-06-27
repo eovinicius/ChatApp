@@ -99,8 +99,8 @@ public class LeaveRoomTests
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().BeOfType<Error>();
-        await _chatRoomRepositoryMock.DidNotReceive().Add(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
-        await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
+        _chatRoomRepositoryMock.DidNotReceive().Add(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
+        _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -118,7 +118,7 @@ public class LeaveRoomTests
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().BeOfType<Error>();
-        await _chatRoomRepositoryMock.DidNotReceive().Add(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
-        await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
+        _chatRoomRepositoryMock.DidNotReceive().Add(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
+        _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
     }
 }
