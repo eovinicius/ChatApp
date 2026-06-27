@@ -24,9 +24,9 @@ public class ChatRoomRepository : IChatRoomRepository
         await Task.CompletedTask;
     }
 
-    public Task<ChatRoom?> GetById(Guid chatRoomId, CancellationToken cancellationToken)
+    public async Task<ChatRoom?> GetById(Guid chatRoomId, CancellationToken cancellationToken)
     {
-        return _dbContext.ChatRooms
+        return await _dbContext.ChatRooms
             .Include(x => x.Members)
             .FirstOrDefaultAsync(x => x.Id == chatRoomId, cancellationToken);
     }
