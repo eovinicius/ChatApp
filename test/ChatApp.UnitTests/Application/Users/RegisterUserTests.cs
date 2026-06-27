@@ -82,5 +82,31 @@ public class RegisterUserTests
         await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
         _authenticationServiceMock.DidNotReceive().GenerateToken(Arg.Any<User>());
     }
+
+    [Fact]
+    public async Task Handle_Deve_Retornar_Erro_Quando_Nome_Vazio()
+    {
+        _userRepositoryMock.GetByUsername(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((User?)null);
+        _hashServiceMock.Hash(Arg.Any<string>()).Returns("hash");
+
+        var result = await _handler.Handle(new RegisterUserCommand("   ", "username", "password"), CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("User.EmptyName");
+        await _userRepositoryMock.DidNotReceive().Add(Arg.Any<User>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Deve_Retornar_Erro_Quando_Username_Vazio()
+    {
+        _userRepositoryMock.GetByUsername(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((User?)null);
+        _hashServiceMock.Hash(Arg.Any<string>()).Returns("hash");
+
+        var result = await _handler.Handle(new RegisterUserCommand("John Doe", "   ", "password"), CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("User.EmptyUsername");
+        await _userRepositoryMock.DidNotReceive().Add(Arg.Any<User>(), Arg.Any<CancellationToken>());
+    }
 }
 
