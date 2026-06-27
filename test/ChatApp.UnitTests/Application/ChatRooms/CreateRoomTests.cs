@@ -55,6 +55,8 @@ public class CreateRoomTests
         result.Value.Should().NotBe(Guid.Empty);
         await _chatRoomRepositoryMock.Received(1).Add(Arg.Is<ChatRoom>(x => x.Name == Command.Name && x.IsPrivate == Command.IsPrivate), Arg.Any<CancellationToken>());
         await _unitOfWorkMock.Received(1).Commit(Arg.Any<CancellationToken>());
+        await _chatHubMock.Received(1).JoinGroup(Arg.Any<string>(), user.Name, Arg.Any<CancellationToken>());
+        await _chatHubMock.Received(1).SendMessageToGroup(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -71,9 +73,12 @@ public class CreateRoomTests
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBe(Guid.Empty);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBe(Guid.Empty);
         await _chatRoomRepositoryMock.Received(1).Add(Arg.Is<ChatRoom>(x => x.Name == command.Name && x.IsPrivate == command.IsPrivate && x.Password == command.Password), Arg.Any<CancellationToken>());
         await _unitOfWorkMock.Received(1).Commit(Arg.Any<CancellationToken>());
+        await _chatHubMock.Received(1).JoinGroup(Arg.Any<string>(), user.Name, Arg.Any<CancellationToken>());
+        await _chatHubMock.Received(1).SendMessageToGroup(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -90,7 +95,9 @@ public class CreateRoomTests
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().BeOfType<Error>();
-        await _chatRoomRepositoryMock.DidNotReceive().Add(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
-        await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
+        _ = _chatRoomRepositoryMock.DidNotReceive().Add(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
+        _ = _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
+        _ = _chatHubMock.DidNotReceive().JoinGroup(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        _ = _chatHubMock.DidNotReceive().SendMessageToGroup(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 }
