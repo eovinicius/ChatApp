@@ -157,5 +157,47 @@ public class EditMessageTests
         await _messageRepositoryMock.DidNotReceive().Update(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
         await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task Handle_Deve_Retornar_Erro_Ao_Editar_Mensagem_Nao_Texto()
+    {
+        var user = new User("John Doe", "username", "password");
+        var roomId = Guid.NewGuid();
+        var messageId = Guid.NewGuid();
+        var message = new ChatMessage(roomId, ContentType.Image, "s3/img.png", user.Id, DateTime.UtcNow);
+        var command = new EditMessageCommand(messageId, new MessageContent("Image", "novo"), roomId);
+
+        _userContextMock.UserId.Returns(user.Id);
+        _dateTimeProviderMock.UtcNow.Returns(DateTime.UtcNow);
+        _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+        _messageRepositoryMock.GetById(messageId, Arg.Any<CancellationToken>()).Returns(message);
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("ChatMessage.NotTextMessage");
+        await _messageRepositoryMock.DidNotReceive().Update(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Deve_Retornar_Erro_Ao_Editar_Com_Conteudo_Vazio()
+    {
+        var user = new User("John Doe", "username", "password");
+        var roomId = Guid.NewGuid();
+        var messageId = Guid.NewGuid();
+        var message = new ChatMessage(roomId, ContentType.Text, "original", user.Id, DateTime.UtcNow);
+        var command = new EditMessageCommand(messageId, new MessageContent("Text", "   "), roomId);
+
+        _userContextMock.UserId.Returns(user.Id);
+        _dateTimeProviderMock.UtcNow.Returns(DateTime.UtcNow);
+        _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+        _messageRepositoryMock.GetById(messageId, Arg.Any<CancellationToken>()).Returns(message);
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("ChatMessage.EmptyContent");
+        await _messageRepositoryMock.DidNotReceive().Update(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
+    }
 }
 

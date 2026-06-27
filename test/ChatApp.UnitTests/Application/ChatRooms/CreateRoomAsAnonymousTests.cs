@@ -79,4 +79,24 @@ public class CreateRoomAsAnonymousTests
             Command.GuestName,
             Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task Handle_Deve_Retornar_Erro_Quando_Nome_Da_Sala_Vazio()
+    {
+        var result = await _handler.Handle(new CreateRoomAsAnonymousCommand("   ", "Visitante"), CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("ChatRoom.EmptyName");
+        await _chatRoomRepositoryMock.DidNotReceive().Add(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Deve_Retornar_Erro_Quando_Nome_Do_Convidado_Vazio()
+    {
+        var result = await _handler.Handle(new CreateRoomAsAnonymousCommand("sala", "   "), CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("ChatRoom.EmptyGuestName");
+        await _chatRoomRepositoryMock.DidNotReceive().Add(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
+    }
 }

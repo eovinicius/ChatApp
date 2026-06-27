@@ -100,4 +100,32 @@ public class CreateRoomTests
         _ = _chatHubMock.DidNotReceive().JoinGroup(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
         _ = _chatHubMock.DidNotReceive().SendMessageToGroup(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task Deveria_retornar_erro_quando_nome_da_sala_e_vazio()
+    {
+        var user = new User("John Doe", "username", "password");
+        _userContextMock.UserId.Returns(user.Id);
+        _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+
+        var result = await _handler.Handle(new CreateChatroomCommand("   ", false), CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("ChatRoom.EmptyName");
+        _ = _chatRoomRepositoryMock.DidNotReceive().Add(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Deveria_retornar_erro_quando_sala_privada_criada_sem_senha()
+    {
+        var user = new User("John Doe", "username", "password");
+        _userContextMock.UserId.Returns(user.Id);
+        _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+
+        var result = await _handler.Handle(new CreateChatroomCommand("sala", true, null), CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("ChatRoom.PrivateRoomRequiresPassword");
+        _ = _chatRoomRepositoryMock.DidNotReceive().Add(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
+    }
 }

@@ -91,4 +91,52 @@ public class ChatMessageTest
         // Assert
         canDelete.Should().BeFalse();
     }
+
+    [Fact]
+    public void Nao_deveria_poder_deletar_mensagem_de_chat_com_roomId_incorreto()
+    {
+        var senderId = Guid.NewGuid();
+        var chatRoomId = Guid.NewGuid();
+        var chatMessage = ChatMessage.Create(chatRoomId, ContentType.Text, "hello world", senderId, DateTime.UtcNow).Value;
+
+        var canDelete = chatMessage.CanBeDeletedBy(senderId, Guid.NewGuid(), DateTime.UtcNow);
+
+        canDelete.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Nao_deveria_editar_mensagem_que_nao_e_de_texto()
+    {
+        var chatMessage = ChatMessage.Create(Guid.NewGuid(), ContentType.Image, "s3/img.png", Guid.NewGuid(), DateTime.UtcNow).Value;
+
+        var result = chatMessage.Edit("novo conteudo", DateTime.UtcNow);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("ChatMessage.NotTextMessage");
+    }
+
+    [Fact]
+    public void Deveria_atualizar_EditedAt_na_segunda_edicao()
+    {
+        var sentAt = DateTime.UtcNow.AddMinutes(-10);
+        var chatMessage = ChatMessage.Create(Guid.NewGuid(), ContentType.Text, "original", Guid.NewGuid(), sentAt).Value;
+
+        var primeiraEdicao = DateTime.UtcNow.AddMinutes(-5);
+        chatMessage.Edit("primeira edicao", primeiraEdicao);
+
+        var segundaEdicao = DateTime.UtcNow;
+        chatMessage.Edit("segunda edicao", segundaEdicao);
+
+        chatMessage.Content.Should().Be("segunda edicao");
+        chatMessage.EditedAt.Should().BeCloseTo(segundaEdicao, TimeSpan.FromMilliseconds(10));
+        chatMessage.IsEdited.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Deveria_criar_mensagem_audio_com_conteudo_vazio_sem_erro()
+    {
+        var result = ChatMessage.Create(Guid.NewGuid(), ContentType.Audio, "", Guid.NewGuid(), DateTime.UtcNow);
+
+        result.IsSuccess.Should().BeTrue();
+    }
 }

@@ -53,6 +53,41 @@ public class UploadFileTests
     }
 
     [Fact]
+    public async Task Handle_Deve_Retornar_Erro_Quando_Arquivo_Vazio()
+    {
+        var command = new UploadFileCommand("empty.jpg", "image/jpeg", new MemoryStream(), ".jpg");
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("UploadFile.EmptyFile");
+        await _fileStorageServiceMock.DidNotReceive().Upload(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Deve_Retornar_Erro_Quando_Arquivo_Excede_Limite()
+    {
+        var bigContent = new MemoryStream(new byte[51 * 1024 * 1024]);
+        var command = new UploadFileCommand("big.jpg", "image/jpeg", bigContent, ".jpg");
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("UploadFile.FileTooLarge");
+    }
+
+    [Fact]
+    public async Task Handle_Deve_Retornar_Erro_Para_Tipo_De_Conteudo_Invalido()
+    {
+        var command = new UploadFileCommand("doc.pdf", "application/pdf", new MemoryStream([1, 2, 3]), ".pdf");
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("UploadFile.InvalidContentType");
+    }
+
+    [Fact]
     public async Task Handle_Deve_Gerar_Chave_Unica_Para_Cada_Upload()
     {
         // Arrange

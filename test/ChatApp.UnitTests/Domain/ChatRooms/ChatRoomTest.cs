@@ -147,4 +147,45 @@ public class ChatRoomTest
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("ChatRoom.PrivateRoomRequiresPassword");
     }
+
+    [Fact]
+    public void Nao_deveria_criar_sala_anonima_com_nome_de_convidado_vazio()
+    {
+        var result = ChatRoom.CreateAnonymous("sala", "   ");
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("ChatRoom.EmptyGuestName");
+    }
+
+    [Fact]
+    public void ValidatePassword_deveria_retornar_true_para_senha_correta()
+    {
+        var user = new User("John Doe", "username", "password");
+        var room = ChatRoom.Create("sala", user, isPrivate: true, password: "secreto").Value;
+
+        room.ValidatePassword("secreto").Should().BeTrue();
+    }
+
+    [Fact]
+    public void ValidatePassword_deveria_retornar_false_para_senha_incorreta()
+    {
+        var user = new User("John Doe", "username", "password");
+        var room = ChatRoom.Create("sala", user, isPrivate: true, password: "secreto").Value;
+
+        room.ValidatePassword("errada").Should().BeFalse();
+    }
+
+    [Fact]
+    public void Leave_de_usuario_que_nao_eh_membro_nao_deve_lancar_excecao()
+    {
+        var owner = new User("Owner", "owner", "password");
+        var room = ChatRoom.Create("sala", owner, false).Value;
+        var outsider = new User("Outsider", "outsider", "password");
+
+        var membrosAntes = room.Members.Count;
+        var act = () => room.Leave(outsider);
+
+        act.Should().NotThrow();
+        room.Members.Should().HaveCount(membrosAntes);
+    }
 }
