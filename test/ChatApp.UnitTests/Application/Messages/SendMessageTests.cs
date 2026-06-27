@@ -52,7 +52,7 @@ public class SendMessageTests
     public async Task Handle_Deve_Enviar_Mensagem_Com_Sucesso()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var room = ChatRoom.Create("sala", user, false).Value;
 
         _userContext.UserId.Returns(user.Id);
@@ -90,7 +90,7 @@ public class SendMessageTests
     public async Task Handle_Deve_Retornar_Erro_Quando_Chat_Nao_Existir()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
 
         _userContext.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
@@ -110,8 +110,8 @@ public class SendMessageTests
     public async Task Handle_Deve_Retornar_Erro_Quando_Usuario_Nao_Estiver_Na_Sala()
     {
         // Arrange
-        var user = new User("George", "username", "password");
-        var room = ChatRoom.Create("sala", new User("John Doe", "username", "password"), false).Value;
+        var user = User.Create("George", "username", "password").Value;
+        var room = ChatRoom.Create("sala", User.Create("John Doe", "username", "password").Value, false).Value;
 
         _userContext.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);

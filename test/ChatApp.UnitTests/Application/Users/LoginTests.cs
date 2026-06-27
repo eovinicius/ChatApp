@@ -34,7 +34,7 @@ public class LoginTests
     public async Task Handle_DeveAutenticarUsuario_QuandoCredenciaisForemValidas()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var token = "jwt_token";
 
         _userRepositoryMock.GetByUsername(Command.Username, Arg.Any<CancellationToken>()).Returns(user);
@@ -75,7 +75,7 @@ public class LoginTests
     public async Task Handle_NaoDeveAutenticarUsuario_QuandoSenhaEstiverIncorreta()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         _userRepositoryMock.GetByUsername(Command.Username, Arg.Any<CancellationToken>()).Returns(user);
         _hashServiceMock.Compare(Command.Password, user.Password).Returns(false);
 

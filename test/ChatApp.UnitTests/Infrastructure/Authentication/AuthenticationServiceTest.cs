@@ -28,7 +28,7 @@ public class AuthenticationServiceTest
     [Fact]
     public void GenerateToken_Deveria_Incluir_Claim_NameIdentifier_Com_UserId()
     {
-        var user = new User("João Silva", "joao", "hash");
+        var user = User.Create("João Silva", "joao", "hash").Value;
         var service = CreateService();
 
         var token = service.GenerateToken(user);
@@ -42,7 +42,7 @@ public class AuthenticationServiceTest
     [Fact]
     public void GenerateToken_Deveria_Incluir_Claim_Name_Com_Username()
     {
-        var user = new User("João Silva", "joao", "hash");
+        var user = User.Create("João Silva", "joao", "hash").Value;
         var service = CreateService();
 
         var token = service.GenerateToken(user);
@@ -56,7 +56,7 @@ public class AuthenticationServiceTest
     [Fact]
     public void GenerateToken_Deveria_Expirar_Em_Aproximadamente_1_Hora()
     {
-        var user = new User("João Silva", "joao", "hash");
+        var user = User.Create("João Silva", "joao", "hash").Value;
         var service = CreateService();
 
         var token = service.GenerateToken(user);
@@ -69,7 +69,7 @@ public class AuthenticationServiceTest
     [Fact]
     public void GenerateToken_Deveria_Lancar_Excecao_Quando_SecretKey_Nao_Configurada()
     {
-        var user = new User("João Silva", "joao", "hash");
+        var user = User.Create("João Silva", "joao", "hash").Value;
         var service = CreateService(secretKey: null);
 
         var act = () => service.GenerateToken(user);
@@ -80,7 +80,7 @@ public class AuthenticationServiceTest
     [Fact]
     public void GenerateToken_Deveria_Lancar_Excecao_Quando_Issuer_Nao_Configurado()
     {
-        var user = new User("João Silva", "joao", "hash");
+        var user = User.Create("João Silva", "joao", "hash").Value;
         var service = CreateService(issuer: null);
 
         var act = () => service.GenerateToken(user);
@@ -91,7 +91,7 @@ public class AuthenticationServiceTest
     [Fact]
     public void GenerateToken_Deveria_Lancar_Excecao_Quando_Audience_Nao_Configurada()
     {
-        var user = new User("João Silva", "joao", "hash");
+        var user = User.Create("João Silva", "joao", "hash").Value;
         var service = CreateService(audience: null);
 
         var act = () => service.GenerateToken(user);

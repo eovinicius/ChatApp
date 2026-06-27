@@ -12,7 +12,7 @@ public class ChatRoomTest
     {
         // Arrange
         var name = "sala";
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
 
         // Act
         var room = ChatRoomFactory.CreatePublicRoom(name, user).Value;
@@ -30,7 +30,7 @@ public class ChatRoomTest
     public void Deveria_criar_sala_privada_com_senha()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var name = "sala";
         var senha = "123";
 
@@ -51,9 +51,9 @@ public class ChatRoomTest
     public void Deveria_adicionar_usuario_quando_entrar_na_sala_publica()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var name = "sala";
-        var user2 = new User("jose", "username", "password");
+        var user2 = User.Create("jose", "username", "password").Value;
 
         // Act
         var room = ChatRoomFactory.CreatePublicRoom(name, user).Value;
@@ -70,18 +70,18 @@ public class ChatRoomTest
     public void Nao_deveria_permitir_entrada_usuarios_quando_limite_for_atigindo()
     {
         // Arrange
-        var chatRoom = ChatRoomFactory.CreatePublicRoom("full room", new User("John Doe", "username", "password")).Value;
+        var chatRoom = ChatRoomFactory.CreatePublicRoom("full room", User.Create("John Doe", "username", "password").Value).Value;
 
         int maxMembers = chatRoom.MaxMembers;
 
         for (int i = 0; i < maxMembers; i++)
         {
-            var user = new User("John Doe", "username", "password");
+            var user = User.Create("John Doe", "username", "password").Value;
             chatRoom.Join(user);
         }
 
         // Act
-        var extraUser = new User("John Doe", "username", "password");
+        var extraUser = User.Create("John Doe", "username", "password").Value;
         chatRoom.Join(extraUser);
 
         // Assert
@@ -92,8 +92,8 @@ public class ChatRoomTest
     public void Deveria_remover_usuario_da_lista_de_membros_ao_sair_da_sala()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
-        var user2 = new User("jose", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
+        var user2 = User.Create("jose", "username", "password").Value;
         var name = "sala";
 
         var room = ChatRoomFactory.CreatePublicRoom(name, user).Value;
@@ -112,8 +112,8 @@ public class ChatRoomTest
     public void Deveria_permitir_ao_dono_da_sala_definir_membro_como_admin()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
-        var room = ChatRoomFactory.CreatePublicRoom("sala", new User("Geroge", "username", "password")).Value;
+        var user = User.Create("John Doe", "username", "password").Value;
+        var room = ChatRoomFactory.CreatePublicRoom("sala", User.Create("Geroge", "username", "password").Value).Value;
 
         room.Join(user);
 
@@ -129,7 +129,7 @@ public class ChatRoomTest
     [Fact]
     public void Nao_deveria_criar_sala_com_nome_vazio()
     {
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
 
         var result = ChatRoom.Create("", user, false);
 
@@ -140,7 +140,7 @@ public class ChatRoomTest
     [Fact]
     public void Nao_deveria_criar_sala_privada_sem_senha()
     {
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
 
         var result = ChatRoom.Create("sala", user, isPrivate: true, password: null);
 
@@ -160,7 +160,7 @@ public class ChatRoomTest
     [Fact]
     public void ValidatePassword_deveria_retornar_true_para_senha_correta()
     {
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var room = ChatRoom.Create("sala", user, isPrivate: true, password: "secreto").Value;
 
         room.ValidatePassword("secreto").Should().BeTrue();
@@ -169,7 +169,7 @@ public class ChatRoomTest
     [Fact]
     public void ValidatePassword_deveria_retornar_false_para_senha_incorreta()
     {
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var room = ChatRoom.Create("sala", user, isPrivate: true, password: "secreto").Value;
 
         room.ValidatePassword("errada").Should().BeFalse();
@@ -178,9 +178,9 @@ public class ChatRoomTest
     [Fact]
     public void Leave_de_usuario_que_nao_eh_membro_nao_deve_lancar_excecao()
     {
-        var owner = new User("Owner", "owner", "password");
+        var owner = User.Create("Owner", "owner", "password").Value;
         var room = ChatRoom.Create("sala", owner, false).Value;
-        var outsider = new User("Outsider", "outsider", "password");
+        var outsider = User.Create("Outsider", "outsider", "password").Value;
 
         var membrosAntes = room.Members.Count;
         var act = () => room.Leave(outsider);

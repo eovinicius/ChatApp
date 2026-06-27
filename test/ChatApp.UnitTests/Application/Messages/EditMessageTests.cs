@@ -41,7 +41,7 @@ public class EditMessageTests
     public async Task Handle_Deve_Editar_Mensagem_Com_Sucesso()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var roomId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
         var sentAt = DateTime.UtcNow.AddMinutes(-59);
@@ -90,7 +90,7 @@ public class EditMessageTests
     public async Task Handle_Deve_Retornar_Erro_Quando_Mensagem_Nao_Existir()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var messageId = Guid.NewGuid();
         var command = new EditMessageCommand(messageId, new MessageContent("Text", "Edited message"), Guid.NewGuid());
 
@@ -111,8 +111,8 @@ public class EditMessageTests
     public async Task Handle_Deve_Retornar_Erro_Quando_Usuario_Nao_For_Remetente()
     {
         // Arrange
-        var owner = new User("Owner", "owner", "password");
-        var otherUser = new User("Other User", "other", "password");
+        var owner = User.Create("Owner", "owner", "password").Value;
+        var otherUser = User.Create("Other User", "other", "password").Value;
         var roomId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
         var message = new ChatMessage(roomId, ContentType.Text, "Original message", owner.Id, DateTime.UtcNow);
@@ -136,7 +136,7 @@ public class EditMessageTests
     public async Task Handle_Deve_Retornar_Erro_Quando_Tempo_Limite_Expirado()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var roomId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
         var sentAt = DateTime.UtcNow.AddHours(-7); // Mais de 6 horas
@@ -161,7 +161,7 @@ public class EditMessageTests
     [Fact]
     public async Task Handle_Deve_Retornar_Erro_Ao_Editar_Mensagem_Nao_Texto()
     {
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var roomId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
         var message = new ChatMessage(roomId, ContentType.Image, "s3/img.png", user.Id, DateTime.UtcNow);
@@ -182,7 +182,7 @@ public class EditMessageTests
     [Fact]
     public async Task Handle_Deve_Retornar_Erro_Ao_Editar_Com_Conteudo_Vazio()
     {
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var roomId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
         var message = new ChatMessage(roomId, ContentType.Text, "original", user.Id, DateTime.UtcNow);

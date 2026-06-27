@@ -52,7 +52,7 @@ public class DeleteMessageTests
     [Fact]
     public async Task Deveria_deletar_mensagem_com_sucesso()
     {
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var roomId = Guid.NewGuid();
         var message = new ChatMessage(roomId, ContentType.Text, "test", user.Id, DateTime.UtcNow);
 
@@ -95,7 +95,7 @@ public class DeleteMessageTests
     public async Task Deve_Retornar_Erro_Quando_Mensagem_Nao_Existir()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var messageId = Guid.NewGuid();
         var roomId = Guid.NewGuid();
         var command = new DeleteMessageCommand(messageId, roomId);
@@ -117,8 +117,8 @@ public class DeleteMessageTests
     public async Task Deve_Retornar_Erro_Quando_Usuario_Nao_For_Remetente()
     {
         // Arrange
-        var owner = new User("Owner", "owner", "password");
-        var otherUser = new User("Other User", "other", "password");
+        var owner = User.Create("Owner", "owner", "password").Value;
+        var otherUser = User.Create("Other User", "other", "password").Value;
         var roomId = Guid.NewGuid();
         var message = new ChatMessage(roomId, ContentType.Text, "test", owner.Id, DateTime.UtcNow);
         var command = new DeleteMessageCommand(message.Id, roomId);
@@ -141,7 +141,7 @@ public class DeleteMessageTests
     public async Task Deve_Retornar_Erro_Quando_Tempo_Limite_Expirado()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var roomId = Guid.NewGuid();
         var sentAt = DateTime.UtcNow.AddHours(-25); // Mais de 24 horas
         var message = new ChatMessage(roomId, ContentType.Text, "test", user.Id, sentAt);
@@ -165,7 +165,7 @@ public class DeleteMessageTests
     public async Task Deve_Deletar_Arquivo_Do_Storage_Quando_Mensagem_For_Arquivo()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         var roomId = Guid.NewGuid();
         var message = new ChatMessage(roomId, ContentType.Image, "file-url", user.Id, DateTime.UtcNow);
         var command = new DeleteMessageCommand(message.Id, roomId);
