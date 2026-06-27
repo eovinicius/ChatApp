@@ -21,10 +21,12 @@ using ChatApp.Infrastructure.Database.Repositories;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using ChatApp.Application.Abstractions.Clock;
 
@@ -34,12 +36,14 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         AddPersistence(services, configuration);
         AddAuthentication(services, configuration);
         AddServicesProviders(services, configuration);
-        AddRateLimiter(services);
+        if (!environment.IsEnvironment("Testing"))
+            AddRateLimiter(services);
         return services;
     }
 
