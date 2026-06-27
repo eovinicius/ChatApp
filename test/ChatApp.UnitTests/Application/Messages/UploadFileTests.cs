@@ -38,8 +38,8 @@ public class UploadFileTests
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.FileUrl.Should().Be(expectedUrl);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.FileUrl.Should().Be(expectedUrl);
 
         await _fileStorageServiceMock.Received(1).Upload(
             fileContent,
