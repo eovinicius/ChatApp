@@ -3,9 +3,8 @@ using ChatApp.Domain.Entities.Users;
 
 namespace ChatApp.Domain.Entities.ChatRooms;
 
-public sealed class ChatRoom
+public sealed class ChatRoom : AggregateRoot
 {
-    public Guid Id { get; private set; }
     public string Name { get; private set; }
     public string Password { get; private set; }
     public Guid OwnerId { get; private set; }
@@ -18,8 +17,8 @@ public sealed class ChatRoom
     private ChatRoom() { }
 
     public ChatRoom(string name, Guid ownerId, bool isPrivate, string? password = null)
+        : base(Guid.NewGuid())
     {
-        Id = Guid.NewGuid();
         Name = name;
         Password = password ?? string.Empty;
         OwnerId = ownerId;

@@ -2,9 +2,8 @@ using ChatApp.Domain.Abstractions;
 
 namespace ChatApp.Domain.Entities.Messages;
 
-public class ChatMessage
+public class ChatMessage : AggregateRoot
 {
-    public Guid Id { get; private set; }
     public Guid ChatRoomId { get; private set; }
     public string Content { get; private set; }
     public Guid SenderId { get; private set; }
@@ -18,8 +17,8 @@ public class ChatMessage
     private ChatMessage() { }
 
     public ChatMessage(Guid chatRoomId, ContentType contentType, string content, Guid senderId, DateTime sendAt)
+        : base(Guid.NewGuid())
     {
-        Id = Guid.NewGuid();
         ChatRoomId = chatRoomId;
         Content = content;
         ContentType = contentType;
