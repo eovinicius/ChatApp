@@ -9,7 +9,9 @@ public sealed class User
     public string Username { get; private set; }
     public string Password { get; private set; }
 
-    public User(string name, string username, string password)
+    private User() { }
+
+    private User(string name, string username, string password)
     {
         Id = Guid.NewGuid();
         Name = name;
@@ -24,6 +26,9 @@ public sealed class User
 
         if (string.IsNullOrWhiteSpace(username))
             return Result.Failure<User>(UserErrors.EmptyUsername);
+
+        if (string.IsNullOrWhiteSpace(password))
+            return Result.Failure<User>(UserErrors.EmptyPassword);
 
         return Result.Success(new User(name, username, password));
     }

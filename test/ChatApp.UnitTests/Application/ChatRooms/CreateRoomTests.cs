@@ -43,7 +43,7 @@ public class CreateRoomTests
     public async Task Handle_deve_criar_sala_publica()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         _userContextMock.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
 
@@ -63,7 +63,7 @@ public class CreateRoomTests
     public async Task Handle_deve_criar_sala_privada_com_senha()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         _userContextMock.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
 
@@ -85,7 +85,7 @@ public class CreateRoomTests
     public async Task Deveria_retornar_erro_quando_usuario_nao_existir()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         _userContextMock.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns((User?)null);
 
@@ -104,7 +104,7 @@ public class CreateRoomTests
     [Fact]
     public async Task Deveria_retornar_erro_quando_nome_da_sala_e_vazio()
     {
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         _userContextMock.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
 
@@ -118,7 +118,7 @@ public class CreateRoomTests
     [Fact]
     public async Task Deveria_retornar_erro_quando_sala_privada_criada_sem_senha()
     {
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         _userContextMock.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
 

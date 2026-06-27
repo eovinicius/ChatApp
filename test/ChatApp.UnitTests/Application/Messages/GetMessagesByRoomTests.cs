@@ -54,7 +54,7 @@ public class GetMessagesByRoomTests
     public async Task Handle_Deve_Retornar_Erro_Quando_Sala_Nao_Existir()
     {
         // Arrange
-        var user = new User("John Doe", "username", "password");
+        var user = User.Create("John Doe", "username", "password").Value;
         _userContextMock.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
         _chatRoomRepositoryMock.GetById(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns((ChatRoom?)null);
@@ -71,8 +71,8 @@ public class GetMessagesByRoomTests
     public async Task Handle_Deve_Retornar_Erro_Quando_Usuario_Nao_For_Membro_Da_Sala()
     {
         // Arrange
-        var owner = new User("Owner", "owner", "password");
-        var outsider = new User("Outsider", "outsider", "password");
+        var owner = User.Create("Owner", "owner", "password").Value;
+        var outsider = User.Create("Outsider", "outsider", "password").Value;
         var room = ChatRoom.Create("sala", owner, false).Value;
 
         _userContextMock.UserId.Returns(outsider.Id);

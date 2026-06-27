@@ -42,8 +42,8 @@ public class JoinRoomTests
     public async Task Deveria_adicionar_usuario_quando_entrar_na_sala_publica()
     {
         // Arrange
-        var ownerUser = new User("John Doe", "username", "password");
-        var newMember = new User("George", "username", "password");
+        var ownerUser = User.Create("John Doe", "username", "password").Value;
+        var newMember = User.Create("George", "username", "password").Value;
         var room = ChatRoom.Create("sala", ownerUser, false).Value;
         _userContextMock.UserId.Returns(newMember.Id);
         _userRepositoryMock.GetById(newMember.Id, Arg.Any<CancellationToken>()).Returns(newMember);
@@ -64,8 +64,8 @@ public class JoinRoomTests
     [Fact]
     public async Task Deve_adicionar_usuario_quando_entrar_na_sala_privada_com_senha_correta()
     {
-        var ownerUser = new User("John Doe", "username", "password");
-        var newMember = new User("George", "username", "password");
+        var ownerUser = User.Create("John Doe", "username", "password").Value;
+        var newMember = User.Create("George", "username", "password").Value;
         var room = ChatRoom.Create("sala", ownerUser, true, "123").Value;
         _userContextMock.UserId.Returns(newMember.Id);
         _userRepositoryMock.GetById(newMember.Id, Arg.Any<CancellationToken>()).Returns(newMember);
@@ -87,7 +87,7 @@ public class JoinRoomTests
     public async Task Deve_retornar_erro_quando_usuario_nao_existir()
     {
         // Arrange
-        var newMember = new User("John Doe", "username", "password");
+        var newMember = User.Create("John Doe", "username", "password").Value;
         _userContextMock.UserId.Returns(newMember.Id);
         _userRepositoryMock.GetById(newMember.Id, Arg.Any<CancellationToken>()).Returns((User?)null);
 
@@ -105,7 +105,7 @@ public class JoinRoomTests
     public async Task Deve_retornar_erro_quando_sala_nao_existir()
     {
         // Arrange
-        var newMember = new User("John Doe", "username", "password");
+        var newMember = User.Create("John Doe", "username", "password").Value;
         _userContextMock.UserId.Returns(newMember.Id);
         _userRepositoryMock.GetById(newMember.Id, Arg.Any<CancellationToken>()).Returns(newMember);
         _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns((ChatRoom?)null);
@@ -124,8 +124,8 @@ public class JoinRoomTests
     public async Task Deve_retornar_erro_quando_senha_incorreta()
     {
         // Arrange
-        var newMember = new User("George", "username", "password");
-        var room = ChatRoom.Create("sala", new User("John Doe", "username", "password"), true, "1234").Value;
+        var newMember = User.Create("George", "username", "password").Value;
+        var room = ChatRoom.Create("sala", User.Create("John Doe", "username", "password").Value, true, "1234").Value;
         _userContextMock.UserId.Returns(newMember.Id);
         _userRepositoryMock.GetById(newMember.Id, Arg.Any<CancellationToken>()).Returns(newMember);
         _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(room);
@@ -144,18 +144,18 @@ public class JoinRoomTests
     public async Task Nao_deveria_permitir_entrada_usuarios_quando_limite_for_atigindo()
     {
         // Arrange
-        var ownerUser = new User("John Doe", "username", "password");
+        var ownerUser = User.Create("John Doe", "username", "password").Value;
         var chatRoom = ChatRoom.Create("full room", ownerUser, false).Value;
         int maxMembers = chatRoom.MaxMembers;
 
         // Preenche a sala até o limite (owner já está na sala, então adiciona maxMembers - 1)
         for (int i = 0; i < maxMembers - 1; i++)
         {
-            var user = new User($"User {i}", "username", "password");
+            var user = User.Create($"User {i}", "username", "password").Value;
             chatRoom.Join(user);
         }
 
-        var newUser = new User("New User", "newuser", "password");
+        var newUser = User.Create("New User", "newuser", "password").Value;
         _userContextMock.UserId.Returns(newUser.Id);
         _userRepositoryMock.GetById(newUser.Id, Arg.Any<CancellationToken>()).Returns(newUser);
         _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(chatRoom);

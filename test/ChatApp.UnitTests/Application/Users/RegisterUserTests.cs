@@ -66,7 +66,7 @@ public class RegisterUserTests
     public async Task Handle_Deve_Retornar_Erro_Quando_Username_Ja_Existe()
     {
         // Arrange
-        var existingUser = new User("Existing User", Command.Username, "password");
+        var existingUser = User.Create("Existing User", Command.Username, "password").Value;
         _userRepositoryMock.GetByUsername(Command.Username, Arg.Any<CancellationToken>()).Returns(existingUser);
 
         // Act
