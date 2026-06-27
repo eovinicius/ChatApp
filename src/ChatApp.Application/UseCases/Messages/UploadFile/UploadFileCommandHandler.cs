@@ -13,8 +13,21 @@ public class UploadFileCommandHandler : ICommandHandler<UploadFileCommand, Uploa
         _fileStorage = fileStorage;
     }
 
+    private const long MaxFileSizeInBytes = 50 * 1024 * 1024; // 50 MB
+
+    private static readonly string[] AllowedContentTypePrefixes = ["image/", "audio/", "video/"];
+
     public async Task<Result<UploadFileCommandResponse>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
     {
+        if (request.Content.Length == 0)
+            return Result.Failure<UploadFileCommandResponse>(UploadFileErrors.EmptyFile);
+
+        if (request.Content.Length > MaxFileSizeInBytes)
+            return Result.Failure<UploadFileCommandResponse>(UploadFileErrors.FileTooLarge);
+
+        if (!AllowedContentTypePrefixes.Any(prefix => request.ContentType.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+            return Result.Failure<UploadFileCommandResponse>(UploadFileErrors.InvalidContentType);
+
         var key = $"messages/{Guid.NewGuid()}{request.Extension}";
 
         await _fileStorage.Upload(request.Content, key, request.ContentType, cancellationToken);
