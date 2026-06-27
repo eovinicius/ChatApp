@@ -17,10 +17,11 @@ public class ChatMessageTest
         var currentUtcTime = DateTime.UtcNow;
 
         // Act
-        var chatMessage = ChatMessage.Create(chatRoomId, contentType, contentData, senderId, currentUtcTime);
+        var result = ChatMessage.Create(chatRoomId, contentType, contentData, senderId, currentUtcTime);
 
         // Assert
-        chatMessage.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+        var chatMessage = result.Value;
         chatMessage.Id.Should().NotBe(Guid.Empty);
         chatMessage.ChatRoomId.Should().Be(chatRoomId);
         chatMessage.SenderId.Should().Be(senderId);
@@ -30,22 +31,33 @@ public class ChatMessageTest
     }
 
     [Fact]
+    public void Nao_deveria_criar_mensagem_de_texto_com_conteudo_vazio()
+    {
+        var result = ChatMessage.Create(Guid.NewGuid(), ContentType.Text, "   ", Guid.NewGuid(), DateTime.UtcNow);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("ChatMessage.EmptyContent");
+    }
+
+    [Fact]
+    public void Deveria_criar_mensagem_de_imagem_sem_validar_conteudo_como_texto()
+    {
+        var result = ChatMessage.Create(Guid.NewGuid(), ContentType.Image, "s3-key/image.png", Guid.NewGuid(), DateTime.UtcNow);
+
+        result.IsSuccess.Should().BeTrue();
+    }
+
+    [Fact]
     public void Deveria_editar_mensagem_de_chat()
     {
         // Arrange
-        var senderId = Guid.NewGuid();
-        var chatRoomId = Guid.NewGuid();
-        var contentType = ContentType.Text;
-        var contentData = "hello world";
-        var currentUtcTime = DateTime.UtcNow;
-        var chatMessage = ChatMessage.Create(chatRoomId, contentType, contentData, senderId, currentUtcTime);
+        var chatMessage = ChatMessage.Create(Guid.NewGuid(), ContentType.Text, "hello world", Guid.NewGuid(), DateTime.UtcNow).Value;
 
         // Act
-        var newContent = "Hello Universe";
-        chatMessage.Edit(newContent, DateTime.UtcNow);
+        chatMessage.Edit("Hello Universe", DateTime.UtcNow);
 
         // Assert
-        chatMessage.Content.Should().Be(newContent);
+        chatMessage.Content.Should().Be("Hello Universe");
         chatMessage.ContentType.Should().Be(ContentType.Text);
         chatMessage.IsEdited.Should().BeTrue();
     }
@@ -56,14 +68,10 @@ public class ChatMessageTest
         // Arrange
         var senderId = Guid.NewGuid();
         var chatRoomId = Guid.NewGuid();
-        var roomId = chatRoomId;
-        var contentType = ContentType.Text;
-        var contentData = "hello world";
-        var currentUtcTime = DateTime.UtcNow;
-        var chatMessage = ChatMessage.Create(chatRoomId, contentType, contentData, senderId, currentUtcTime);
+        var chatMessage = ChatMessage.Create(chatRoomId, ContentType.Text, "hello world", senderId, DateTime.UtcNow).Value;
 
         // Act
-        var canDelete = chatMessage.CanBeDeletedBy(senderId, roomId, DateTime.UtcNow);
+        var canDelete = chatMessage.CanBeDeletedBy(senderId, chatRoomId, DateTime.UtcNow);
 
         // Assert
         canDelete.Should().BeTrue();
@@ -75,23 +83,12 @@ public class ChatMessageTest
         // Arrange
         var senderId = Guid.NewGuid();
         var chatRoomId = Guid.NewGuid();
-        var roomId = chatRoomId;
-        var contentType = ContentType.Text;
-        var contentData = "hello world";
-        var currentUtcTime = DateTime.UtcNow;
-        var chatMessage = ChatMessage.Create(chatRoomId, contentType, contentData, senderId, currentUtcTime);
-        var otherUserId = Guid.NewGuid();
+        var chatMessage = ChatMessage.Create(chatRoomId, ContentType.Text, "hello world", senderId, DateTime.UtcNow).Value;
 
         // Act
-        var canDelete = chatMessage.CanBeDeletedBy(otherUserId, roomId, DateTime.UtcNow);
+        var canDelete = chatMessage.CanBeDeletedBy(Guid.NewGuid(), chatRoomId, DateTime.UtcNow);
 
         // Assert
         canDelete.Should().BeFalse();
-    }
-
-    [Fact]
-    public void Nao_deveria_permitir_deletar_mensagem_apos_limite_de_tempo()
-    {
-        //todo: implementar teste para verificar se a mensagem não pode ser deletada após o limite de tempo
     }
 }

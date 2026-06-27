@@ -56,13 +56,18 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
             return Result.Failure<Guid>(ChatRoomErrors.NotMember);
         }
 
-        var chatMessage = ChatMessage.Create(
+        var messageResult = ChatMessage.Create(
             room.Id,
             ContentType.From(request.ContentType),
             request.Content,
             user.Id,
             _dateTimeProvider.UtcNow
         );
+
+        if (messageResult.IsFailure)
+            return Result.Failure<Guid>(messageResult.Error);
+
+        var chatMessage = messageResult.Value;
 
         await _chatMessageRepository.Add(chatMessage, cancellationToken);
 

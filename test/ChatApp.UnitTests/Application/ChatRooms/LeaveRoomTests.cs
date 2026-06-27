@@ -43,7 +43,7 @@ public class LeaveRoomTests
     public async Task Deve_remover_usuario_quando_sair_da_sala()
     {
         // Arrange
-        var room = ChatRoom.Create("sala", new User("John Doe", "username", "password"), true, "1234");
+        var room = ChatRoom.Create("sala", new User("John Doe", "username", "password"), true, "1234").Value;
 
         var user = new User("George", "username", "password");
         room.Join(user);
@@ -68,7 +68,7 @@ public class LeaveRoomTests
     {
         // Arrange
         var ownerMember = new User("John Doe", "username", "password");
-        var room = ChatRoom.Create("sala", ownerMember, true, "1234");
+        var room = ChatRoom.Create("sala", ownerMember, true, "1234").Value;
 
         _userContextMock.UserId.Returns(ownerMember.Id);
         _userRepositoryMock.GetById(ownerMember.Id, Arg.Any<CancellationToken>()).Returns(ownerMember);

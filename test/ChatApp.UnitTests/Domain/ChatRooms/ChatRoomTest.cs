@@ -1,4 +1,4 @@
-﻿using ChatApp.Domain.Entities.ChatRooms;
+using ChatApp.Domain.Entities.ChatRooms;
 using ChatApp.Domain.Entities.Users;
 
 using FluentAssertions;
@@ -15,7 +15,7 @@ public class ChatRoomTest
         var user = new User("John Doe", "username", "password");
 
         // Act
-        var room = ChatRoomFactory.CreatePublicRoom(name, user);
+        var room = ChatRoomFactory.CreatePublicRoom(name, user).Value;
 
         // Assert
         room.Should().NotBeNull();
@@ -35,7 +35,7 @@ public class ChatRoomTest
         var senha = "123";
 
         // Act
-        var room = ChatRoomFactory.CreatePrivateRoom(name, user, senha);
+        var room = ChatRoomFactory.CreatePrivateRoom(name, user, senha).Value;
 
         // Assert
         room.Should().NotBeNull();
@@ -53,11 +53,10 @@ public class ChatRoomTest
         // Arrange
         var user = new User("John Doe", "username", "password");
         var name = "sala";
-
         var user2 = new User("jose", "username", "password");
 
         // Act
-        var room = ChatRoomFactory.CreatePublicRoom(name, user);
+        var room = ChatRoomFactory.CreatePublicRoom(name, user).Value;
         room.Join(user2);
 
         // Assert
@@ -71,7 +70,7 @@ public class ChatRoomTest
     public void Nao_deveria_permitir_entrada_usuarios_quando_limite_for_atigindo()
     {
         // Arrange
-        var chatRoom = ChatRoomFactory.CreatePublicRoom("full room", new User("John Doe", "username", "password"));
+        var chatRoom = ChatRoomFactory.CreatePublicRoom("full room", new User("John Doe", "username", "password")).Value;
 
         int maxMembers = chatRoom.MaxMembers;
 
@@ -97,7 +96,7 @@ public class ChatRoomTest
         var user2 = new User("jose", "username", "password");
         var name = "sala";
 
-        var room = ChatRoomFactory.CreatePublicRoom(name, user);
+        var room = ChatRoomFactory.CreatePublicRoom(name, user).Value;
         room.Join(user2);
 
         // Act
@@ -114,9 +113,10 @@ public class ChatRoomTest
     {
         // Arrange
         var user = new User("John Doe", "username", "password");
-        var room = ChatRoomFactory.CreatePublicRoom("sala", new User("Geroge", "username", "password"));
+        var room = ChatRoomFactory.CreatePublicRoom("sala", new User("Geroge", "username", "password")).Value;
 
         room.Join(user);
+
         // Act
         room.SetMemberAsAdministrator(user);
 
@@ -124,5 +124,27 @@ public class ChatRoomTest
         var member = room.Members.FirstOrDefault(x => x.UserId == user.Id);
         member.Should().NotBeNull("o usuário deve ser membro da sala");
         member.IsAdmin.Should().BeTrue("o usuário deve ser admin");
+    }
+
+    [Fact]
+    public void Nao_deveria_criar_sala_com_nome_vazio()
+    {
+        var user = new User("John Doe", "username", "password");
+
+        var result = ChatRoom.Create("", user, false);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("ChatRoom.EmptyName");
+    }
+
+    [Fact]
+    public void Nao_deveria_criar_sala_privada_sem_senha()
+    {
+        var user = new User("John Doe", "username", "password");
+
+        var result = ChatRoom.Create("sala", user, isPrivate: true, password: null);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("ChatRoom.PrivateRoomRequiresPassword");
     }
 }

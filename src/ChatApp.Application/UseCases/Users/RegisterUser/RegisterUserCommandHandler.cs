@@ -34,7 +34,11 @@ public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, s
 
         var passwordHash = _hashService.Hash(request.Password);
 
-        var user = new User(request.Name, request.Username, passwordHash);
+        var userResult = User.Create(request.Name, request.Username, passwordHash);
+        if (userResult.IsFailure)
+            return Result.Failure<string?>(userResult.Error);
+
+        var user = userResult.Value;
 
         await _userRepository.Add(user, cancellationToken);
 

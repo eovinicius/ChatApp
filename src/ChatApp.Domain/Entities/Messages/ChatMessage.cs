@@ -27,9 +27,12 @@ public class ChatMessage
         SentAt = sendAt;
     }
 
-    public static ChatMessage Create(Guid chatRoomId, ContentType contentType, string content, Guid senderId, DateTime sendAt)
+    public static Result<ChatMessage> Create(Guid chatRoomId, ContentType contentType, string content, Guid senderId, DateTime sendAt)
     {
-        return new ChatMessage(chatRoomId, contentType, content, senderId, sendAt);
+        if (contentType == ContentType.Text && string.IsNullOrWhiteSpace(content))
+            return Result.Failure<ChatMessage>(ChatMessageErrors.EmptyContent);
+
+        return Result.Success(new ChatMessage(chatRoomId, contentType, content, senderId, sendAt));
     }
 
     public bool CanBeDeletedBy(Guid userId, Guid roomId, DateTime utcNow)

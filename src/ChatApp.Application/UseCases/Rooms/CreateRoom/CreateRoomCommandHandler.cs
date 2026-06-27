@@ -39,7 +39,11 @@ public sealed class CreateChatroomCommandHandler : ICommandHandler<CreateChatroo
             return Result.Failure<Guid>(UserErrors.NotFound);
         }
 
-        var chatRoom = ChatRoom.Create(request.Name, user, request.IsPrivate, request.Password);
+        var roomResult = ChatRoom.Create(request.Name, user, request.IsPrivate, request.Password);
+        if (roomResult.IsFailure)
+            return Result.Failure<Guid>(roomResult.Error);
+
+        var chatRoom = roomResult.Value;
 
         await _chatRoomRepository.Add(chatRoom, cancellationToken);
 
