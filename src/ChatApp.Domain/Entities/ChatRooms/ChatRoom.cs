@@ -1,4 +1,5 @@
-﻿using ChatApp.Domain.Entities.Users;
+﻿using ChatApp.Domain.Abstractions;
+using ChatApp.Domain.Entities.Users;
 
 namespace ChatApp.Domain.Entities.ChatRooms;
 
@@ -31,22 +32,23 @@ public sealed class ChatRoom
     public static ChatRoom Create(string name, User user, bool isPrivate, string? password = null)
     {
         var room = new ChatRoom(name, user.Id, isPrivate, password);
-        room.Join(user);
+        _ = room.Join(user);
 
         return room;
     }
 
-    public void Join(User user)
+    public Result Join(User user)
     {
         if (IsUserInRoom(user))
-            return;
+            return Result.Failure(ChatRoomErrors.AlreadyMember);
 
         if (MaxMembersReached())
-            return;
+            return Result.Failure(ChatRoomErrors.RoomFull);
 
         var chatRoomUser = ChatRoomUser.Create(Id, user.Id);
 
         _members.Add(chatRoomUser);
+        return Result.Success();
     }
 
     public void JoinAnonymously(string guestName)
