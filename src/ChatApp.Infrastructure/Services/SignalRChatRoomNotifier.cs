@@ -16,18 +16,18 @@ public class SignalRChatRoomNotifier : IChatHub
 
     public async Task JoinGroup(string roomId, string user, CancellationToken cancellationToken)
     {
-        await _hubContext.Clients.Group(roomId)
+        await _hubContext.Clients.Group($"chat_{roomId}")
             .SendAsync("UserJoined", user, cancellationToken: cancellationToken);
     }
 
     public async Task LeftGroup(string roomId, string user, CancellationToken cancellationToken)
     {
-        await _hubContext.Clients.Group(roomId)
+        await _hubContext.Clients.Group($"chat_{roomId}")
             .SendAsync("UserLeft", user, cancellationToken: cancellationToken);
     }
 
     public async Task SendMessageToGroup(string roomId, string message, CancellationToken cancellationToken)
     {
-        await _hubContext.Clients.Group(roomId).SendAsync("ReceiveMessage", roomId, message, cancellationToken: cancellationToken);
+        await _hubContext.Clients.Group($"chat_{roomId}").SendAsync("ReceiveMessage", roomId, message, cancellationToken: cancellationToken);
     }
 }
