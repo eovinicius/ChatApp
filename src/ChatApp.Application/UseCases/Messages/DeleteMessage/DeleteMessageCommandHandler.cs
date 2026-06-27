@@ -52,7 +52,7 @@ public class DeleteMessageCommandHandler : ICommandHandler<DeleteMessageCommand>
             return Result.Failure(ChatMessageErrors.Unauthorized);
         }
 
-        _messageRepository.Delete(message, cancellationToken);
+        await _messageRepository.Delete(message, cancellationToken);
 
 
         if (message.ContentType != ContentType.Text)

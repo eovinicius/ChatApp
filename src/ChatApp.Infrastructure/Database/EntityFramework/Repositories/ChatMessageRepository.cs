@@ -19,9 +19,10 @@ public class ChatMessageRepository : IChatMessageRepository
         await _dbContext.Messages.AddAsync(chatMessage, cancellationToken);
     }
 
-    public void Delete(ChatMessage chatMessage, CancellationToken cancellationToken)
+    public Task Delete(ChatMessage chatMessage, CancellationToken cancellationToken = default)
     {
         _dbContext.Messages.Remove(chatMessage);
+        return Task.CompletedTask;
     }
 
     public async Task<ChatMessage?> GetById(Guid messageId, CancellationToken cancellationToken)
