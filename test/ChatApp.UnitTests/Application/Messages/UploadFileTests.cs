@@ -56,8 +56,8 @@ public class UploadFileTests
     public async Task Handle_Deve_Gerar_Chave_Unica_Para_Cada_Upload()
     {
         // Arrange
-        var command1 = new UploadFileCommand("test1.jpg", "image/jpeg", new MemoryStream(), ".jpg");
-        var command2 = new UploadFileCommand("test2.jpg", "image/jpeg", new MemoryStream(), ".jpg");
+        var command1 = new UploadFileCommand("test1.jpg", "image/jpeg", new MemoryStream([1, 2, 3]), ".jpg");
+        var command2 = new UploadFileCommand("test2.jpg", "image/jpeg", new MemoryStream([4, 5, 6]), ".jpg");
 
         var keys = new List<string>();
         _fileStorageServiceMock.When(x => x.Upload(
