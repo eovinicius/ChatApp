@@ -31,7 +31,7 @@ public class ChatRoomController : ControllerBase
         
         if (result.IsFailure)
         {
-            return BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: result.Error.Code, detail: result.Error.Name);
         }
 
         return CreatedAtAction(
@@ -47,7 +47,7 @@ public class ChatRoomController : ControllerBase
 
         if (result.IsFailure)
         {
-            return BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: result.Error.Code, detail: result.Error.Name);
         }
 
         return CreatedAtAction(
@@ -63,7 +63,7 @@ public class ChatRoomController : ControllerBase
         var result = await _sender.Send(new JoinRoomCommand(roomId, request?.Password));
 
         if (result.IsFailure)
-            return BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: result.Error.Code, detail: result.Error.Name);
 
         return Ok();
     }
@@ -75,7 +75,7 @@ public class ChatRoomController : ControllerBase
         var result = await _sender.Send(new LeaveRoomCommand(roomId));
 
         if (result.IsFailure)
-            return BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: result.Error.Code, detail: result.Error.Name);
 
         return NoContent();
     }

@@ -31,7 +31,7 @@ public sealed class MessageController : ControllerBase
         var result = await _sender.Send(new GetMessagesByRoomQuery(roomId, before, take));
 
         if (result.IsFailure)
-            return BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: result.Error.Code, detail: result.Error.Name);
 
         return Ok(result.Value);
     }
@@ -42,7 +42,7 @@ public sealed class MessageController : ControllerBase
         var result = await _sender.Send(new SendMessageCommand(request.RoomId, request.Content, request.ContentType));
 
         if (result.IsFailure)
-            return BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: result.Error.Code, detail: result.Error.Name);
 
         return CreatedAtAction(nameof(SendMessage), new { id = result.Value }, new { id = result.Value });
     }
@@ -53,7 +53,7 @@ public sealed class MessageController : ControllerBase
         var result = await _sender.Send(new EditMessageCommand(messageId, new MessageContent("text", request.Content), request.RoomId));
 
         if (result.IsFailure)
-            return BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: result.Error.Code, detail: result.Error.Name);
 
         return NoContent();
     }
@@ -64,7 +64,7 @@ public sealed class MessageController : ControllerBase
         var result = await _sender.Send(new DeleteMessageCommand(messageId, roomId));
 
         if (result.IsFailure)
-            return BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: result.Error.Code, detail: result.Error.Name);
 
         return NoContent();
     }
@@ -73,13 +73,13 @@ public sealed class MessageController : ControllerBase
     public async Task<IActionResult> UploadFile(IFormFile file)
     {
         if (file is null || file.Length == 0)
-            return BadRequest(new { error = "UploadFile.EmptyFile", message = "Nenhum arquivo enviado." });
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "UploadFile.EmptyFile", detail: "Nenhum arquivo enviado.");
 
         var extension = Path.GetExtension(file.FileName);
         var result = await _sender.Send(new UploadFileCommand(file.FileName, file.ContentType, file.OpenReadStream(), extension));
 
         if (result.IsFailure)
-            return BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: result.Error.Code, detail: result.Error.Name);
 
         return Ok(new { url = result.Value.FileUrl });
     }
