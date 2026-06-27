@@ -2,6 +2,7 @@ using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Messaging;
 using ChatApp.Domain.Abstractions;
+using ChatApp.Domain.Repositories;
 
 using Dapper;
 
@@ -12,15 +13,40 @@ public class GetMessagesByRoomQueryHandler : IQueryHandler<GetMessagesByRoomQuer
 {
     private readonly ISqlConnectionFactory _sqlConnectionFactory;
     private readonly IUserContext _userContext;
+    private readonly IUserRepository _userRepository;
+    private readonly IChatRoomRepository _chatRoomRepository;
 
-    public GetMessagesByRoomQueryHandler(ISqlConnectionFactory sqlConnectionFactory, IUserContext userContext)
+    public GetMessagesByRoomQueryHandler(ISqlConnectionFactory sqlConnectionFactory, IUserContext userContext, IUserRepository userRepository, IChatRoomRepository chatRoomRepository)
     {
         _sqlConnectionFactory = sqlConnectionFactory;
         _userContext = userContext;
+        _userRepository = userRepository;
+        _chatRoomRepository = chatRoomRepository;
     }
 
     public async Task<Result<IEnumerable<GetMessagesByRoomResponse>>> Handle(GetMessagesByRoomQuery request, CancellationToken cancellationToken)
     {
+        var currentUserId = _userContext.UserId;
+
+        var user = await _userRepository.GetById(currentUserId, cancellationToken);
+
+        if (user is null)
+        {
+            return Result.Failure<IEnumerable<GetMessagesByRoomResponse>>(Error.NullValue);
+        }
+
+        var chatRoom = await _chatRoomRepository.GetById(request.RoomId, cancellationToken);
+
+        if (chatRoom is null)
+        {
+            return Result.Failure<IEnumerable<GetMessagesByRoomResponse>>(Error.NullValue);
+        }
+
+        if (!chatRoom.IsUserInRoom(user))
+        {
+            return Result.Failure<IEnumerable<GetMessagesByRoomResponse>>(Error.NullValue);
+        }
+
         var connection = _sqlConnectionFactory.CreateConnection();
 
         const string sql = """
