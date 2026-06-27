@@ -28,5 +28,7 @@ public class ChatRoomUserConfiguration : IEntityTypeConfiguration<ChatRoomUser>
         builder.HasOne<User>()
            .WithMany()
            .HasForeignKey(cru => cru.UserId);
+
+        builder.HasIndex(cru => cru.UserId);
     }
 }
