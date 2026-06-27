@@ -73,7 +73,7 @@ public class GetMessagesByRoomTests
         // Arrange
         var owner = new User("Owner", "owner", "password");
         var outsider = new User("Outsider", "outsider", "password");
-        var room = ChatRoom.Create("sala", owner, false);
+        var room = ChatRoom.Create("sala", owner, false).Value;
 
         _userContextMock.UserId.Returns(outsider.Id);
         _userRepositoryMock.GetById(outsider.Id, Arg.Any<CancellationToken>()).Returns(outsider);

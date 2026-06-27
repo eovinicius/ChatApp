@@ -44,7 +44,7 @@ public class JoinRoomTests
         // Arrange
         var ownerUser = new User("John Doe", "username", "password");
         var newMember = new User("George", "username", "password");
-        var room = ChatRoom.Create("sala", ownerUser, false);
+        var room = ChatRoom.Create("sala", ownerUser, false).Value;
         _userContextMock.UserId.Returns(newMember.Id);
         _userRepositoryMock.GetById(newMember.Id, Arg.Any<CancellationToken>()).Returns(newMember);
         _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(room);
@@ -66,7 +66,7 @@ public class JoinRoomTests
     {
         var ownerUser = new User("John Doe", "username", "password");
         var newMember = new User("George", "username", "password");
-        var room = ChatRoom.Create("sala", ownerUser, true, "123");
+        var room = ChatRoom.Create("sala", ownerUser, true, "123").Value;
         _userContextMock.UserId.Returns(newMember.Id);
         _userRepositoryMock.GetById(newMember.Id, Arg.Any<CancellationToken>()).Returns(newMember);
         _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(room);
@@ -125,7 +125,7 @@ public class JoinRoomTests
     {
         // Arrange
         var newMember = new User("George", "username", "password");
-        var room = ChatRoom.Create("sala", new User("John Doe", "username", "password"), true, "1234");
+        var room = ChatRoom.Create("sala", new User("John Doe", "username", "password"), true, "1234").Value;
         _userContextMock.UserId.Returns(newMember.Id);
         _userRepositoryMock.GetById(newMember.Id, Arg.Any<CancellationToken>()).Returns(newMember);
         _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(room);
@@ -145,7 +145,7 @@ public class JoinRoomTests
     {
         // Arrange
         var ownerUser = new User("John Doe", "username", "password");
-        var chatRoom = ChatRoom.Create("full room", ownerUser, false);
+        var chatRoom = ChatRoom.Create("full room", ownerUser, false).Value;
         int maxMembers = chatRoom.MaxMembers;
 
         // Preenche a sala até o limite (owner já está na sala, então adiciona maxMembers - 1)

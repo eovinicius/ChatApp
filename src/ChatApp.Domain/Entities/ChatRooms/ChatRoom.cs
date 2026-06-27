@@ -29,19 +29,31 @@ public sealed class ChatRoom
         MaxMembers = 50;
     }
 
-    public static ChatRoom Create(string name, User user, bool isPrivate, string? password = null)
+    public static Result<ChatRoom> Create(string name, User user, bool isPrivate, string? password = null)
     {
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure<ChatRoom>(ChatRoomErrors.EmptyName);
+
+        if (isPrivate && string.IsNullOrWhiteSpace(password))
+            return Result.Failure<ChatRoom>(ChatRoomErrors.PrivateRoomRequiresPassword);
+
         var room = new ChatRoom(name, user.Id, isPrivate, password);
         _ = room.Join(user);
 
-        return room;
+        return Result.Success(room);
     }
 
-    public static ChatRoom CreateAnonymous(string name, string guestName)
+    public static Result<ChatRoom> CreateAnonymous(string name, string guestName)
     {
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure<ChatRoom>(ChatRoomErrors.EmptyName);
+
+        if (string.IsNullOrWhiteSpace(guestName))
+            return Result.Failure<ChatRoom>(ChatRoomErrors.EmptyGuestName);
+
         var room = new ChatRoom(name, Guid.Empty, isPrivate: false);
         room.JoinAnonymously(guestName);
-        return room;
+        return Result.Success(room);
     }
 
     public Result Join(User user)

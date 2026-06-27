@@ -22,7 +22,11 @@ public sealed class CreateRoomAsAnonymousCommandHandler : ICommandHandler<Create
 
     public async Task<Result<Guid>> Handle(CreateRoomAsAnonymousCommand request, CancellationToken cancellationToken)
     {
-        var room = ChatRoom.CreateAnonymous(request.RoomName, request.GuestName);
+        var roomResult = ChatRoom.CreateAnonymous(request.RoomName, request.GuestName);
+        if (roomResult.IsFailure)
+            return Result.Failure<Guid>(roomResult.Error);
+
+        var room = roomResult.Value;
 
         await _chatRoomRepository.Add(room, cancellationToken);
 

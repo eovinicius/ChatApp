@@ -53,7 +53,7 @@ public class SendMessageTests
     {
         // Arrange
         var user = new User("John Doe", "username", "password");
-        var room = ChatRoom.Create("sala", user, false);
+        var room = ChatRoom.Create("sala", user, false).Value;
 
         _userContext.UserId.Returns(user.Id);
         _dateTimeProviderMock.UtcNow.Returns(DateTime.UtcNow);
@@ -111,7 +111,7 @@ public class SendMessageTests
     {
         // Arrange
         var user = new User("George", "username", "password");
-        var room = ChatRoom.Create("sala", new User("John Doe", "username", "password"), false);
+        var room = ChatRoom.Create("sala", new User("John Doe", "username", "password"), false).Value;
 
         _userContext.UserId.Returns(user.Id);
         _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);

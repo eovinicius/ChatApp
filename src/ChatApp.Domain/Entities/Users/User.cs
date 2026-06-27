@@ -1,3 +1,5 @@
+using ChatApp.Domain.Abstractions;
+
 namespace ChatApp.Domain.Entities.Users;
 
 public sealed class User
@@ -15,4 +17,14 @@ public sealed class User
         Password = password;
     }
 
+    public static Result<User> Create(string name, string username, string password)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure<User>(UserErrors.EmptyName);
+
+        if (string.IsNullOrWhiteSpace(username))
+            return Result.Failure<User>(UserErrors.EmptyUsername);
+
+        return Result.Success(new User(name, username, password));
+    }
 }
