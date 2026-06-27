@@ -43,13 +43,14 @@ public sealed class JoinRoomCommandHanlder : ICommandHandler<JoinRoomCommand>
             return Result.Failure(Error.NullValue);
         }
 
-        // todo:faz sentido colocar essa logica aqui? ou deveria ser feita no ChatRoom no metodo Join?
         if (room.IsPrivate && !room.ValidatePassword(request.Password))
         {
             return Result.Failure(Error.NullValue);
         }
 
-        room.Join(user);
+        var joinResult = room.Join(user);
+        if (joinResult.IsFailure)
+            return joinResult;
 
         await _chatRoomRepository.Update(room, cancellationToken);
 

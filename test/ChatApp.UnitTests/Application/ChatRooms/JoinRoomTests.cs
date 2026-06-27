@@ -164,12 +164,10 @@ public class JoinRoomTests
         var result = await _handler.Handle(Command, CancellationToken.None);
 
         // Assert
-        // Nota: O handler atual não verifica se o Join foi bem-sucedido,
-        // então sempre retorna sucesso mesmo quando o limite é atingido.
-        // Este é um comportamento que poderia ser melhorado no handler.
-        // Por enquanto, verificamos que o usuário não foi adicionado à sala.
-        chatRoom.Members.Should().HaveCount(maxMembers); // Não deve ter aumentado
-        // O handler ainda retorna sucesso porque não verifica, mas o usuário não foi adicionado
-        result.IsSuccess.Should().BeTrue(); // Comportamento atual do handler
+        result.IsSuccess.Should().BeFalse();
+        chatRoom.Members.Should().HaveCount(maxMembers);
+        await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
+        await _chatRoomRepositoryMock.DidNotReceive().Update(Arg.Any<ChatRoom>(), Arg.Any<CancellationToken>());
+        await _chatHubMock.DidNotReceive().JoinGroup(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 }
