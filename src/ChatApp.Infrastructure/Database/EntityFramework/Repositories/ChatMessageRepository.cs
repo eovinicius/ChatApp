@@ -26,7 +26,7 @@ public class ChatMessageRepository : IChatMessageRepository
 
     public async Task<ChatMessage?> GetById(Guid messageId, CancellationToken cancellationToken)
     {
-        return await _dbContext.Messages.FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
+        return await _dbContext.Messages.AsNoTracking().FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
     }
 
     public Task Update(ChatMessage chatMessage, CancellationToken cancellationToken)
