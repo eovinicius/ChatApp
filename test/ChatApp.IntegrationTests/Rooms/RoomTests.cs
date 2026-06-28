@@ -95,17 +95,4 @@ public class RoomTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
-    [Fact]
-    public async Task CreateRoomAnonymous_Deve_Retornar_201()
-    {
-        var response = await Client.PostAsJsonAsync("/api/chatroom/anonymous", new
-        {
-            roomName = "Sala Anônima",
-            guestName = "Visitante"
-        });
-
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
-        json.GetProperty("id").GetGuid().Should().NotBe(Guid.Empty);
-    }
 }

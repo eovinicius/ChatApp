@@ -149,15 +149,6 @@ public class ChatRoomTest
     }
 
     [Fact]
-    public void Nao_deveria_criar_sala_anonima_com_nome_de_convidado_vazio()
-    {
-        var result = ChatRoom.CreateAnonymous("sala", "   ");
-
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("ChatRoom.EmptyGuestName");
-    }
-
-    [Fact]
     public void ValidatePassword_deveria_retornar_true_para_senha_correta()
     {
         var user = User.Create("John Doe", "username", "password").Value;

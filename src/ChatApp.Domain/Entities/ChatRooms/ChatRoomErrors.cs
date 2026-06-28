@@ -11,5 +11,4 @@ public static class ChatRoomErrors
     public static readonly Error NotMember = new("ChatRoom.NotMember", "O usuário não é membro desta sala.");
     public static readonly Error EmptyName = new("ChatRoom.EmptyName", "O nome da sala não pode ser vazio.");
     public static readonly Error PrivateRoomRequiresPassword = new("ChatRoom.PrivateRoomRequiresPassword", "Sala privada deve ter uma senha definida.");
-    public static readonly Error EmptyGuestName = new("ChatRoom.EmptyGuestName", "O nome do convidado anônimo não pode ser vazio.");
 }
