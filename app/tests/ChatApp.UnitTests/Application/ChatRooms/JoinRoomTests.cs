@@ -17,7 +17,7 @@ public class JoinRoomTests
 
     private static readonly JoinRoomCommand Command = new(Guid.NewGuid(), "123");
 
-    private readonly JoinRoomCommandHanlder _handler;
+    private readonly JoinRoomCommandHandler _handler;
     private readonly IUserRepository _userRepositoryMock;
     private readonly IChatRoomRepository _chatRoomRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
@@ -34,7 +34,7 @@ public class JoinRoomTests
         _chatHubMock = Substitute.For<IChatHub>();
         _hashServiceMock = Substitute.For<IHashService>();
 
-        _handler = new JoinRoomCommandHanlder(
+        _handler = new JoinRoomCommandHandler(
             _chatRoomRepositoryMock,
             _userContextMock,
             _userRepositoryMock,
