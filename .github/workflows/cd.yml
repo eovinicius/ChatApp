@@ -29,7 +29,7 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Configurar credenciais AWS (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -70,7 +70,7 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Configurar credenciais AWS (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_PROD }}
           aws-region: ${{ secrets.AWS_REGION }}
