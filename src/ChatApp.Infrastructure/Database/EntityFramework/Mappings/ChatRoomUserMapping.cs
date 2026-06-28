@@ -14,6 +14,8 @@ public class ChatRoomUserConfiguration : IEntityTypeConfiguration<ChatRoomUser>
 
         builder.HasKey(cru => new { cru.ChatRoomId, cru.UserId });
 
+        builder.Ignore(cru => cru.Id);
+
         builder.Property(cru => cru.JoinedAt)
             .IsRequired();
 

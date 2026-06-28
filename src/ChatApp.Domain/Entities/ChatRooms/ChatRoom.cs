@@ -42,19 +42,6 @@ public sealed class ChatRoom : AggregateRoot
         return Result.Success(room);
     }
 
-    public static Result<ChatRoom> CreateAnonymous(string name, string guestName)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return Result.Failure<ChatRoom>(ChatRoomErrors.EmptyName);
-
-        if (string.IsNullOrWhiteSpace(guestName))
-            return Result.Failure<ChatRoom>(ChatRoomErrors.EmptyGuestName);
-
-        var room = new ChatRoom(name, Guid.Empty, isPrivate: false);
-        room.JoinAnonymously(guestName);
-        return Result.Success(room);
-    }
-
     public Result Join(User user)
     {
         if (IsUserInRoom(user))
@@ -67,11 +54,6 @@ public sealed class ChatRoom : AggregateRoot
 
         _members.Add(chatRoomUser);
         return Result.Success();
-    }
-
-    public void JoinAnonymously(string guestName)
-    {
-        _members.Add(ChatRoomUser.CreateAnonymous(Id, guestName));
     }
 
     public void Leave(User user)
