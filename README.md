@@ -1,147 +1,109 @@
-# ChatApp
+<div align="center">
+  <h1>💬 ChatApp</h1>
+  <p>API de chat em tempo real construída com .NET 10 e Clean Architecture</p>
 
-ChatApp é uma aplicação de chat desenvolvida em .NET, estruturada em múltiplos projetos para separar responsabilidades de domínio, aplicação, infraestrutura, API e testes.
+  [![CI](https://github.com/eovinicius/ChatApp/actions/workflows/ci.yml/badge.svg)](https://github.com/eovinicius/ChatApp/actions/workflows/ci.yml)
+  ![.NET](https://img.shields.io/badge/.NET-10-512BD4)
+  ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)
+  ![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-green)
+</div>
 
-## Visão Geral
+---
 
-O ChatApp permite a comunicação em tempo real entre usuários, com funcionalidades de cadastro, autenticação, criação de salas e histórico de mensagens. O projeto segue boas práticas de arquitetura, separando as camadas de domínio, aplicação, infraestrutura, API e testes.
+ChatApp é uma API REST + WebSocket de chat em tempo real construída com .NET 10 e Clean Architecture, demonstrando CQRS, Result Pattern, domain-driven design e integração com AWS S3.
 
-## Arquitetura
+## ✨ Funcionalidades
 
-- **Domain:** Entidades, agregados e regras de negócio.
-- **Application:** Casos de uso, DTOs e lógica de orquestração.
-- **Infrastructure:** Persistência de dados (Entity Framework Core), integrações externas.
-- **API:** Endpoints REST para interação com clientes.
-- **Testes:** Testes unitários com xUnit.
+- 🔐 **Autenticação JWT** — registro e login com tokens de curta duração
+- 🏠 **Salas de chat** — crie salas públicas ou protegidas por senha (máximo 50 membros)
+- 💬 **Mensagens** — envie, edite (até 1h) e delete (até 24h) mensagens de texto
+- 📎 **Upload de mídia** — imagens, áudio e vídeo via AWS S3 (máximo 50 MB)
+- ⚡ **Tempo real** — notificações instantâneas via SignalR WebSocket
+- 🚦 **Rate limiting** — proteção contra abuso por IP e por usuário
 
-Estrutura de pastas:
+## 🛠 Stack
 
+| Tecnologia | Uso |
+|------------|-----|
+| .NET 10 / ASP.NET Core | Framework web |
+| PostgreSQL | Banco de dados relacional |
+| Entity Framework Core | ORM + migrações |
+| MediatR | CQRS e pipeline behaviors |
+| SignalR | WebSocket em tempo real |
+| JWT Bearer | Autenticação |
+| AWS S3 | Armazenamento de mídia |
+| xUnit + NSubstitute + FluentAssertions | Testes unitários e de integração |
+| Serilog | Logging estruturado com correlation ID |
+
+## 🏛 Arquitetura
+
+ChatApp segue o padrão **Clean Architecture** com quatro camadas. As dependências sempre apontam para o centro: `API → Application → Domain` (Infrastructure implementa interfaces de Application).
+
+```mermaid
+graph LR
+    A["ChatApp.Api\nControllers · Middlewares · Hubs"] --> B["ChatApp.Application\nUse Cases · CQRS · Abstrações"]
+    B --> C["ChatApp.Domain\nEntidades · Value Objects · Erros"]
+    D["ChatApp.Infrastructure\nEF Core · SignalR · JWT · S3"] --> B
+    D --> C
 ```
-src/
-  ChatApp.Domain/
-  ChatApp.Application/
-  ChatApp.Infrastructure/
-  ChatApp.Api/
-Test/
-  ChatApp.UnitTests/
+
+> Veja [docs/architecture.md](docs/architecture.md) para detalhes sobre padrões e fluxo de dados.
+
+## 🚀 Quickstart
+
+**Pré-requisitos:** [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) · [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+```bash
+# 1. Clone o repositório
+git clone https://github.com/eovinicius/ChatApp.git
+cd ChatApp
+
+# 2. Suba o banco de dados
+docker-compose up -d --build chatapp-db
+
+# 3. Configure as variáveis (veja docs/configuration.md)
+dotnet user-secrets set "ConnectionStrings:Database" \
+  "Host=localhost;Port=5432;Database=chatapp;Username=postgres;Password=postgres" \
+  --project .\src\ChatApp.Api\
+dotnet user-secrets set "JwtSettings:SecretKey" "dev-secret-key-min-32-characters" --project .\src\ChatApp.Api\
+dotnet user-secrets set "JwtSettings:Issuer" "ChatApp" --project .\src\ChatApp.Api\
+dotnet user-secrets set "JwtSettings:Audience" "ChatApp" --project .\src\ChatApp.Api\
+
+# 4. Execute as migrações
+dotnet ef database update --project .\src\ChatApp.Infrastructure\ --startup-project .\src\ChatApp.Api\
+
+# 5. Rode a API
+dotnet run --project .\src\ChatApp.Api\ChatApp.Api.csproj
 ```
 
-## Tecnologias Utilizadas
+Acesse a interface Swagger em **http://localhost:5110/swagger/index.html**
 
-- .NET 8+ (C#)
-- ASP.NET Core (Web API)
-- Entity Framework Core (ORM)
-- MediatR (para mediadores de comandos e consultas)
-- SignalR (para comunicação em tempo real)
-- xUnit (testes unitários)
-- Swagger (documentação da API)
-- Docker (para containerização)
-- PostgreSQL (banco de dados)
-- Redis (para cache e mensagens em tempo real)
-- FluentValidation (validação de modelos)
-- Serilog (logging)
+## 📖 Documentação
 
-## Como Executar
+| Documento | Descrição |
+|-----------|-----------|
+| [Arquitetura](docs/architecture.md) | Camadas, padrões (Result, CQRS, IUserContext) e fluxo de dados |
+| [Referência da API](docs/api.md) | Endpoints REST, autenticação, rate limiting, SignalR |
+| [Banco de Dados](docs/database.md) | Modelo entidade-relacionamento e schema PostgreSQL |
+| [Configuração](docs/configuration.md) | Settings, variáveis de ambiente e gerenciamento de segredos |
+| [Desenvolvimento](docs/development.md) | Setup local, comandos, testes e convenções de código |
 
-1. Clone o repositório:
-   ```sh
-   git clone https://github.com/eovinicius/ChatApp.git
-   ```
-2. Restaure os pacotes NuGet:
-   ```sh
-   dotnet restore
-   ```
-3. Compile a solução:
-   ```sh
-   dotnet build
-   ```
-4. Execute a API:
-   ```sh
-   cd src/ChatApp.Api
-   dotnet run
-   ```
-5. Acesse a API em `https://localhost:5001` ou `http://localhost:5000`.
+## 🧪 Testes
 
-## Executando os Testes
-
-```sh
+```bash
+# Todos os testes
 dotnet test
+
+# Filtrar por classe
+dotnet test --filter "FullyQualifiedName~CreateRoomTests"
+
+# Apenas unit tests
+dotnet test test/ChatApp.UnitTests/
+
+# Apenas integration tests
+dotnet test test/ChatApp.IntegrationTests/
 ```
 
-## Funcionalidades
+## 📄 Licença
 
-- Cadastro e autenticação de usuários
-- Criação de salas de chat
-- Envio e recebimento de mensagens em tempo real
-- Histórico de conversas
-
-## Exemplos de Endpoints
-
-### Cadastro de Usuário
-
-```http
-POST /api/users/register
-Content-Type: application/json
-
-{
-  "username": "usuario",
-  "password": "senha"
-}
-```
-
-### Login
-
-```http
-POST /api/users/login
-Content-Type: application/json
-
-{
-  "username": "usuario",
-  "password": "senha"
-}
-```
-
-### Criar Sala
-
-```http
-POST /api/rooms
-Content-Type: application/json
-
-{
-  "name": "Sala Geral"
-}
-```
-
-### Enviar Mensagem
-
-```http
-POST /api/messages
-Content-Type: application/json
-
-{
-  "roomId": "id-da-sala",
-  "content": "Olá, mundo!"
-}
-```
-
-### Listar Mensagens de uma Sala
-
-```http
-GET /api/rooms/{roomId}/messages
-```
-
-## Contribuição
-
-1. Faça um fork do projeto
-2. Crie uma branch (`git checkout -b feature/NovaFuncionalidade`)
-3. Commit suas alterações (`git commit -am 'Adiciona nova funcionalidade'`)
-4. Faça push para a branch (`git push origin feature/NovaFuncionalidade`)
-5. Abra um Pull Request
-
-## Licença
-
-Este projeto está licenciado sob a licença MIT.
-
-## Contato
-
-Dúvidas ou sugestões? Entre em contato pelo [eovinicius10@gmail.com](mailto:seu-email@dominio.com).
+Distribuído sob a licença MIT. Veja [LICENSE](LICENSE) para detalhes.
