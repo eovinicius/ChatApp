@@ -14,14 +14,14 @@ dotnet test
 dotnet test --filter "FullyQualifiedName~CreateRoomTests"
 
 # Run the API (Swagger at http://localhost:5110/swagger/index.html)
-dotnet run --project .\src\ChatApp.Api\ChatApp.Api.csproj
+dotnet run --project .\app\src\ChatApp.Api\ChatApp.Api.csproj
 
 # Start only the database (required before running locally)
 docker-compose up -d --build chatapp-db
 
 # EF migrations
-dotnet ef migrations add <MigrationName> --project .\src\ChatApp.Infrastructure\ChatApp.Infrastructure.csproj --startup-project .\src\ChatApp.Api\
-dotnet ef database update --project .\src\ChatApp.Infrastructure\ --startup-project .\src\ChatApp.Api\
+dotnet ef migrations add <MigrationName> --project .\app\src\ChatApp.Infrastructure\ChatApp.Infrastructure.csproj --startup-project .\app\src\ChatApp.Api\
+dotnet ef database update --project .\app\src\ChatApp.Infrastructure\ --startup-project .\app\src\ChatApp.Api\
 ```
 
 ## Architecture

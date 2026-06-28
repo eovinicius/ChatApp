@@ -5,19 +5,19 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp.Domain", "src\ChatApp.Domain\ChatApp.Domain.csproj", "{11966A24-E8C7-4F50-A7E2-9C0935FA50DD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp.Domain", "app\src\ChatApp.Domain\ChatApp.Domain.csproj", "{11966A24-E8C7-4F50-A7E2-9C0935FA50DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp.Application", "src\ChatApp.Application\ChatApp.Application.csproj", "{9C37BCF3-3310-464D-B7A3-BFC3CADAA791}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp.Application", "app\src\ChatApp.Application\ChatApp.Application.csproj", "{9C37BCF3-3310-464D-B7A3-BFC3CADAA791}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp.Infrastructure", "src\ChatApp.Infrastructure\ChatApp.Infrastructure.csproj", "{0C883C11-D2F4-45B7-90BF-DC6B85EB1542}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp.Infrastructure", "app\src\ChatApp.Infrastructure\ChatApp.Infrastructure.csproj", "{0C883C11-D2F4-45B7-90BF-DC6B85EB1542}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp.Api", "src\ChatApp.Api\ChatApp.Api.csproj", "{33E5238D-EB63-496F-8F42-F6B4F590458C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp.Api", "app\src\ChatApp.Api\ChatApp.Api.csproj", "{33E5238D-EB63-496F-8F42-F6B4F590458C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{0C88DD14-F956-CE84-757C-A364CCF449FC}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0C88DD14-F956-CE84-757C-A364CCF449FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp.UnitTests", "test\ChatApp.UnitTests\ChatApp.UnitTests.csproj", "{27960F12-BEA7-4FBD-83C2-AA1E85B11C06}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp.UnitTests", "app\tests\ChatApp.UnitTests\ChatApp.UnitTests.csproj", "{27960F12-BEA7-4FBD-83C2-AA1E85B11C06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp.IntegrationTests", "test\ChatApp.IntegrationTests\ChatApp.IntegrationTests.csproj", "{785C3D5B-984B-4018-A712-83E0BA2487BE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp.IntegrationTests", "app\tests\ChatApp.IntegrationTests\ChatApp.IntegrationTests.csproj", "{785C3D5B-984B-4018-A712-83E0BA2487BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
