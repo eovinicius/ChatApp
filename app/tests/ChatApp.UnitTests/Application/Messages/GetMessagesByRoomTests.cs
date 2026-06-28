@@ -36,7 +36,7 @@ public class GetMessagesByRoomTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Usuario_Nao_Existir()
+    public async Task Deveria_retornar_erro_quando_usuario_nao_existir()
     {
         // Arrange
         _userContextMock.UserId.Returns(Guid.NewGuid());
@@ -51,7 +51,7 @@ public class GetMessagesByRoomTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Sala_Nao_Existir()
+    public async Task Deveria_retornar_erro_quando_sala_nao_existir()
     {
         // Arrange
         var user = User.Create("John Doe", "username", "password").Value;
@@ -68,7 +68,7 @@ public class GetMessagesByRoomTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Usuario_Nao_For_Membro_Da_Sala()
+    public async Task Deveria_retornar_erro_quando_usuario_nao_for_membro_da_sala()
     {
         // Arrange
         var owner = User.Create("Owner", "owner", "password").Value;

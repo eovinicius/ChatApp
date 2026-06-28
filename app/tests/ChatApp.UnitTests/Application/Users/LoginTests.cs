@@ -30,8 +30,9 @@ public class LoginTests
             _authenticationServiceMock,
             _hashServiceMock);
     }
+
     [Fact]
-    public async Task Handle_DeveAutenticarUsuario_QuandoCredenciaisForemValidas()
+    public async Task Deveria_autenticar_usuario_quando_credenciais_forem_validas()
     {
         // Arrange
         var user = User.Create("John Doe", "username", "password").Value;
@@ -54,7 +55,7 @@ public class LoginTests
     }
 
     [Fact]
-    public async Task Handle_NaoDeveAutenticarUsuario_QuandoUsernameEstiverIncorreto()
+    public async Task Nao_deveria_autenticar_usuario_quando_username_estiver_incorreto()
     {
         // Arrange
         _userRepositoryMock.GetByUsername(Command.Username, Arg.Any<CancellationToken>()).Returns((User?)null);
@@ -72,7 +73,7 @@ public class LoginTests
     }
 
     [Fact]
-    public async Task Handle_NaoDeveAutenticarUsuario_QuandoSenhaEstiverIncorreta()
+    public async Task Nao_deveria_autenticar_usuario_quando_senha_estiver_incorreta()
     {
         // Arrange
         var user = User.Create("John Doe", "username", "password").Value;
@@ -90,5 +91,4 @@ public class LoginTests
         _hashServiceMock.Received(1).Compare(Command.Password, user.Password);
         _authenticationServiceMock.DidNotReceive().GenerateToken(Arg.Any<User>());
     }
-
 }

@@ -20,7 +20,7 @@ public class UploadFileTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Upload_Arquivo_Com_Sucesso()
+    public async Task Deveria_fazer_upload_de_arquivo_com_sucesso()
     {
         // Arrange
         var fileName = "test.jpg";
@@ -53,7 +53,7 @@ public class UploadFileTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Arquivo_Vazio()
+    public async Task Deveria_retornar_erro_quando_arquivo_vazio()
     {
         var command = new UploadFileCommand("empty.jpg", "image/jpeg", new MemoryStream(), ".jpg");
 
@@ -65,7 +65,7 @@ public class UploadFileTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Arquivo_Excede_Limite()
+    public async Task Deveria_retornar_erro_quando_arquivo_excede_limite()
     {
         var bigContent = new MemoryStream(new byte[51 * 1024 * 1024]);
         var command = new UploadFileCommand("big.jpg", "image/jpeg", bigContent, ".jpg");
@@ -77,7 +77,7 @@ public class UploadFileTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Para_Tipo_De_Conteudo_Invalido()
+    public async Task Deveria_retornar_erro_para_tipo_de_conteudo_invalido()
     {
         var command = new UploadFileCommand("doc.pdf", "application/pdf", new MemoryStream([1, 2, 3]), ".pdf");
 
@@ -88,7 +88,7 @@ public class UploadFileTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Gerar_Chave_Unica_Para_Cada_Upload()
+    public async Task Deveria_gerar_chave_unica_para_cada_upload()
     {
         // Arrange
         var command1 = new UploadFileCommand("test1.jpg", "image/jpeg", new MemoryStream([1, 2, 3]), ".jpg");
@@ -113,4 +113,3 @@ public class UploadFileTests
         keys[1].Should().StartWith("messages/");
     }
 }
-

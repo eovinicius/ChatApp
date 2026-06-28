@@ -44,7 +44,7 @@ public class CreateRoomTests
     }
 
     [Fact]
-    public async Task Handle_deve_criar_sala_publica()
+    public async Task Deveria_criar_sala_publica()
     {
         // Arrange
         var user = User.Create("John Doe", "username", "password").Value;
@@ -64,7 +64,7 @@ public class CreateRoomTests
     }
 
     [Fact]
-    public async Task Handle_deve_criar_sala_privada_com_senha()
+    public async Task Deveria_criar_sala_privada_com_senha()
     {
         // Arrange
         var user = User.Create("John Doe", "username", "password").Value;

@@ -67,7 +67,7 @@ public class JoinRoomTests
     }
 
     [Fact]
-    public async Task Deve_adicionar_usuario_quando_entrar_na_sala_privada_com_senha_correta()
+    public async Task Deveria_adicionar_usuario_quando_entrar_na_sala_privada_com_senha_correta()
     {
         var ownerUser = User.Create("John Doe", "username", "password").Value;
         var newMember = User.Create("George", "username", "password").Value;
@@ -90,7 +90,7 @@ public class JoinRoomTests
     }
 
     [Fact]
-    public async Task Deve_retornar_erro_quando_usuario_nao_existir()
+    public async Task Deveria_retornar_erro_quando_usuario_nao_existir()
     {
         // Arrange
         var newMember = User.Create("John Doe", "username", "password").Value;
@@ -108,7 +108,7 @@ public class JoinRoomTests
     }
 
     [Fact]
-    public async Task Deve_retornar_erro_quando_sala_nao_existir()
+    public async Task Deveria_retornar_erro_quando_sala_nao_existir()
     {
         // Arrange
         var newMember = User.Create("John Doe", "username", "password").Value;
@@ -127,7 +127,7 @@ public class JoinRoomTests
     }
 
     [Fact]
-    public async Task Deve_retornar_erro_quando_senha_incorreta()
+    public async Task Deveria_retornar_erro_quando_senha_incorreta()
     {
         // Arrange
         var newMember = User.Create("George", "username", "password").Value;

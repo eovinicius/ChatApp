@@ -38,7 +38,7 @@ public class EditMessageTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Editar_Mensagem_Com_Sucesso()
+    public async Task Deveria_editar_mensagem_com_sucesso()
     {
         // Arrange
         var user = User.Create("John Doe", "username", "password").Value;
@@ -67,7 +67,7 @@ public class EditMessageTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Usuario_Nao_Existir()
+    public async Task Deveria_retornar_erro_quando_usuario_nao_existir()
     {
         // Arrange
         var messageId = Guid.NewGuid();
@@ -87,7 +87,7 @@ public class EditMessageTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Mensagem_Nao_Existir()
+    public async Task Deveria_retornar_erro_quando_mensagem_nao_existir()
     {
         // Arrange
         var user = User.Create("John Doe", "username", "password").Value;
@@ -108,7 +108,7 @@ public class EditMessageTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Usuario_Nao_For_Remetente()
+    public async Task Deveria_retornar_erro_quando_usuario_nao_for_remetente()
     {
         // Arrange
         var owner = User.Create("Owner", "owner", "password").Value;
@@ -133,7 +133,7 @@ public class EditMessageTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Tempo_Limite_Expirado()
+    public async Task Deveria_retornar_erro_quando_tempo_limite_expirado()
     {
         // Arrange
         var user = User.Create("John Doe", "username", "password").Value;
@@ -159,7 +159,7 @@ public class EditMessageTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Ao_Editar_Mensagem_Nao_Texto()
+    public async Task Deveria_retornar_erro_ao_editar_mensagem_nao_texto()
     {
         var user = User.Create("John Doe", "username", "password").Value;
         var roomId = Guid.NewGuid();
@@ -180,7 +180,7 @@ public class EditMessageTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Ao_Editar_Com_Conteudo_Vazio()
+    public async Task Deveria_retornar_erro_ao_editar_com_conteudo_vazio()
     {
         var user = User.Create("John Doe", "username", "password").Value;
         var roomId = Guid.NewGuid();
@@ -200,4 +200,3 @@ public class EditMessageTests
         await _messageRepositoryMock.DidNotReceive().Update(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
     }
 }
-

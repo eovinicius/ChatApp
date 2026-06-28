@@ -36,7 +36,7 @@ public class RegisterUserTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Registrar_Usuario_Com_Sucesso()
+    public async Task Deveria_registrar_usuario_com_sucesso()
     {
         // Arrange
         var hashedPassword = "hashed_password";
@@ -63,7 +63,7 @@ public class RegisterUserTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Username_Ja_Existe()
+    public async Task Deveria_retornar_erro_quando_username_ja_existe()
     {
         // Arrange
         var existingUser = User.Create("Existing User", Command.Username, "password").Value;
@@ -84,7 +84,7 @@ public class RegisterUserTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Nome_Vazio()
+    public async Task Deveria_retornar_erro_quando_nome_vazio()
     {
         _userRepositoryMock.GetByUsername(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((User?)null);
         _hashServiceMock.Hash(Arg.Any<string>()).Returns("hash");
@@ -97,7 +97,7 @@ public class RegisterUserTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Username_Vazio()
+    public async Task Deveria_retornar_erro_quando_username_vazio()
     {
         _userRepositoryMock.GetByUsername(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((User?)null);
         _hashServiceMock.Hash(Arg.Any<string>()).Returns("hash");
@@ -109,4 +109,3 @@ public class RegisterUserTests
         await _userRepositoryMock.DidNotReceive().Add(Arg.Any<User>(), Arg.Any<CancellationToken>());
     }
 }
-
