@@ -4,7 +4,7 @@ services:
     container_name: ChatApp.Api
     build:
       context: .
-      dockerfile: src/ChatApp.Api/Dockerfile
+      dockerfile: app/src/ChatApp.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
