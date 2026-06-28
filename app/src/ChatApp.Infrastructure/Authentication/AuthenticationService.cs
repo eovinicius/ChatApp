@@ -34,7 +34,7 @@ public class AuthenticationService : IAuthenticationService
                 ?? throw new InvalidOperationException("JwtSettings:Issuer não configurado"),
             Audience = _configuration.GetSection("JwtSettings:Audience").Value
                 ?? throw new InvalidOperationException("JwtSettings:Audience não configurado"),
-            Expires = DateTime.UtcNow.AddHours(24),
+            Expires = DateTime.UtcNow.AddMinutes(15),
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("JwtSettings:SecretKey").Value
                     ?? throw new InvalidOperationException("JwtSettings:SecretKey não configurado"))),
