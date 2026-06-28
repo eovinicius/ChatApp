@@ -33,7 +33,7 @@ Excedido o limite: **HTTP 429 Too Many Requests**.
 {
   "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
   "title": "ChatRoom.NotFound",
-  "status": 404,
+  "status": 400,
   "detail": "Sala de chat não encontrada.",
   "traceId": "00-abc123-def456-00"
 }
@@ -80,7 +80,7 @@ POST /api/user/register
 | 400 | `User.EmptyName` | Nome não informado |
 | 400 | `User.EmptyUsername` | Username não informado |
 | 400 | `User.EmptyPassword` | Senha não informada |
-| 409 | `User.UsernameAlreadyTaken` | Username já em uso |
+| 400 | `User.UsernameAlreadyTaken` | Username já em uso |
 
 ---
 
@@ -109,8 +109,8 @@ POST /api/user/login
 
 | HTTP | Error Code | Descrição |
 |------|------------|-----------|
-| 401 | `User.InvalidCredentials` | Username ou senha inválidos |
-| 404 | `User.NotFound` | Usuário não encontrado |
+| 400 | `User.InvalidCredentials` | Username ou senha inválidos |
+| 400 | `User.NotFound` | Usuário não encontrado |
 
 ---
 
@@ -139,7 +139,10 @@ POST /api/chatroom
 | `isPrivate` | `bool` | Obrigatório |
 | `password` | `string?` | Obrigatório se `isPrivate = true` |
 
-**Resposta 200:** `"<roomId>"` (Guid como string)
+**Resposta 201:**
+```json
+{ "id": "<roomId>" }
+```
 
 **Erros:**
 
@@ -177,7 +180,7 @@ POST /api/chatroom/{roomId}/join
 
 | HTTP | Error Code | Descrição |
 |------|------------|-----------|
-| 404 | `ChatRoom.NotFound` | Sala não encontrada |
+| 400 | `ChatRoom.NotFound` | Sala não encontrada |
 | 400 | `ChatRoom.AlreadyMember` | Usuário já é membro |
 | 400 | `ChatRoom.RoomFull` | Capacidade máxima atingida (50 membros) |
 | 400 | `ChatRoom.InvalidPassword` | Senha incorreta |
@@ -198,13 +201,13 @@ DELETE /api/chatroom/{roomId}/leave
 |-----------|------|-----------|
 | `roomId` | `Guid` | ID da sala |
 
-**Resposta 200:** Sem body
+**Resposta 204:** Sem body
 
 **Erros:**
 
 | HTTP | Error Code | Descrição |
 |------|------------|-----------|
-| 404 | `ChatRoom.NotFound` | Sala não encontrada |
+| 400 | `ChatRoom.NotFound` | Sala não encontrada |
 | 400 | `ChatRoom.NotMember` | Usuário não é membro da sala |
 
 ---
@@ -264,13 +267,16 @@ POST /api/message
 | `content` | `string` | Texto (type `text`) ou URL do S3 (outros tipos) |
 | `contentType` | `string` | `text`, `image`, `audio`, `video` |
 
-**Resposta 200:** `"<messageId>"` (Guid como string)
+**Resposta 201:**
+```json
+{ "id": "<messageId>" }
+```
 
 **Erros:**
 
 | HTTP | Error Code | Descrição |
 |------|------------|-----------|
-| 404 | `ChatRoom.NotFound` | Sala não encontrada |
+| 400 | `ChatRoom.NotFound` | Sala não encontrada |
 | 400 | `ChatRoom.NotMember` | Usuário não é membro da sala |
 | 400 | `ChatMessage.EmptyContent` | Conteúdo da mensagem vazio |
 
@@ -300,14 +306,14 @@ PUT /api/message/{messageId}
 
 **Restrições:** Apenas mensagens de tipo `text`. Janela de edição: **1 hora** após o envio.
 
-**Resposta 200:** Sem body
+**Resposta 204:** Sem body
 
 **Erros:**
 
 | HTTP | Error Code | Descrição |
 |------|------------|-----------|
-| 404 | `ChatMessage.NotFound` | Mensagem não encontrada |
-| 403 | `ChatMessage.Unauthorized` | Não é o autor da mensagem |
+| 400 | `ChatMessage.NotFound` | Mensagem não encontrada |
+| 400 | `ChatMessage.Unauthorized` | Não é o autor da mensagem |
 | 400 | `ChatMessage.EditWindowExpired` | Janela de 1h encerrada |
 | 400 | `ChatMessage.NotTextMessage` | Só mensagens de texto podem ser editadas |
 
@@ -328,14 +334,14 @@ DELETE /api/message/{messageId}?roomId={guid}
 
 **Restrições:** Janela de exclusão: **24 horas** após o envio.
 
-**Resposta 200:** Sem body
+**Resposta 204:** Sem body
 
 **Erros:**
 
 | HTTP | Error Code | Descrição |
 |------|------------|-----------|
-| 404 | `ChatMessage.NotFound` | Mensagem não encontrada |
-| 403 | `ChatMessage.Unauthorized` | Não é o autor ou não é membro da sala |
+| 400 | `ChatMessage.NotFound` | Mensagem não encontrada |
+| 400 | `ChatMessage.Unauthorized` | Não é o autor ou não é membro da sala |
 
 ---
 
@@ -359,7 +365,10 @@ POST /api/message/upload
 
 **Tamanho máximo:** 50 MB
 
-**Resposta 200:** URL assinada do S3 (válida por 10 minutos)
+**Resposta 200:**
+```json
+{ "url": "<signed-url>" }
+```
 
 ---
 
