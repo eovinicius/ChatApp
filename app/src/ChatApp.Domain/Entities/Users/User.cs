@@ -1,4 +1,5 @@
 using ChatApp.Domain.Abstractions;
+using ChatApp.Domain.Events;
 
 namespace ChatApp.Domain.Entities.Users;
 
@@ -29,6 +30,8 @@ public sealed class User : AggregateRoot
         if (string.IsNullOrWhiteSpace(password))
             return Result.Failure<User>(UserErrors.EmptyPassword);
 
-        return Result.Success(new User(name, username, password));
+        var user = new User(name, username, password);
+        user.RaiseDomainEvent(new UserRegisteredEvent(user.Id, user.Username));
+        return Result.Success(user);
     }
 }
