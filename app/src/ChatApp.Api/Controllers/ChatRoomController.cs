@@ -5,6 +5,8 @@ using ChatApp.Domain.Abstractions;
 
 using MediatR;
 
+using Asp.Versioning;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -12,7 +14,8 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace ChatApp.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [EnableRateLimiting("chat")]
 public class ChatRoomController : ControllerBase
 {

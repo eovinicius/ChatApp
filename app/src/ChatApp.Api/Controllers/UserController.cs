@@ -6,13 +6,16 @@ using ChatApp.Domain.Abstractions;
 
 using MediatR;
 
+using Asp.Versioning;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace ChatApp.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [EnableRateLimiting("auth")]
 public sealed class UserController : ControllerBase
 {

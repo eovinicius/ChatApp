@@ -17,7 +17,7 @@ public class RoomTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         var token = await RegisterAndLoginAsync();
         var client = CreateAuthenticatedClient(token);
 
-        var response = await client.PostAsJsonAsync("/api/chatroom", new
+        var response = await client.PostAsJsonAsync("/api/v1/chatroom", new
         {
             roomName = "Sala de Testes",
             isPrivate = false
@@ -31,7 +31,7 @@ public class RoomTests(ChatAppFactory factory) : IntegrationTestBase(factory)
     [Fact]
     public async Task CreateRoom_Sem_Token_Deve_Retornar_401()
     {
-        var response = await Client.PostAsJsonAsync("/api/chatroom", new
+        var response = await Client.PostAsJsonAsync("/api/v1/chatroom", new
         {
             roomName = "Sala",
             isPrivate = false
@@ -46,7 +46,7 @@ public class RoomTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         var token = await RegisterAndLoginAsync();
         var client = CreateAuthenticatedClient(token);
 
-        var response = await client.PostAsJsonAsync("/api/chatroom", new
+        var response = await client.PostAsJsonAsync("/api/v1/chatroom", new
         {
             roomName = "   ",
             isPrivate = false
@@ -65,7 +65,7 @@ public class RoomTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         var memberToken = await RegisterAndLoginAsync();
         var memberClient = CreateAuthenticatedClient(memberToken);
 
-        var response = await memberClient.PostAsJsonAsync($"/api/chatroom/{roomId}/join", new { });
+        var response = await memberClient.PostAsJsonAsync($"/api/v1/chatroom/{roomId}/join", new { });
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
@@ -78,7 +78,7 @@ public class RoomTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         var roomId = await CreateRoomAsync(client);
 
         // Tenta entrar novamente (já é membro por ser o criador)
-        var response = await client.PostAsJsonAsync($"/api/chatroom/{roomId}/join", new { });
+        var response = await client.PostAsJsonAsync($"/api/v1/chatroom/{roomId}/join", new { });
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -90,7 +90,7 @@ public class RoomTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         var client = CreateAuthenticatedClient(token);
         var roomId = await CreateRoomAsync(client);
 
-        var response = await client.DeleteAsync($"/api/chatroom/{roomId}/leave");
+        var response = await client.DeleteAsync($"/api/v1/chatroom/{roomId}/leave");
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }

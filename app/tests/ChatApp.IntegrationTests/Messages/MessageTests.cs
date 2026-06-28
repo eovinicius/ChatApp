@@ -17,7 +17,7 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         var client = CreateAuthenticatedClient(token);
         var roomId = await CreateRoomAsync(client);
 
-        var response = await client.PostAsJsonAsync("/api/message", new
+        var response = await client.PostAsJsonAsync("/api/v1/message", new
         {
             roomId,
             content = "Olá, mundo!",
@@ -32,7 +32,7 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
     [Fact]
     public async Task SendMessage_Sem_Autenticacao_Deve_Retornar_401()
     {
-        var response = await Client.PostAsJsonAsync("/api/message", new
+        var response = await Client.PostAsJsonAsync("/api/v1/message", new
         {
             roomId = Guid.NewGuid(),
             content = "Olá",
@@ -52,7 +52,7 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         var outsiderToken = await RegisterAndLoginAsync();
         var outsiderClient = CreateAuthenticatedClient(outsiderToken);
 
-        var response = await outsiderClient.PostAsJsonAsync("/api/message", new
+        var response = await outsiderClient.PostAsJsonAsync("/api/v1/message", new
         {
             roomId,
             content = "Não devia entrar",
@@ -70,7 +70,7 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         var roomId = await CreateRoomAsync(client);
         var messageId = await SendMessageAsync(client, roomId);
 
-        var response = await client.PutAsJsonAsync($"/api/message/{messageId}", new
+        var response = await client.PutAsJsonAsync($"/api/v1/message/{messageId}", new
         {
             roomId,
             content = "Mensagem editada"
@@ -89,9 +89,9 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
 
         var otherToken = await RegisterAndLoginAsync();
         var otherClient = CreateAuthenticatedClient(otherToken);
-        await otherClient.PostAsJsonAsync($"/api/chatroom/{roomId}/join", new { });
+        await otherClient.PostAsJsonAsync($"/api/v1/chatroom/{roomId}/join", new { });
 
-        var response = await otherClient.PutAsJsonAsync($"/api/message/{messageId}", new
+        var response = await otherClient.PutAsJsonAsync($"/api/v1/message/{messageId}", new
         {
             roomId,
             content = "Tentativa de edição"
@@ -108,7 +108,7 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         var roomId = await CreateRoomAsync(client);
         var messageId = await SendMessageAsync(client, roomId);
 
-        var response = await client.DeleteAsync($"/api/message/{messageId}?roomId={roomId}");
+        var response = await client.DeleteAsync($"/api/v1/message/{messageId}?roomId={roomId}");
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
@@ -122,7 +122,7 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         await SendMessageAsync(client, roomId, "Primeira mensagem");
         await SendMessageAsync(client, roomId, "Segunda mensagem");
 
-        var response = await client.GetAsync($"/api/message?roomId={roomId}");
+        var response = await client.GetAsync($"/api/v1/message?roomId={roomId}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var messages = await response.Content.ReadFromJsonAsync<JsonElement>();
@@ -139,7 +139,7 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         var outsiderToken = await RegisterAndLoginAsync();
         var outsiderClient = CreateAuthenticatedClient(outsiderToken);
 
-        var response = await outsiderClient.GetAsync($"/api/message?roomId={roomId}");
+        var response = await outsiderClient.GetAsync($"/api/v1/message?roomId={roomId}");
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

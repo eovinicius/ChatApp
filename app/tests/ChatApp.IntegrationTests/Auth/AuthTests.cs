@@ -15,7 +15,7 @@ public class AuthTests(ChatAppFactory factory) : IntegrationTestBase(factory)
     {
         var username = $"user_{Guid.NewGuid():N}";
 
-        var response = await Client.PostAsJsonAsync("/api/user/register", new
+        var response = await Client.PostAsJsonAsync("/api/v1/user/register", new
         {
             name = "João Silva",
             username,
@@ -32,14 +32,14 @@ public class AuthTests(ChatAppFactory factory) : IntegrationTestBase(factory)
     {
         var username = $"dup_{Guid.NewGuid():N}";
 
-        await Client.PostAsJsonAsync("/api/user/register", new
+        await Client.PostAsJsonAsync("/api/v1/user/register", new
         {
             name = "Primeiro",
             username,
             password = "Senha@123"
         });
 
-        var response = await Client.PostAsJsonAsync("/api/user/register", new
+        var response = await Client.PostAsJsonAsync("/api/v1/user/register", new
         {
             name = "Segundo",
             username,
@@ -53,14 +53,14 @@ public class AuthTests(ChatAppFactory factory) : IntegrationTestBase(factory)
     public async Task Login_Com_Credenciais_Validas_Deve_Retornar_200_Com_Token()
     {
         var username = $"login_{Guid.NewGuid():N}";
-        await Client.PostAsJsonAsync("/api/user/register", new
+        await Client.PostAsJsonAsync("/api/v1/user/register", new
         {
             name = "Usuário Login",
             username,
             password = "Senha@123"
         });
 
-        var response = await Client.PostAsJsonAsync("/api/user/login", new
+        var response = await Client.PostAsJsonAsync("/api/v1/user/login", new
         {
             username,
             password = "Senha@123"
@@ -75,14 +75,14 @@ public class AuthTests(ChatAppFactory factory) : IntegrationTestBase(factory)
     public async Task Login_Com_Senha_Errada_Deve_Retornar_400()
     {
         var username = $"wrongpwd_{Guid.NewGuid():N}";
-        await Client.PostAsJsonAsync("/api/user/register", new
+        await Client.PostAsJsonAsync("/api/v1/user/register", new
         {
             name = "Usuário",
             username,
             password = "Senha@123"
         });
 
-        var response = await Client.PostAsJsonAsync("/api/user/login", new
+        var response = await Client.PostAsJsonAsync("/api/v1/user/login", new
         {
             username,
             password = "SenhaErrada"
@@ -94,7 +94,7 @@ public class AuthTests(ChatAppFactory factory) : IntegrationTestBase(factory)
     [Fact]
     public async Task Login_Com_Usuario_Inexistente_Deve_Retornar_400()
     {
-        var response = await Client.PostAsJsonAsync("/api/user/login", new
+        var response = await Client.PostAsJsonAsync("/api/v1/user/login", new
         {
             username = $"naoexiste_{Guid.NewGuid():N}",
             password = "Senha@123"

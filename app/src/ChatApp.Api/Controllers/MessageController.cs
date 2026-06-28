@@ -6,6 +6,8 @@ using ChatApp.Application.UseCases.Messages.UploadFile;
 
 using MediatR;
 
+using Asp.Versioning;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -14,7 +16,8 @@ namespace ChatApp.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 [EnableRateLimiting("chat")]
 public sealed class MessageController : ControllerBase
 {
