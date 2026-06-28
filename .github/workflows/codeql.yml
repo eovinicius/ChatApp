@@ -1,4 +1,4 @@
-name: CI - Build and Test
+name: CodeQL - Análise de Segurança
 
 on:
   push:
@@ -8,12 +8,17 @@ on:
   pull_request:
     branches:
       - main
+  schedule:
+    - cron: "0 0 * * 0"
 
 permissions:
   contents: read
+  security-events: write
+  actions: read
 
 jobs:
-  build-test:
+  analyze:
+    name: Analisar C#
     runs-on: ubuntu-latest
 
     steps:
@@ -33,11 +38,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Restaurar dependências
-        run: dotnet restore ChatApp.sln
+      - name: Inicializar CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+          queries: security-and-quality
 
-      - name: Compilar projeto principal
-        run: dotnet build --no-restore ChatApp.sln
+      - name: Restaurar e compilar para análise
+        run: |
+          dotnet restore ChatApp.sln
+          dotnet build --no-restore ChatApp.sln
 
-      - name: Executar testes
-        run: dotnet test --no-build --no-restore ChatApp.sln
+      - name: Executar análise CodeQL
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:csharp"

@@ -9,7 +9,7 @@ using ChatApp.Domain.Repositories;
 
 namespace ChatApp.Application.UseCases.Rooms.JoinRoom;
 
-public sealed class JoinRoomCommandHanlder : ICommandHandler<JoinRoomCommand>
+public sealed class JoinRoomCommandHandler : ICommandHandler<JoinRoomCommand>
 {
     private readonly IChatRoomRepository _chatRoomRepository;
     private readonly IUserRepository _userRepository;
@@ -18,7 +18,7 @@ public sealed class JoinRoomCommandHanlder : ICommandHandler<JoinRoomCommand>
     private readonly IChatHub _chatHub;
     private readonly IHashService _hashService;
 
-    public JoinRoomCommandHanlder(
+    public JoinRoomCommandHandler(
         IChatRoomRepository chatRoomRepository,
         IUserContext userContext,
         IUserRepository userRepository,

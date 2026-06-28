@@ -1,0 +1,58 @@
+name: Bug Report
+description: Reporte um bug ou comportamento inesperado na API
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por reportar! Preencha as informações abaixo para nos ajudar a reproduzir o problema.
+
+  - type: input
+    id: version
+    attributes:
+      label: Versão
+      description: Commit SHA ou tag de release onde o bug foi encontrado.
+      placeholder: "ex: abc1234 ou v1.2.0"
+    validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição do problema
+      description: Descrição clara e concisa do bug.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passos para reproduzir
+      placeholder: |
+        1. Faça POST em '/api/rooms' com payload '...'
+        2. Observe a resposta '...'
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento esperado
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Comportamento atual
+      description: Inclua stack traces ou logs relevantes.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto adicional
+      description: Sistema operacional, versão do .NET, configurações relevantes.
+    validations:
+      required: false

@@ -49,7 +49,7 @@ public class SendMessageTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Enviar_Mensagem_Com_Sucesso()
+    public async Task Deveria_enviar_mensagem_com_sucesso()
     {
         // Arrange
         var user = User.Create("John Doe", "username", "password").Value;
@@ -70,7 +70,7 @@ public class SendMessageTests
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Usuario_Nao_Existir()
+    public async Task Deveria_retornar_erro_quando_usuario_nao_existir()
     {
         // Arrange
         _userContext.UserId.Returns(Guid.NewGuid());
@@ -80,14 +80,13 @@ public class SendMessageTests
         var result = await _handler.Handle(Command, CancellationToken.None);
 
         // Assert
-
         result.IsSuccess.Should().BeFalse();
         await _chatMessageRepositoryMock.DidNotReceive().Add(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
         await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Chat_Nao_Existir()
+    public async Task Deveria_retornar_erro_quando_chat_nao_existir()
     {
         // Arrange
         var user = User.Create("John Doe", "username", "password").Value;
@@ -100,14 +99,13 @@ public class SendMessageTests
         var result = await _handler.Handle(Command, CancellationToken.None);
 
         // Assert
-
         result.IsSuccess.Should().BeFalse();
         await _chatMessageRepositoryMock.DidNotReceive().Add(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
         await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Erro_Quando_Usuario_Nao_Estiver_Na_Sala()
+    public async Task Deveria_retornar_erro_quando_usuario_nao_estiver_na_sala()
     {
         // Arrange
         var user = User.Create("George", "username", "password").Value;

@@ -1,4 +1,5 @@
 using ChatApp.Domain.Abstractions;
+using ChatApp.Domain.Events;
 
 namespace ChatApp.Domain.Entities.Messages;
 
@@ -31,7 +32,9 @@ public class ChatMessage : AggregateRoot
         if (contentType == ContentType.Text && string.IsNullOrWhiteSpace(content))
             return Result.Failure<ChatMessage>(ChatMessageErrors.EmptyContent);
 
-        return Result.Success(new ChatMessage(chatRoomId, contentType, content, senderId, sendAt));
+        var message = new ChatMessage(chatRoomId, contentType, content, senderId, sendAt);
+        message.RaiseDomainEvent(new MessageSentEvent(message.Id, chatRoomId, senderId));
+        return Result.Success(message);
     }
 
     public bool CanBeDeletedBy(Guid userId, Guid roomId, DateTime utcNow)

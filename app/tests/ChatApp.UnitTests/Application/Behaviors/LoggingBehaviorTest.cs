@@ -19,7 +19,7 @@ public class LoggingBehaviorTest
         Substitute.For<ILogger<LoggingBehavior<LoggingTestCommand, Result>>>();
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Resultado_De_Sucesso()
+    public async Task Deveria_retornar_resultado_de_sucesso()
     {
         var behavior = new LoggingBehavior<LoggingTestCommand, Result>(_loggerMock);
         var command = new LoggingTestCommand();
@@ -30,7 +30,7 @@ public class LoggingBehaviorTest
     }
 
     [Fact]
-    public async Task Handle_Deve_Retornar_Resultado_De_Falha()
+    public async Task Deveria_retornar_resultado_de_falha()
     {
         var behavior = new LoggingBehavior<LoggingTestCommand, Result>(_loggerMock);
         var command = new LoggingTestCommand();
@@ -43,7 +43,7 @@ public class LoggingBehaviorTest
     }
 
     [Fact]
-    public async Task Handle_Deve_Propagar_Excecao()
+    public async Task Deveria_propagar_excecao()
     {
         var behavior = new LoggingBehavior<LoggingTestCommand, Result>(_loggerMock);
         var command = new LoggingTestCommand();

@@ -1,0 +1,97 @@
+name: CD - Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI - Build and Test"]
+    types:
+      - completed
+    branches:
+      - main
+      - development
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-dev:
+    name: Deploy → dev
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'development'
+    environment: development
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Configurar credenciais AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login no Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build e push da imagem Docker
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          IMAGE_URI="${ECR_REGISTRY}/chatapp-dev:${IMAGE_TAG}"
+          docker build -t "$IMAGE_URI" -f app/src/ChatApp.Api/Dockerfile .
+          docker push "$IMAGE_URI"
+
+      - name: Deploy no ECS
+        run: |
+          aws ecs update-service \
+            --cluster chatapp-dev \
+            --service chatapp-dev \
+            --force-new-deployment \
+            --region ${{ secrets.AWS_REGION }}
+
+  deploy-prod:
+    name: Deploy → prod
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    environment: production
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Configurar credenciais AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_PROD }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login no Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build e push da imagem Docker
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          IMAGE_URI="${ECR_REGISTRY}/chatapp-prod:${IMAGE_TAG}"
+          docker build -t "$IMAGE_URI" -f app/src/ChatApp.Api/Dockerfile .
+          docker push "$IMAGE_URI"
+
+      - name: Deploy no ECS
+        run: |
+          aws ecs update-service \
+            --cluster chatapp-prod \
+            --service chatapp-prod \
+            --force-new-deployment \
+            --region ${{ secrets.AWS_REGION }}

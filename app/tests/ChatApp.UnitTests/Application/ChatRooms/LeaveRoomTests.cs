@@ -1,4 +1,4 @@
-﻿using ChatApp.Application.Abstractions.Authentication;
+using ChatApp.Application.Abstractions.Authentication;
 using ChatApp.Application.Abstractions.Data;
 using ChatApp.Application.Abstractions.Services;
 using ChatApp.Application.UseCases.Rooms.LeaveRoom;
@@ -24,6 +24,7 @@ public class LeaveRoomTests
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IUserContext _userContextMock;
     private readonly IChatHub _chatHubMock;
+
     public LeaveRoomTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
@@ -39,8 +40,9 @@ public class LeaveRoomTests
             _unitOfWorkMock,
             _chatHubMock);
     }
+
     [Fact]
-    public async Task Deve_remover_usuario_quando_sair_da_sala()
+    public async Task Deveria_remover_usuario_quando_sair_da_sala()
     {
         // Arrange
         var room = ChatRoom.Create("sala", User.Create("John Doe", "username", "password").Value, true, "1234").Value;
@@ -64,7 +66,7 @@ public class LeaveRoomTests
     }
 
     [Fact]
-    public async Task Deve_deletar_sala_quando_ultimo_membro_sair()
+    public async Task Deveria_deletar_sala_quando_ultimo_membro_sair()
     {
         // Arrange
         var ownerMember = User.Create("John Doe", "username", "password").Value;
@@ -86,7 +88,7 @@ public class LeaveRoomTests
     }
 
     [Fact]
-    public async Task Deve_retornar_erro_quando_usuario_nao_existir()
+    public async Task Deveria_retornar_erro_quando_usuario_nao_existir()
     {
         // Arrange
         var user = User.Create("John Doe", "username", "password").Value;
@@ -104,7 +106,7 @@ public class LeaveRoomTests
     }
 
     [Fact]
-    public async Task Deve_retornar_erro_quando_sala_nao_existir()
+    public async Task Deveria_retornar_erro_quando_sala_nao_existir()
     {
         // Arrange
         var user = User.Create("John Doe", "username", "password").Value;

@@ -54,7 +54,7 @@ public class AuthenticationServiceTest
     }
 
     [Fact]
-    public void GenerateToken_Deveria_Expirar_Em_Aproximadamente_1_Hora()
+    public void GenerateToken_Deveria_Expirar_Em_Aproximadamente_15_Minutos()
     {
         var user = User.Create("João Silva", "joao", "hash").Value;
         var service = CreateService();
@@ -63,7 +63,7 @@ public class AuthenticationServiceTest
 
         var handler = new JwtSecurityTokenHandler();
         var jwt = handler.ReadJwtToken(token);
-        jwt.ValidTo.Should().BeCloseTo(DateTime.UtcNow.AddHours(1), TimeSpan.FromSeconds(10));
+        jwt.ValidTo.Should().BeCloseTo(DateTime.UtcNow.AddMinutes(15), TimeSpan.FromSeconds(10));
     }
 
     [Fact]

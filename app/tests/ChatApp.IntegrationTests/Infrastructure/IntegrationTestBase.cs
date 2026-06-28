@@ -27,14 +27,14 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         var id = Interlocked.Increment(ref _userCounter);
         username ??= $"testuser_{id}_{Guid.NewGuid():N}";
 
-        await Client.PostAsJsonAsync("/api/user/register", new
+        await Client.PostAsJsonAsync("/api/v1/user/register", new
         {
             name = $"Test User {id}",
             username,
             password
         });
 
-        var loginResponse = await Client.PostAsJsonAsync("/api/user/login", new { username, password });
+        var loginResponse = await Client.PostAsJsonAsync("/api/v1/user/login", new { username, password });
         loginResponse.EnsureSuccessStatusCode();
 
         var json = await loginResponse.Content.ReadFromJsonAsync<JsonElement>();
@@ -50,7 +50,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
 
     protected async Task<Guid> CreateRoomAsync(HttpClient client, string roomName = "Sala de Teste")
     {
-        var response = await client.PostAsJsonAsync("/api/chatroom", new
+        var response = await client.PostAsJsonAsync("/api/v1/chatroom", new
         {
             roomName,
             isPrivate = false
@@ -63,7 +63,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
 
     protected async Task<Guid> SendMessageAsync(HttpClient client, Guid roomId, string content = "Olá mundo")
     {
-        var response = await client.PostAsJsonAsync("/api/message", new
+        var response = await client.PostAsJsonAsync("/api/v1/message", new
         {
             roomId,
             content,

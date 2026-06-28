@@ -17,7 +17,7 @@ public record PerformanceTestCommand : IRequest<Result>;
 public class PerformanceBehaviorTest
 {
     [Fact]
-    public async Task Handle_Deve_Retornar_Resultado_Para_Requisicao_Rapida()
+    public async Task Deveria_retornar_resultado_para_requisicao_rapida()
     {
         var logger = NullLogger<PerformanceBehavior<PerformanceTestCommand, Result>>.Instance;
         var behavior = new PerformanceBehavior<PerformanceTestCommand, Result>(logger);
@@ -29,7 +29,7 @@ public class PerformanceBehaviorTest
     }
 
     [Fact]
-    public async Task Handle_Deve_Logar_Warning_Para_Requisicao_Lenta()
+    public async Task Deveria_logar_warning_para_requisicao_lenta()
     {
         var loggerMock = Substitute.For<ILogger<PerformanceBehavior<PerformanceTestCommand, Result>>>();
         var behavior = new PerformanceBehavior<PerformanceTestCommand, Result>(loggerMock);

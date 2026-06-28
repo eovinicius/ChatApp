@@ -1,5 +1,6 @@
 ﻿using ChatApp.Domain.Abstractions;
 using ChatApp.Domain.Entities.Users;
+using ChatApp.Domain.Events;
 
 namespace ChatApp.Domain.Entities.ChatRooms;
 
@@ -37,6 +38,7 @@ public sealed class ChatRoom : AggregateRoot
             return Result.Failure<ChatRoom>(ChatRoomErrors.PrivateRoomRequiresPassword);
 
         var room = new ChatRoom(name, user.Id, isPrivate, password);
+        room.RaiseDomainEvent(new RoomCreatedEvent(room.Id, room.Name, room.OwnerId));
         _ = room.Join(user);
 
         return Result.Success(room);

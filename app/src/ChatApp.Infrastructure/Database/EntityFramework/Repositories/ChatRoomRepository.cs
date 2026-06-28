@@ -18,10 +18,10 @@ public class ChatRoomRepository : IChatRoomRepository
         await _dbContext.ChatRooms.AddAsync(chatChatroom, cancellationToken);
     }
 
-    public async Task Delete(ChatRoom chatRoom, CancellationToken cancellationToken = default)
+    public Task Delete(ChatRoom chatRoom, CancellationToken cancellationToken = default)
     {
         _dbContext.ChatRooms.Remove(chatRoom);
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     public async Task<ChatRoom?> GetById(Guid chatRoomId, CancellationToken cancellationToken)
@@ -31,9 +31,9 @@ public class ChatRoomRepository : IChatRoomRepository
             .FirstOrDefaultAsync(x => x.Id == chatRoomId, cancellationToken);
     }
 
-    public async Task Update(ChatRoom chatRoom, CancellationToken cancellationToken = default)
+    public Task Update(ChatRoom chatRoom, CancellationToken cancellationToken = default)
     {
         _dbContext.ChatRooms.Update(chatRoom);
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 }
