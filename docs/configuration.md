@@ -56,6 +56,14 @@
 
 ---
 
+### Cors
+
+| Chave | Obrigatório | Exemplo | Descrição |
+|-------|-------------|---------|-----------|
+| `Cors:AllowedOrigins` | ✅ | `["http://localhost:3000"]` | Lista de origens permitidas pelo middleware CORS. Em produção, use a variável de ambiente `Cors__AllowedOrigins` |
+
+---
+
 ## Desenvolvimento Local com User Secrets
 
 **Nunca commite credenciais no repositório.** Use `dotnet user-secrets` em desenvolvimento:
@@ -113,4 +121,4 @@ Por padrão, a API permite requisições das seguintes origens:
 | `http://localhost:5173` | Vite (React, Vue, Svelte) |
 | `http://localhost:4200` | Angular CLI |
 
-Para adicionar outras origens, edite a política de CORS em `src/ChatApp.Api/Extensions/ApplicationBuilderExtensions.cs`.
+As origens permitidas são lidas em tempo de execução a partir da chave `Cors:AllowedOrigins` no `appsettings.json` (ou no arquivo de ambiente correspondente, como `appsettings.Development.json`). Para adicionar ou remover origens, edite esse array em `src/ChatApp.Api/appsettings.Development.json` (desenvolvimento) ou via variável de ambiente `Cors__AllowedOrigins` em produção.

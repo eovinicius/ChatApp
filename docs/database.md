@@ -53,7 +53,7 @@ erDiagram
 |--------|------|-------------|-----------|
 | `id` | `uuid` | PK | Identificador único |
 | `name` | `varchar(100)` | NOT NULL | Nome de exibição |
-| `username` | `varchar(200)` | NOT NULL, UNIQUE | Nome de login |
+| `username` | `varchar(50)` | NOT NULL, UNIQUE | Nome de login |
 | `password` | `text` | NOT NULL | Hash BCrypt da senha |
 
 ---
@@ -64,7 +64,7 @@ erDiagram
 |--------|------|-------------|-----------|
 | `id` | `uuid` | PK | Identificador único |
 | `name` | `varchar(50)` | NOT NULL | Nome da sala |
-| `password` | `varchar(30)` | — | Hash da senha (vazio se sala pública) |
+| `password` | `varchar(72)` | — | Hash da senha (vazio se sala pública) |
 | `owner_id` | `uuid` | NOT NULL | ID do usuário criador |
 | `is_private` | `boolean` | NOT NULL | Se a sala requer senha para entrar |
 | `created_at` | `timestamptz` | NOT NULL | Data de criação (UTC) |
