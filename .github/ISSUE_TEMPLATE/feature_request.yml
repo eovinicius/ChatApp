@@ -1,0 +1,41 @@
+name: Feature Request
+description: Sugira uma nova funcionalidade ou melhoria para o ChatApp
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado pela sugestão! Descreva a funcionalidade que gostaria de ver.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema a resolver
+      description: Qual limitação ou problema essa funcionalidade aborda?
+      placeholder: "Exemplo: Atualmente não é possível editar mensagens após 1 hora..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solução proposta
+      description: Como você imagina que a funcionalidade funcionaria?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas consideradas
+      description: Outras formas de resolver o problema e por que essa é preferível.
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto adicional
+      description: Links, referências, mockups ou qualquer informação adicional.
+    validations:
+      required: false
