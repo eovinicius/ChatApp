@@ -4,7 +4,9 @@ using ChatApp.Infrastructure.Database.EntityFramework;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using NSubstitute;
 
@@ -41,21 +43,36 @@ public class ChatAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         builder.UseEnvironment("Testing");
 
+        builder.ConfigureAppConfiguration((_, config) =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ConnectionStrings:Database"] = _postgres.GetConnectionString()
+            });
+        });
+
         builder.ConfigureServices(services =>
         {
-            // Replace real DB connection with test container
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ChatAppDbContext>));
-            if (descriptor is not null)
-                services.Remove(descriptor);
+            // Remove all DbContext-related descriptors to ensure test container is used
+            services.RemoveAll<DbContextOptions<ChatAppDbContext>>();
+            services.RemoveAll<DbContextOptions>();
+            services.RemoveAll<ChatAppDbContext>();
+
+            // Also remove any IDbContextOptionsConfiguration<ChatAppDbContext> that might exist
+            var configDescriptors = services
+                .Where(d => d.ServiceType.IsGenericType &&
+                            d.ServiceType.GenericTypeArguments.Length == 1 &&
+                            d.ServiceType.GenericTypeArguments[0] == typeof(ChatAppDbContext) &&
+                            d.ServiceType.Name.Contains("DbContextOptionsConfiguration"))
+                .ToList();
+            foreach (var d in configDescriptors)
+                services.Remove(d);
 
             services.AddDbContext<ChatAppDbContext>(options =>
                 options.UseNpgsql(_postgres.GetConnectionString()));
 
             // Replace S3 with mock to avoid real AWS calls
-            var storageDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IFileStorageService));
-            if (storageDescriptor is not null)
-                services.Remove(storageDescriptor);
-
+            services.RemoveAll<IFileStorageService>();
             services.AddSingleton(FileStorageMock);
         });
     }
