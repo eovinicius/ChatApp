@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CorrelationId" Version="3.0.0" />
+    <PackageReference Include="CorrelationId" Version="3.0.1" />
     <PackageReference Include="Dapper" Version="2.1.79" />
     <PackageReference Include="MediatR" Version="12.5.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
