@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ChatApp.Application.UseCases.Users.RegisterUser;
 
-internal sealed class UserRegisteredEventHandler : IDomainEventHandler<UserRegisteredEvent>
+public sealed class UserRegisteredEventHandler : IDomainEventHandler<UserRegisteredEvent>
 {
     private readonly ILogger<UserRegisteredEventHandler> _logger;
 

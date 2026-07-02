@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ChatApp.Application.UseCases.Messages.SendMessage;
 
-internal sealed class MessageSentEventHandler : IDomainEventHandler<MessageSentEvent>
+public sealed class MessageSentEventHandler : IDomainEventHandler<MessageSentEvent>
 {
     private readonly ILogger<MessageSentEventHandler> _logger;
 

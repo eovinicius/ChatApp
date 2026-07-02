@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ChatApp.Application.UseCases.Rooms.CreateRoom;
 
-internal sealed class RoomCreatedEventHandler : IDomainEventHandler<RoomCreatedEvent>
+public sealed class RoomCreatedEventHandler : IDomainEventHandler<RoomCreatedEvent>
 {
     private readonly ILogger<RoomCreatedEventHandler> _logger;
 
