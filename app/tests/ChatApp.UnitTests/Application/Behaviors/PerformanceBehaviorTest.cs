@@ -37,7 +37,7 @@ public class PerformanceBehaviorTest
 
         var result = await behavior.Handle(command, async ct =>
         {
-            await Task.Delay(550, ct);
+            await Task.Delay(3500, ct);
             return Result.Success();
         }, CancellationToken.None);
 
