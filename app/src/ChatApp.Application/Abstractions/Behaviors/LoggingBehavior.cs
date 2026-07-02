@@ -43,9 +43,9 @@ public class LoggingBehavior<TRequest, TResponse>
             }
             else
             {
-                using (LogContext.PushProperty("Error", result.Error, true))
+                using (LogContext.PushProperty("Warning", result.Error, true))
                 {
-                    _logger.LogError("{RequestName} - Request failed in {ElapsedMilliseconds}ms", requestName, sw.ElapsedMilliseconds);
+                    _logger.LogWarning("{RequestName} - Request failed in {ElapsedMilliseconds}ms", requestName, sw.ElapsedMilliseconds);
                 }
             }
 

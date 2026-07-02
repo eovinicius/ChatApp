@@ -10,7 +10,7 @@ public class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
     where TRequest : IRequest<TResponse>
 {
     readonly ILogger<PerformanceBehavior<TRequest, TResponse>> _logger;
-    private const int WARNING_THRESHOLD_MILLISECONDS = 500;
+    private const int WARNING_THRESHOLD_MILLISECONDS = 3000;
 
     public PerformanceBehavior(ILogger<PerformanceBehavior<TRequest, TResponse>> logger)
     {
