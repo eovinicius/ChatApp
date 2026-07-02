@@ -1,8 +1,8 @@
-﻿using MediatR;
+﻿using ChatApp.Application.Abstractions.Clock;
+
+using MediatR;
 
 using Microsoft.Extensions.Logging;
-
-using System.Diagnostics;
 
 namespace ChatApp.Application.Abstractions.Behaviors;
 
@@ -10,11 +10,13 @@ public class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
     where TRequest : IRequest<TResponse>
 {
     readonly ILogger<PerformanceBehavior<TRequest, TResponse>> _logger;
+    readonly IDateTimeProvider _dateTimeProvider;
     private const int WARNING_THRESHOLD_MILLISECONDS = 3000;
 
-    public PerformanceBehavior(ILogger<PerformanceBehavior<TRequest, TResponse>> logger)
+    public PerformanceBehavior(ILogger<PerformanceBehavior<TRequest, TResponse>> logger, IDateTimeProvider dateTimeProvider)
     {
         _logger = logger;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<TResponse> Handle(
@@ -23,7 +25,7 @@ public class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
         CancellationToken cancellationToken
     )
     {
-        var stopwatch = Stopwatch.StartNew();
+        var startedAt = _dateTimeProvider.UtcNow;
 
         try
         {
@@ -31,9 +33,7 @@ public class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
         }
         finally
         {
-            stopwatch.Stop();
-
-            var elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+            var elapsedMilliseconds = (_dateTimeProvider.UtcNow - startedAt).TotalMilliseconds;
 
             if (elapsedMilliseconds > WARNING_THRESHOLD_MILLISECONDS)
             {
