@@ -44,4 +44,16 @@ public class EntityTest
 
         entity.GetDomainEvents().Should().BeEmpty();
     }
+
+    [Fact]
+    public void GetDomainEvents_Deveria_Retornar_Snapshot_Que_Nao_E_Afetado_Por_ClearDomainEvents()
+    {
+        var entity = new TestEntity(Guid.NewGuid());
+        entity.Raise(new TestDomainEvent());
+
+        var eventsBeforeClear = entity.GetDomainEvents();
+        entity.ClearDomainEvents();
+
+        eventsBeforeClear.Should().ContainSingle();
+    }
 }
