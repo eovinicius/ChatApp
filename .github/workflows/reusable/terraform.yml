@@ -1,0 +1,144 @@
+name: Reusable - Terraform
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Nome do GitHub Environment (protection rules), ex: development, staging, production"
+        required: true
+        type: string
+      label:
+        description: "Nome curto do ambiente para exibição, ex: dev, staging, prod"
+        required: true
+        type: string
+      working-directory:
+        description: "Caminho de infra/environments/<label>"
+        required: true
+        type: string
+      action:
+        description: "plan ou apply"
+        required: true
+        type: string
+    secrets:
+      aws-role-arn:
+        required: true
+      aws-region:
+        required: true
+      jwt-secret-key:
+        required: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: terraform-${{ inputs.label }}
+  cancel-in-progress: false
+
+jobs:
+  terraform:
+    name: ${{ inputs.action == 'plan' && 'Plan' || 'Apply' }} (${{ inputs.label }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.environment }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar credenciais AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.aws-role-arn }}
+          aws-region: ${{ secrets.aws-region }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.6"
+
+      - name: Terraform Format Check
+        if: inputs.action == 'plan'
+        id: fmt
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        if: inputs.action == 'plan'
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform Plan
+        if: inputs.action == 'plan'
+        id: plan
+        run: |
+          terraform plan \
+            -var-file="terraform.tfvars" \
+            -var "jwt_secret_key=${{ secrets.jwt-secret-key }}" \
+            -no-color \
+            -out=tfplan 2>&1 | tee plan_output.txt
+        continue-on-error: true
+
+      - name: Postar resultado no PR
+        if: inputs.action == 'plan' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const planPath = '${{ inputs.working-directory }}/plan_output.txt';
+            const planOutput = fs.existsSync(planPath)
+              ? fs.readFileSync(planPath, 'utf8')
+              : '(output não disponível)';
+
+            const fmt      = '${{ steps.fmt.outcome }}'      === 'success' ? '✅' : '❌';
+            const init     = '${{ steps.init.outcome }}'     === 'success' ? '✅' : '❌';
+            const validate = '${{ steps.validate.outcome }}' === 'success' ? '✅' : '❌';
+            const plan     = '${{ steps.plan.outcome }}'     === 'success' ? '✅' : '❌';
+
+            const body = `#### Terraform Plan — \`${{ inputs.label }}\`
+
+            | Etapa    | Status |
+            |----------|--------|
+            | Format   | ${fmt} |
+            | Init     | ${init} |
+            | Validate | ${validate} |
+            | Plan     | ${plan} |
+
+            <details><summary>Detalhes do Plan</summary>
+
+            \`\`\`terraform
+            ${planOutput.slice(0, 60000)}
+            \`\`\`
+
+            </details>
+
+            *Acionado por: @${{ github.actor }} — \`${{ github.workflow }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
+
+      - name: Falhar se o Plan falhou
+        if: inputs.action == 'plan' && steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        if: inputs.action == 'apply'
+        run: |
+          terraform apply \
+            -var-file="terraform.tfvars" \
+            -var "jwt_secret_key=${{ secrets.jwt-secret-key }}" \
+            -auto-approve \
+            -input=false

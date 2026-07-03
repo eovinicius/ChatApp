@@ -1,0 +1,28 @@
+name: Chat CI
+
+on:
+  push:
+    branches:
+      - main
+      - development
+    paths:
+      - "apps/chat-service/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "apps/chat-service/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chat-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    uses: ./.github/workflows/reusable/dotnet-ci.yml
+    with:
+      working-directory: apps/chat-service
+      solution-file: Chat.sln

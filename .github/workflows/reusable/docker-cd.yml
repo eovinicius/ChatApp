@@ -1,0 +1,83 @@
+name: Reusable - Docker Build e Deploy ECS
+
+on:
+  workflow_call:
+    inputs:
+      dockerfile:
+        description: "Caminho do Dockerfile, relativo à raiz do repo"
+        required: true
+        type: string
+      context:
+        description: "Contexto de build do Docker, relativo à raiz do repo"
+        required: false
+        type: string
+        default: "."
+      ecr-repository:
+        description: "Nome do repositório no Amazon ECR"
+        required: true
+        type: string
+      ecs-cluster:
+        description: "Nome do cluster ECS"
+        required: true
+        type: string
+      ecs-service:
+        description: "Nome do serviço ECS"
+        required: true
+        type: string
+      environment-name:
+        description: "Nome do GitHub Environment (protection rules + secrets)"
+        required: true
+        type: string
+      sha:
+        description: "SHA do commit a fazer checkout e usar como tag da imagem"
+        required: true
+        type: string
+    secrets:
+      aws-role-arn:
+        required: true
+      aws-region:
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy → ${{ inputs.environment-name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ inputs.environment-name }}
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha }}
+
+      - name: Configurar credenciais AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.aws-role-arn }}
+          aws-region: ${{ secrets.aws-region }}
+
+      - name: Login no Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build e push da imagem Docker
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ inputs.sha }}
+        run: |
+          IMAGE_URI="${ECR_REGISTRY}/${{ inputs.ecr-repository }}:${IMAGE_TAG}"
+          docker build -t "$IMAGE_URI" -f "${{ inputs.dockerfile }}" "${{ inputs.context }}"
+          docker push "$IMAGE_URI"
+
+      - name: Deploy no ECS
+        run: |
+          aws ecs update-service \
+            --cluster ${{ inputs.ecs-cluster }} \
+            --service ${{ inputs.ecs-service }} \
+            --force-new-deployment \
+            --region ${{ secrets.aws-region }}

@@ -6,6 +6,17 @@ on:
       - main
     paths:
       - "infra/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Ambiente para aplicar manualmente"
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+        default: prod
 
 permissions:
   contents: read
@@ -13,35 +24,35 @@ permissions:
 
 jobs:
   apply:
-    name: Apply (prod)
-    runs-on: ubuntu-latest
-    environment: production
-    defaults:
-      run:
-        working-directory: infra/environments/prod
-
-    steps:
-      - name: Checkout do código
-        uses: actions/checkout@v4
-
-      - name: Configurar credenciais AWS (OIDC)
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN_PROD }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "~> 1.6"
-
-      - name: Terraform Init
-        run: terraform init -input=false
-
-      - name: Terraform Apply
-        run: |
-          terraform apply \
-            -var-file="terraform.tfvars" \
-            -var "jwt_secret_key=${{ secrets.TF_VAR_JWT_SECRET_KEY }}" \
-            -auto-approve \
-            -input=false
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # auto: true roda automaticamente em todo push em main que toque infra/**
+          # (comportamento idêntico ao atual). Dev/staging só aplicam via
+          # "Run workflow" até existir uma branch/gatilho de auto-apply para eles.
+          - label: prod
+            environment: production
+            role-secret: AWS_ROLE_ARN_PROD
+            auto: true
+          - label: dev
+            environment: development
+            role-secret: AWS_ROLE_ARN_DEV
+            auto: false
+          - label: staging
+            environment: staging
+            role-secret: AWS_ROLE_ARN_STAGING
+            auto: false
+    if: >
+      (github.event_name == 'push' && matrix.auto == true) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == matrix.label)
+    uses: ./.github/workflows/reusable/terraform.yml
+    with:
+      environment: ${{ matrix.environment }}
+      label: ${{ matrix.label }}
+      working-directory: infra/environments/${{ matrix.label }}
+      action: apply
+    secrets:
+      aws-role-arn: ${{ secrets[matrix.role-secret] }}
+      aws-region: ${{ secrets.AWS_REGION }}
+      jwt-secret-key: ${{ secrets.TF_VAR_JWT_SECRET_KEY }}

@@ -2,7 +2,7 @@
   <h1>💬 Chat</h1>
   <p>API de chat em tempo real construída com .NET 10 e Clean Architecture</p>
 
-  [![CI](https://github.com/eovinicius/ChatApp/actions/workflows/ci.yml/badge.svg)](https://github.com/eovinicius/ChatApp/actions/workflows/ci.yml)
+  [![CI](https://github.com/eovinicius/ChatApp/actions/workflows/chat-ci.yml/badge.svg)](https://github.com/eovinicius/ChatApp/actions/workflows/chat-ci.yml)
   ![.NET](https://img.shields.io/badge/.NET-10-512BD4)
   ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)
   ![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-green)

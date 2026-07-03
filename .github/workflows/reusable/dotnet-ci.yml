@@ -1,0 +1,55 @@
+name: Reusable - .NET CI
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: "Diretório raiz do serviço (contém a .sln)"
+        required: true
+        type: string
+      solution-file:
+        description: "Nome do arquivo .sln, relativo a working-directory"
+        required: true
+        type: string
+      dotnet-version:
+        required: false
+        type: string
+        default: "10.x"
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Build e Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+
+      - name: Cache de dependências NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restaurar dependências
+        run: dotnet restore ${{ inputs.solution-file }}
+
+      - name: Compilar projeto principal
+        run: dotnet build --no-restore ${{ inputs.solution-file }}
+
+      - name: Executar testes
+        run: dotnet test --no-build --no-restore ${{ inputs.solution-file }}

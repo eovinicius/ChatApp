@@ -16,13 +16,28 @@ permissions:
   security-events: write
   actions: read
 
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analyze:
-    name: Analisar C#
+    name: Analisar ${{ matrix.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # Para adicionar um novo serviço do monorepo à análise, basta incluir
+        # mais uma entrada aqui (ex: notification-service / Notification.sln).
+        include:
+          - name: chat-service
+            working-directory: apps/chat-service
+            solution: Chat.sln
+            language: csharp
     defaults:
       run:
-        working-directory: apps/chat-service
+        working-directory: ${{ matrix.working-directory }}
 
     steps:
       - name: Checkout do código
@@ -44,15 +59,15 @@ jobs:
       - name: Inicializar CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: csharp
+          languages: ${{ matrix.language }}
           queries: security-and-quality
 
       - name: Restaurar e compilar para análise
         run: |
-          dotnet restore Chat.sln
-          dotnet build --no-restore Chat.sln
+          dotnet restore ${{ matrix.solution }}
+          dotnet build --no-restore ${{ matrix.solution }}
 
       - name: Executar análise CodeQL
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:csharp"
+          category: "/language:${{ matrix.language }}"
