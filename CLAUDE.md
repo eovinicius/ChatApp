@@ -14,24 +14,24 @@ dotnet test
 dotnet test --filter "FullyQualifiedName~CreateRoomTests"
 
 # Run the API (Swagger at http://localhost:5110/swagger/index.html)
-dotnet run --project .\app\src\ChatApp.Api\ChatApp.Api.csproj
+dotnet run --project .\apps\chat-service\src\Chat.Api\Chat.Api.csproj
 
 # Start only the database (required before running locally)
-docker-compose up -d --build chatapp-db
+docker-compose up -d --build chat-db
 
 # EF migrations
-dotnet ef migrations add <MigrationName> --project .\app\src\ChatApp.Infrastructure\ChatApp.Infrastructure.csproj --startup-project .\app\src\ChatApp.Api\
-dotnet ef database update --project .\app\src\ChatApp.Infrastructure\ --startup-project .\app\src\ChatApp.Api\
+dotnet ef migrations add <MigrationName> --project .\apps\chat-service\src\Chat.Infrastructure\Chat.Infrastructure.csproj --startup-project .\apps\chat-service\src\Chat.Api\
+dotnet ef database update --project .\apps\chat-service\src\Chat.Infrastructure\ --startup-project .\apps\chat-service\src\Chat.Api\
 ```
 
 ## Architecture
 
 Clean Architecture with four layers. Dependencies flow inward: **API → Application → Domain** (Infrastructure implements Application interfaces).
 
-- **Domain** (`ChatApp.Domain`): Entities, value objects, repository interfaces. No framework dependencies. Entities use private setters and static factory methods (`ChatRoom.Create()`, `ChatMessage.Create()`).
-- **Application** (`ChatApp.Application`): CQRS use cases via MediatR, organized under `UseCases/{Feature}/{UseCase}/`. Defines abstractions (`IUserRepository`, `IChatHub`, etc.) that Infrastructure implements.
-- **Infrastructure** (`ChatApp.Infrastructure`): EF Core + PostgreSQL, SignalR hub, JWT auth, AWS S3 file storage, rate limiting. Registered in `DependencyInjection.cs`.
-- **API** (`ChatApp.Api`): Controllers dispatch commands/queries via `ISender`. Middlewares: exception handling, IP logging, request context logging (correlation ID).
+- **Domain** (`Chat.Domain`): Entities, value objects, repository interfaces. No framework dependencies. Entities use private setters and static factory methods (`ChatRoom.Create()`, `ChatMessage.Create()`).
+- **Application** (`Chat.Application`): CQRS use cases via MediatR, organized under `UseCases/{Feature}/{UseCase}/`. Defines abstractions (`IUserRepository`, `IChatHub`, etc.) that Infrastructure implements.
+- **Infrastructure** (`Chat.Infrastructure`): EF Core + PostgreSQL, SignalR hub, JWT auth, AWS S3 file storage, rate limiting. Registered in `DependencyInjection.cs`.
+- **API** (`Chat.Api`): Controllers dispatch commands/queries via `ISender`. Middlewares: exception handling, IP logging, request context logging (correlation ID).
 
 ## Key Patterns
 
@@ -51,7 +51,7 @@ SignalR hub at `/chatHub`. The `IChatHub` interface (in Application) is implemen
 
 ## Testing
 
-Unit tests only (`ChatApp.UnitTests`). Stack: **xUnit + NSubstitute + FluentAssertions**. Test names are written in Portuguese. Tests mock all dependencies via `NSubstitute.Substitute.For<T>()` and instantiate the handler directly — no DI container in tests.
+Unit tests only (`Chat.UnitTests`). Stack: **xUnit + NSubstitute + FluentAssertions**. Test names are written in Portuguese. Tests mock all dependencies via `NSubstitute.Substitute.For<T>()` and instantiate the handler directly — no DI container in tests.
 
 ## Configuration
 

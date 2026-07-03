@@ -2,17 +2,17 @@
 
 ## Visão Geral
 
-ChatApp segue o padrão **Clean Architecture**, separando o sistema em quatro camadas com dependências que sempre apontam para o centro. Nenhuma camada interna conhece detalhes das camadas externas.
+Chat segue o padrão **Clean Architecture**, separando o sistema em quatro camadas com dependências que sempre apontam para o centro. Nenhuma camada interna conhece detalhes das camadas externas.
 
 ```mermaid
 graph TD
     subgraph Externas
-        API["ChatApp.Api\nControllers · Middlewares · Hubs"]
-        Infra["ChatApp.Infrastructure\nEF Core · SignalR · JWT · S3"]
+        API["Chat.Api\nControllers · Middlewares · Hubs"]
+        Infra["Chat.Infrastructure\nEF Core · SignalR · JWT · S3"]
     end
     subgraph Internas
-        App["ChatApp.Application\nUse Cases · CQRS · Abstrações"]
-        Domain["ChatApp.Domain\nEntidades · Value Objects · Erros"]
+        App["Chat.Application\nUse Cases · CQRS · Abstrações"]
+        Domain["Chat.Domain\nEntidades · Value Objects · Erros"]
     end
 
     API -->|"ISender (MediatR)"| App
@@ -25,10 +25,10 @@ graph TD
 
 | Camada | Projeto | Responsabilidade |
 |--------|---------|-----------------|
-| **Domain** | `ChatApp.Domain` | Entidades, value objects, interfaces de repositórios. Sem dependências de framework. |
-| **Application** | `ChatApp.Application` | Use cases via CQRS (MediatR). Define abstrações (`IUserRepository`, `IChatHub`, etc.) que Infrastructure implementa. |
-| **Infrastructure** | `ChatApp.Infrastructure` | EF Core + PostgreSQL, SignalR, JWT, AWS S3. Implementações concretas das abstrações de Application. |
-| **API** | `ChatApp.Api` | Controllers, middlewares, configuração. Despacha comandos/queries via `ISender`. |
+| **Domain** | `Chat.Domain` | Entidades, value objects, interfaces de repositórios. Sem dependências de framework. |
+| **Application** | `Chat.Application` | Use cases via CQRS (MediatR). Define abstrações (`IUserRepository`, `IChatHub`, etc.) que Infrastructure implementa. |
+| **Infrastructure** | `Chat.Infrastructure` | EF Core + PostgreSQL, SignalR, JWT, AWS S3. Implementações concretas das abstrações de Application. |
+| **API** | `Chat.Api` | Controllers, middlewares, configuração. Despacha comandos/queries via `ISender`. |
 
 ## Fluxo de uma Request HTTP
 

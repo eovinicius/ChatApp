@@ -14,12 +14,13 @@
 ```bash
 git clone https://github.com/eovinicius/ChatApp.git
 cd ChatApp
+cd apps/chat-service
 ```
 
 ### 2. Suba o banco de dados
 
 ```bash
-docker-compose up -d --build chatapp-db
+docker-compose up -d --build chat-db
 ```
 
 Aguarde o PostgreSQL subir. Verifique com `docker-compose ps`.
@@ -27,17 +28,17 @@ Aguarde o PostgreSQL subir. Verifique com `docker-compose ps`.
 ### 3. Configure as secrets
 
 ```bash
-dotnet user-secrets init --project .\src\ChatApp.Api\
+dotnet user-secrets init --project .\src\Chat.Api\
 
 dotnet user-secrets set "ConnectionStrings:Database" \
-  "Host=localhost;Port=5432;Database=chatapp;Username=postgres;Password=postgres" \
-  --project .\src\ChatApp.Api\
+  "Host=localhost;Port=5432;Database=chat;Username=postgres;Password=postgres" \
+  --project .\src\Chat.Api\
 
 dotnet user-secrets set "JwtSettings:SecretKey" "dev-secret-key-at-least-32-characters!!" \
-  --project .\src\ChatApp.Api\
+  --project .\src\Chat.Api\
 
-dotnet user-secrets set "JwtSettings:Issuer" "ChatApp" --project .\src\ChatApp.Api\
-dotnet user-secrets set "JwtSettings:Audience" "ChatApp" --project .\src\ChatApp.Api\
+dotnet user-secrets set "JwtSettings:Issuer" "Chat" --project .\src\Chat.Api\
+dotnet user-secrets set "JwtSettings:Audience" "Chat" --project .\src\Chat.Api\
 ```
 
 > Para funcionalidade de upload de mídia, configure também `AwsSettings:S3:*`. Veja [configuration.md](configuration.md).
@@ -46,14 +47,14 @@ dotnet user-secrets set "JwtSettings:Audience" "ChatApp" --project .\src\ChatApp
 
 ```bash
 dotnet ef database update \
-  --project .\src\ChatApp.Infrastructure\ \
-  --startup-project .\src\ChatApp.Api\
+  --project .\src\Chat.Infrastructure\ \
+  --startup-project .\src\Chat.Api\
 ```
 
 ### 5. Rode a API
 
 ```bash
-dotnet run --project .\src\ChatApp.Api\ChatApp.Api.csproj
+dotnet run --project .\src\Chat.Api\Chat.Api.csproj
 ```
 
 Swagger disponível em **http://localhost:5110/swagger/index.html**
@@ -76,28 +77,28 @@ dotnet test
 dotnet test --filter "FullyQualifiedName~CreateRoomTests"
 
 # Apenas unit tests
-dotnet test test/ChatApp.UnitTests/
+dotnet test tests/Chat.UnitTests/
 
 # Apenas integration tests
-dotnet test test/ChatApp.IntegrationTests/
+dotnet test tests/Chat.IntegrationTests/
 
 # Adicionar nova migration
 dotnet ef migrations add <NomeDaMigration> \
-  --project .\src\ChatApp.Infrastructure\ \
-  --startup-project .\src\ChatApp.Api\
+  --project .\src\Chat.Infrastructure\ \
+  --startup-project .\src\Chat.Api\
 
 # Aplicar migrations pendentes
 dotnet ef database update \
-  --project .\src\ChatApp.Infrastructure\ \
-  --startup-project .\src\ChatApp.Api\
+  --project .\src\Chat.Infrastructure\ \
+  --startup-project .\src\Chat.Api\
 
 # Remover última migration (apenas se não aplicada)
 dotnet ef migrations remove \
-  --project .\src\ChatApp.Infrastructure\ \
-  --startup-project .\src\ChatApp.Api\
+  --project .\src\Chat.Infrastructure\ \
+  --startup-project .\src\Chat.Api\
 
 # Subir apenas o banco
-docker-compose up -d --build chatapp-db
+docker-compose up -d --build chat-db
 
 # Limpar containers e volumes do Docker
 docker system prune -a --volumes
@@ -116,7 +117,7 @@ docker system prune -a --volumes
 | **FluentAssertions** | Assertions legíveis |
 | **WebApplicationFactory** | Integration tests com servidor real |
 
-### Unit Tests (`test/ChatApp.UnitTests/`)
+### Unit Tests (`tests/Chat.UnitTests/`)
 
 Nenhum container de DI — todas as dependências são mockadas via `NSubstitute.Substitute.For<T>()`. Os handlers são instanciados diretamente.
 
@@ -143,7 +144,7 @@ public async Task DeveCriarSalaDeChatComSucesso()
 }
 ```
 
-### Integration Tests (`test/ChatApp.IntegrationTests/`)
+### Integration Tests (`tests/Chat.IntegrationTests/`)
 
 Usam `WebApplicationFactory` com PostgreSQL real. Herdam de `IntegrationTestBase`.
 
@@ -158,7 +159,7 @@ Siga o padrão estabelecido no projeto:
 ### 1. Crie a pasta e os arquivos
 
 ```
-src/ChatApp.Application/UseCases/{Feature}/{UseCaseName}/
+src/Chat.Application/UseCases/{Feature}/{UseCaseName}/
 ├── {UseCaseName}Command.cs        ← ou Query.cs
 └── {UseCaseName}CommandHandler.cs ← ou QueryHandler.cs
 ```

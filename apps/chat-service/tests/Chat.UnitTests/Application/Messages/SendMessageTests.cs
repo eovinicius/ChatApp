@@ -1,0 +1,126 @@
+using Chat.Application.Abstractions.Authentication;
+using Chat.Application.Abstractions.Clock;
+using Chat.Application.Abstractions.Data;
+using Chat.Application.UseCases.Messages.SendMessage;
+using Chat.Domain.Entities.ChatRooms;
+using Chat.Domain.Entities.Messages;
+using Chat.Domain.Entities.Users;
+using Chat.Domain.Repositories;
+
+using FluentAssertions;
+
+using NSubstitute;
+
+
+namespace Chat.UnitTests.Application.Messages;
+
+public class SendMessageTests
+{
+    private static readonly SendMessageCommand Command = new(
+        Guid.NewGuid(),
+        "Hello, world!",
+        "Text");
+
+    private readonly SendMessageCommandHandler _handler;
+    private readonly IUserRepository _userRepositoryMock;
+    private readonly IUserContext _userContext;
+    private readonly IChatRoomRepository _chatRoomRepositoryMock;
+    private readonly IChatMessageRepository _chatMessageRepositoryMock;
+    private readonly IUnitOfWork _unitOfWorkMock;
+    private readonly IDateTimeProvider _dateTimeProviderMock;
+
+    public SendMessageTests()
+    {
+        _userRepositoryMock = Substitute.For<IUserRepository>();
+        _userContext = Substitute.For<IUserContext>();
+        _chatRoomRepositoryMock = Substitute.For<IChatRoomRepository>();
+        _chatMessageRepositoryMock = Substitute.For<IChatMessageRepository>();
+        _unitOfWorkMock = Substitute.For<IUnitOfWork>();
+        _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
+
+        _handler = new SendMessageCommandHandler(
+            _userRepositoryMock,
+            _userContext,
+            _chatRoomRepositoryMock,
+            _chatMessageRepositoryMock,
+            _unitOfWorkMock,
+            _dateTimeProviderMock
+        );
+    }
+
+    [Fact]
+    public async Task Deveria_enviar_mensagem_com_sucesso()
+    {
+        // Arrange
+        var user = User.Create("John Doe", "username", "password").Value;
+        var room = ChatRoom.Create("sala", user, false).Value;
+
+        _userContext.UserId.Returns(user.Id);
+        _dateTimeProviderMock.UtcNow.Returns(DateTime.UtcNow);
+        _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+        _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(room);
+
+        // Act
+        var result = await _handler.Handle(Command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        await _chatMessageRepositoryMock.Received(1).Add(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1).Commit(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Deveria_retornar_erro_quando_usuario_nao_existir()
+    {
+        // Arrange
+        _userContext.UserId.Returns(Guid.NewGuid());
+        _userRepositoryMock.GetById(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns((User?)null);
+
+        // Act
+        var result = await _handler.Handle(Command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        await _chatMessageRepositoryMock.DidNotReceive().Add(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Deveria_retornar_erro_quando_chat_nao_existir()
+    {
+        // Arrange
+        var user = User.Create("John Doe", "username", "password").Value;
+
+        _userContext.UserId.Returns(user.Id);
+        _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+        _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns((ChatRoom?)null);
+
+        // Act
+        var result = await _handler.Handle(Command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        await _chatMessageRepositoryMock.DidNotReceive().Add(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Deveria_retornar_erro_quando_usuario_nao_estiver_na_sala()
+    {
+        // Arrange
+        var user = User.Create("George", "username", "password").Value;
+        var room = ChatRoom.Create("sala", User.Create("John Doe", "username", "password").Value, false).Value;
+
+        _userContext.UserId.Returns(user.Id);
+        _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+        _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(room);
+
+        // Act
+        var result = await _handler.Handle(Command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        await _chatMessageRepositoryMock.DidNotReceive().Add(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
+    }
+}

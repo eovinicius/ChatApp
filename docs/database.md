@@ -109,4 +109,4 @@ Tabela de junção entre `users` e `chat_rooms` — registra quem pertence a qua
 
 ## Migrações
 
-As migrações são gerenciadas pelo Entity Framework Core e ficam em `src/ChatApp.Infrastructure/Migrations/`. Em ambiente `Development`, são aplicadas automaticamente na inicialização da API via `app.ApplyMigrations()` em `Program.cs`.
+As migrações são gerenciadas pelo Entity Framework Core e ficam em `src/Chat.Infrastructure/Migrations/`. Em ambiente `Development`, são aplicadas automaticamente na inicialização da API via `app.ApplyMigrations()` em `Program.cs`.

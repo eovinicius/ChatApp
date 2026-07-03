@@ -1,5 +1,5 @@
 name: Feature Request
-description: Sugira uma nova funcionalidade ou melhoria para o ChatApp
+description: Sugira uma nova funcionalidade ou melhoria para o Chat
 labels: ["enhancement"]
 body:
   - type: markdown

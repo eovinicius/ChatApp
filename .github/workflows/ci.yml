@@ -15,6 +15,9 @@ permissions:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/chat-service
 
     steps:
       - name: Checkout do código
@@ -34,10 +37,10 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Restaurar dependências
-        run: dotnet restore ChatApp.sln
+        run: dotnet restore Chat.sln
 
       - name: Compilar projeto principal
-        run: dotnet build --no-restore ChatApp.sln
+        run: dotnet build --no-restore Chat.sln
 
       - name: Executar testes
-        run: dotnet test --no-build --no-restore ChatApp.sln
+        run: dotnet test --no-build --no-restore Chat.sln

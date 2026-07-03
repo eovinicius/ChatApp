@@ -5,12 +5,12 @@
 ```json
 {
   "ConnectionStrings": {
-    "Database": "Host=localhost;Port=5432;Database=chatapp;Username=postgres;Password=postgres"
+    "Database": "Host=localhost;Port=5432;Database=chat;Username=postgres;Password=postgres"
   },
   "JwtSettings": {
     "SecretKey": "<sua-chave-secreta-min-32-caracteres>",
-    "Issuer": "ChatApp",
-    "Audience": "ChatApp"
+    "Issuer": "Chat",
+    "Audience": "Chat"
   },
   "AwsSettings": {
     "S3": {
@@ -29,7 +29,7 @@
 
 | Chave | Obrigatório | Exemplo | Descrição |
 |-------|-------------|---------|-----------|
-| `ConnectionStrings:Database` | ✅ | `Host=localhost;Port=5432;Database=chatapp;Username=postgres;Password=postgres` | Connection string PostgreSQL no formato Npgsql |
+| `ConnectionStrings:Database` | ✅ | `Host=localhost;Port=5432;Database=chat;Username=postgres;Password=postgres` | Connection string PostgreSQL no formato Npgsql |
 
 ---
 
@@ -38,8 +38,8 @@
 | Chave | Obrigatório | Exemplo | Descrição |
 |-------|-------------|---------|-----------|
 | `JwtSettings:SecretKey` | ✅ | `minha-chave-secreta-muito-longa` | Chave HMAC-SHA256. Recomendado: mínimo 32 caracteres |
-| `JwtSettings:Issuer` | ✅ | `ChatApp` | Emissor do token JWT (`iss` claim) |
-| `JwtSettings:Audience` | ✅ | `ChatApp` | Audiência do token JWT (`aud` claim) |
+| `JwtSettings:Issuer` | ✅ | `Chat` | Emissor do token JWT (`iss` claim) |
+| `JwtSettings:Audience` | ✅ | `Chat` | Audiência do token JWT (`aud` claim) |
 
 ---
 
@@ -47,7 +47,7 @@
 
 | Chave | Obrigatório | Exemplo | Descrição |
 |-------|-------------|---------|-----------|
-| `AwsSettings:S3:BucketName` | ✅ | `meu-bucket-chatapp` | Nome do bucket S3 para upload de mídia |
+| `AwsSettings:S3:BucketName` | ✅ | `meu-bucket-chat` | Nome do bucket S3 para upload de mídia |
 | `AwsSettings:S3:Region` | ✅ | `us-east-1` | Região AWS onde o bucket está localizado |
 | `AwsSettings:S3:AccessKey` | ❌ | `AKIAIOSFODNN7EXAMPLE` | Access Key ID. Omita se usar IAM Role |
 | `AwsSettings:S3:SecretKey` | ❌ | `wJalrXUtnFEMI/K7MDENG` | Secret Access Key. Omita se usar IAM Role |
@@ -70,24 +70,24 @@
 
 ```bash
 # Habilitar user secrets no projeto (executar uma vez)
-dotnet user-secrets init --project .\src\ChatApp.Api\
+dotnet user-secrets init --project .\src\Chat.Api\
 
 # Configurar as secrets
 dotnet user-secrets set "ConnectionStrings:Database" \
-  "Host=localhost;Port=5432;Database=chatapp;Username=postgres;Password=postgres" \
-  --project .\src\ChatApp.Api\
+  "Host=localhost;Port=5432;Database=chat;Username=postgres;Password=postgres" \
+  --project .\src\Chat.Api\
 
 dotnet user-secrets set "JwtSettings:SecretKey" "dev-secret-key-at-least-32-characters!!" \
-  --project .\src\ChatApp.Api\
+  --project .\src\Chat.Api\
 
-dotnet user-secrets set "JwtSettings:Issuer" "ChatApp" --project .\src\ChatApp.Api\
-dotnet user-secrets set "JwtSettings:Audience" "ChatApp" --project .\src\ChatApp.Api\
+dotnet user-secrets set "JwtSettings:Issuer" "Chat" --project .\src\Chat.Api\
+dotnet user-secrets set "JwtSettings:Audience" "Chat" --project .\src\Chat.Api\
 
 # Para funcionalidade de upload de arquivo (opcional em dev):
-dotnet user-secrets set "AwsSettings:S3:BucketName" "meu-bucket-dev" --project .\src\ChatApp.Api\
-dotnet user-secrets set "AwsSettings:S3:Region" "us-east-1" --project .\src\ChatApp.Api\
-dotnet user-secrets set "AwsSettings:S3:AccessKey" "sua-access-key" --project .\src\ChatApp.Api\
-dotnet user-secrets set "AwsSettings:S3:SecretKey" "sua-secret-key" --project .\src\ChatApp.Api\
+dotnet user-secrets set "AwsSettings:S3:BucketName" "meu-bucket-dev" --project .\src\Chat.Api\
+dotnet user-secrets set "AwsSettings:S3:Region" "us-east-1" --project .\src\Chat.Api\
+dotnet user-secrets set "AwsSettings:S3:AccessKey" "sua-access-key" --project .\src\Chat.Api\
+dotnet user-secrets set "AwsSettings:S3:SecretKey" "sua-secret-key" --project .\src\Chat.Api\
 ```
 
 As user secrets sobrescrevem `appsettings.json` apenas em ambiente `Development`.
@@ -121,4 +121,4 @@ Por padrão, a API permite requisições das seguintes origens:
 | `http://localhost:5173` | Vite (React, Vue, Svelte) |
 | `http://localhost:4200` | Angular CLI |
 
-As origens permitidas são lidas em tempo de execução a partir da chave `Cors:AllowedOrigins` no `appsettings.json` (ou no arquivo de ambiente correspondente, como `appsettings.Development.json`). Para adicionar ou remover origens, edite esse array em `src/ChatApp.Api/appsettings.Development.json` (desenvolvimento) ou via variável de ambiente `Cors__AllowedOrigins` em produção.
+As origens permitidas são lidas em tempo de execução a partir da chave `Cors:AllowedOrigins` no `appsettings.json` (ou no arquivo de ambiente correspondente, como `appsettings.Development.json`). Para adicionar ou remover origens, edite esse array em `src/Chat.Api/appsettings.Development.json` (desenvolvimento) ou via variável de ambiente `Cors__AllowedOrigins` em produção.

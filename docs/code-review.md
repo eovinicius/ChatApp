@@ -1,8 +1,8 @@
-# Code Review: ChatApp — Análise como Tech Lead Sênior
+# Code Review: Chat — Análise como Tech Lead Sênior
 
 ## Contexto
 
-Análise completa do projeto ChatApp (.NET 10, Clean Architecture) cobrindo Domain, Application, Infrastructure, API e testes. Objetivo: identificar bugs, falhas de segurança, violações de design, problemas de qualidade e oportunidades de melhoria, com priorização por impacto e esforço.
+Análise completa do projeto Chat (.NET 10, Clean Architecture) cobrindo Domain, Application, Infrastructure, API e testes. Objetivo: identificar bugs, falhas de segurança, violações de design, problemas de qualidade e oportunidades de melhoria, com priorização por impacto e esforço.
 
 ---
 
@@ -27,7 +27,7 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### C1. SendMessageCommandHandler retorna Guid aleatório em vez do ID da mensagem
-- **Arquivo:** `src/ChatApp.Application/UseCases/Messages/SendMessage/SendMessageCommandHandler.cs:69`
+- **Arquivo:** `src/Chat.Application/UseCases/Messages/SendMessage/SendMessageCommandHandler.cs:69`
 - **Problema:** `return Result.Success(Guid.NewGuid())` cria um GUID novo em vez de retornar `chatMessage.Id`. O cliente nunca sabe qual mensagem foi criada.
 - **Impacto:** Quebraria qualquer feature de rastreamento de mensagens no frontend.
 - **Fix:** `return Result.Success(chatMessage.Id);`
@@ -36,7 +36,7 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### C2. GetMessagesByRoomQueryHandler sem controle de acesso
-- **Arquivo:** `src/ChatApp.Application/UseCases/Messages/GetMessagesByRoom/GetMessagesByRoomQueryHandler.cs`
+- **Arquivo:** `src/Chat.Application/UseCases/Messages/GetMessagesByRoom/GetMessagesByRoomQueryHandler.cs`
 - **Problema:** Qualquer usuário autenticado pode ler mensagens de qualquer sala sem ser membro. Não há verificação de pertinência à sala.
 - **Impacto:** Violação grave de privacidade — vazamento de mensagens de salas privadas.
 - **Fix:** Verificar `room.IsUserInRoom(user)` antes de retornar mensagens, igual ao padrão dos outros handlers.
@@ -44,7 +44,7 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### C3. DeleteMessageCommandHandler — deleção do arquivo após o commit
-- **Arquivo:** `src/ChatApp.Application/UseCases/Messages/DeleteMessage/DeleteMessageCommandHandler.cs:54-60`
+- **Arquivo:** `src/Chat.Application/UseCases/Messages/DeleteMessage/DeleteMessageCommandHandler.cs:54-60`
 - **Problema:** `UnitOfWork.Commit()` é chamado antes de deletar o arquivo no S3. Se a deleção do arquivo falhar, o registro da mensagem foi removido do banco mas o arquivo persiste — inconsistência permanente de dados.
 - **Impacto:** Dados órfãos em S3; estado inconsistente irrecuperável.
 - **Fix:** Deletar o arquivo S3 *antes* de chamar `Commit()`.
@@ -52,7 +52,7 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### C4. Segredos hardcoded no repositório
-- **Arquivos:** `src/ChatApp.Api/appsettings.json:9,12` · `src/ChatApp.Infrastructure/Database/EntityFramework/ChatAppDbContextFactory.cs:11`
+- **Arquivos:** `src/Chat.Api/appsettings.json:9,12` · `src/Chat.Infrastructure/Database/EntityFramework/ChatDbContextFactory.cs:11`
 - **Problema:** Chave JWT (`rV0xK+6G8xZJ3m9...`) e senha do banco (`postgres`) em texto puro commitados no repositório. Qualquer pessoa com acesso ao código pode comprometer o sistema.
 - **Impacto:** Comprometimento total da autenticação e do banco em produção.
 - **Fix:** Usar .NET User Secrets localmente; variáveis de ambiente em CI/CD e produção. Adicionar `appsettings.*.json` ao `.gitignore` se contiverem segredos.
@@ -60,7 +60,7 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### C5. SignalR Hub sem autenticação e com parâmetro de usuário manipulável pelo cliente
-- **Arquivo:** `src/ChatApp.Infrastructure/RealTime/ChatHub.cs:10-24`
+- **Arquivo:** `src/Chat.Infrastructure/RealTime/ChatHub.cs:10-24`
 - **Problema:** Métodos `JoinRoom`, `LeaveRoom` e `SendMessage` não têm `[Authorize]`. O objeto `User` é passado pelo *cliente* — qualquer um pode se passar por outro usuário.
 - **Impacto:** Qualquer pessoa não autenticada pode enviar mensagens; ataque de impersonation é trivial.
 - **Fix:** Adicionar `[Authorize]` no hub, extrair UserId do `Context.User` (JWT) e remover parâmetro `User` dos métodos públicos.
@@ -68,14 +68,14 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### C6. Endpoint de criação de sala sem autorização
-- **Arquivo:** `src/ChatApp.Api/Controllers/ChatRoomController.cs:22`
+- **Arquivo:** `src/Chat.Api/Controllers/ChatRoomController.cs:22`
 - **Problema:** `CreateChatRoom` não tem `[Authorize]`. Qualquer requisição não autenticada pode criar salas.
 - **Fix:** Adicionar `[Authorize]` no método.
 
 ---
 
 #### C7. Endpoint de Login inexistente
-- **Arquivo:** `src/ChatApp.Api/Controllers/UserController.cs`
+- **Arquivo:** `src/Chat.Api/Controllers/UserController.cs`
 - **Problema:** Existe `LoginCommandHandler` e `LoginCommand`, mas o controller não expõe endpoint de login. Usuários registrados não têm como obter um token JWT.
 - **Impacto:** A aplicação é inutilizável — nenhum fluxo de autenticação funciona end-to-end.
 - **Fix:** Implementar `POST /api/user/login` que executa `LoginCommand` e retorna o token.
@@ -83,7 +83,7 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### C8. Inconsistência no nome de grupo do SignalR (bug de conectividade)
-- **Arquivo:** `src/ChatApp.Infrastructure/RealTime/ChatHub.cs:12` vs `src/ChatApp.Infrastructure/Services/SignalRChatRoomNotifier.cs:19,25,31`
+- **Arquivo:** `src/Chat.Infrastructure/RealTime/ChatHub.cs:12` vs `src/Chat.Infrastructure/Services/SignalRChatRoomNotifier.cs:19,25,31`
 - **Problema:** `ChatHub` usa o prefixo `"chat_{roomId}"` para o nome do grupo, mas `SignalRChatRoomNotifier` usa apenas `roomId` sem prefixo. Nenhuma notificação enviada pelo notifier chega aos clientes conectados.
 - **Impacto:** Real-time completamente quebrado — mensagens não chegam aos usuários.
 - **Fix:** Padronizar prefixo `"chat_"` no `SignalRChatRoomNotifier`.
@@ -95,21 +95,21 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### A1. ContentType.From() não trata ContentType.Video
-- **Arquivo:** `src/ChatApp.Domain/Entities/Messages/ContentType.cs:19-26`
+- **Arquivo:** `src/Chat.Domain/Entities/Messages/ContentType.cs:19-26`
 - **Problema:** `Video` está declarado como campo estático mas não tem case no switch de `From()`. Lança `NotSupportedException` silenciosamente ao tentar enviar vídeo.
 - **Fix:** Adicionar `"video" => Video` ao switch.
 
 ---
 
 #### A2. ChatRoom.Join() silencia falhas — JoinRoomCommandHandler retorna sucesso indevidamente
-- **Arquivos:** `src/ChatApp.Domain/Entities/ChatRooms/ChatRoom.cs:41-48` · `src/ChatApp.Application/UseCases/Rooms/JoinRoom/JoinRoomCommandHanlder.cs:52`
+- **Arquivos:** `src/Chat.Domain/Entities/ChatRooms/ChatRoom.cs:41-48` · `src/Chat.Application/UseCases/Rooms/JoinRoom/JoinRoomCommandHanlder.cs:52`
 - **Problema:** `Join()` retorna `void` e silencia dois casos de falha (usuário já na sala, sala cheia). O handler chama `room.Join(user)` e retorna `Result.Success()` sem verificar se o join de fato ocorreu. O próprio teste documenta esse problema com um comentário.
 - **Fix:** `Join()` deve retornar `Result`. O handler deve checar o resultado.
 
 ---
 
 #### A3. EditMessageCommandHandler com tipo de retorno errado
-- **Arquivo:** `src/ChatApp.Application/UseCases/Messages/EditMessage/EditMessageCommandHandler.cs:34`
+- **Arquivo:** `src/Chat.Application/UseCases/Messages/EditMessage/EditMessageCommandHandler.cs:34`
 - **Problema:** Handler implementa `ICommandHandler<EditMessageCommand>` (retorna `Result`), mas internamente chama `Result.Failure<Guid>()`. Inconsistência de tipo que pode gerar exceção de cast em runtime.
 - **Fix:** Substituir todos os `Result.Failure<Guid>(...)` por `Result.Failure(...)`.
 
@@ -123,84 +123,84 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### A5. User.cs sem validação de invariantes e modelo anêmico
-- **Arquivo:** `src/ChatApp.Domain/Entities/Users/User.cs`
+- **Arquivo:** `src/Chat.Domain/Entities/Users/User.cs`
 - **Problema:** Construtor não valida `name`, `username` ou `password`. Nenhuma regra de negócio reside no `User`. A entidade é apenas um container de dados.
 - **Fix:** Adicionar validação no construtor (ou usar factory). Mover regras de negócio do usuário para a entidade.
 
 ---
 
 #### A6. ChatRoom sem invariantes de criação
-- **Arquivo:** `src/ChatApp.Domain/Entities/ChatRooms/ChatRoom.cs:19-29`
+- **Arquivo:** `src/Chat.Domain/Entities/ChatRooms/ChatRoom.cs:19-29`
 - **Problema:** Nome de sala pode ser nulo/vazio. Sala privada pode ser criada sem senha. `DateTime.UtcNow` é usado diretamente (dificulta testes).
 - **Fix:** Validar nome e exigir senha para salas privadas. Receber `DateTime createdAt` como parâmetro no construtor.
 
 ---
 
 #### A7. RegisterUserCommandHandler sem validação de entrada
-- **Arquivo:** `src/ChatApp.Application/UseCases/Users/RegisterUser/RegisterUserCommandHandler.cs:26-46`
+- **Arquivo:** `src/Chat.Application/UseCases/Users/RegisterUser/RegisterUserCommandHandler.cs:26-46`
 - **Problema:** Nome, username e senha não são validados (tamanho mínimo, formato etc.). Qualquer string chega ao banco.
 - **Fix:** Adicionar validação de negócio no handler, ou implementar validators FluentValidation como pipeline behavior.
 
 ---
 
 #### A8. UploadFileCommand usa `IRequest` diretamente em vez de `ICommand`
-- **Arquivo:** `src/ChatApp.Application/UseCases/Messages/UploadFile/UploadFileCommand.cs:5-14`
+- **Arquivo:** `src/Chat.Application/UseCases/Messages/UploadFile/UploadFileCommand.cs:5-14`
 - **Problema:** Quebra a consistência do padrão CQRS estabelecido no projeto. Não passa pelos pipeline behaviors (`LoggingBehavior`).
 - **Fix:** Implementar `ICommand<UploadFileCommandResponse>`.
 
 ---
 
 #### A9. UploadFileCommandHandler sem validação de arquivo
-- **Arquivo:** `src/ChatApp.Application/UseCases/Messages/UploadFile/UploadFileCommandHandler.cs:16-25`
+- **Arquivo:** `src/Chat.Application/UseCases/Messages/UploadFile/UploadFileCommandHandler.cs:16-25`
 - **Problema:** Nenhuma validação de tamanho de arquivo, tipo de conteúdo permitido ou extensão. Um atacante pode enviar um arquivo de 10GB ou um `.exe` mascarado.
 - **Fix:** Validar content-type contra whitelist, limitar tamanho de arquivo, validar extensão.
 
 ---
 
 #### A10. `Entity.cs` — DomainEvents é uma lista pública mutável
-- **Arquivo:** `src/ChatApp.Domain/Abstractions/Entity.cs`
+- **Arquivo:** `src/Chat.Domain/Abstractions/Entity.cs`
 - **Problema:** `public readonly List<IDomainEvent> DomainEvents` permite mutação externa da coleção. Viola encapsulamento e não é thread-safe.
 - **Fix:** `private readonly List<IDomainEvent> _domainEvents; public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();`
 
 ---
 
 #### A11. CreateRoomAsAnonymousCommandHandler não implementado
-- **Arquivo:** `src/ChatApp.Application/UseCases/Rooms/CreateRoomAsAnonymous/CreateRoomAsAnonymousCommandHandler.cs:24-26`
+- **Arquivo:** `src/Chat.Application/UseCases/Rooms/CreateRoomAsAnonymous/CreateRoomAsAnonymousCommandHandler.cs:24-26`
 - **Problema:** Lança `NotImplementedException`. Se registrado no MediatR, qualquer chamada explode em runtime.
 - **Fix:** Implementar ou remover o feature até estar pronto.
 
 ---
 
 #### A12. HTTPS desabilitado
-- **Arquivo:** `src/ChatApp.Api/Program.cs:55`
+- **Arquivo:** `src/Chat.Api/Program.cs:55`
 - **Problema:** `app.UseHttpsRedirection()` está comentado. Tokens JWT transitam em plaintext sobre HTTP.
 - **Fix:** Habilitar ao menos em produção: `if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();`
 
 ---
 
 #### A13. JWT sem validação de Issuer/Audience
-- **Arquivo:** `src/ChatApp.Infrastructure/DependencyInjection.cs:103-111`
+- **Arquivo:** `src/Chat.Infrastructure/DependencyInjection.cs:103-111`
 - **Problema:** `ValidateIssuer = false` e `ValidateAudience = false` aceitam tokens de qualquer origem com a mesma chave.
 - **Fix:** Configurar `ValidIssuer` e `ValidAudience` via `appsettings.json`.
 
 ---
 
 #### A14. Sem constraint de unicidade no Username no banco
-- **Arquivo:** `src/ChatApp.Infrastructure/Database/EntityFramework/Mappings/UserMapping.cs`
+- **Arquivo:** `src/Chat.Infrastructure/Database/EntityFramework/Mappings/UserMapping.cs`
 - **Problema:** Não há índice único em `Username`. Dois usuários podem ter o mesmo username, quebrando o login.
 - **Fix:** Adicionar `builder.HasIndex(u => u.Username).IsUnique();` e criar migration.
 
 ---
 
 #### A15. `ChatMessageRepository.Update` chama `SaveChangesAsync` diretamente
-- **Arquivo:** `src/ChatApp.Infrastructure/Database/EntityFramework/Repositories/ChatMessageRepository.cs:32-36`
+- **Arquivo:** `src/Chat.Infrastructure/Database/EntityFramework/Repositories/ChatMessageRepository.cs:32-36`
 - **Problema:** Viola o padrão UnitOfWork. Commits parciais tornam transações inconsistentes.
 - **Fix:** Remover `SaveChangesAsync()` — deixar o `UnitOfWork.Commit()` controlar o commit.
 
 ---
 
 #### A16. Anti-pattern `async/await Task.CompletedTask` nos repositórios
-- **Arquivo:** `src/ChatApp.Infrastructure/Database/EntityFramework/Repositories/ChatRoomRepository.cs:21-38`
+- **Arquivo:** `src/Chat.Infrastructure/Database/EntityFramework/Repositories/ChatRoomRepository.cs:21-38`
 - **Problema:** Métodos declarados `async` que executam `await Task.CompletedTask` — overhead desnecessário sem operação assíncrona real.
 - **Fix:** Remover `async`, retornar `Task.CompletedTask` diretamente.
 
@@ -214,7 +214,7 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### A18. Controllers com endpoints críticos faltando
-- **Arquivo:** `src/ChatApp.Api/Controllers/`
+- **Arquivo:** `src/Chat.Api/Controllers/`
 - **Problema:** Os handlers de `JoinRoom`, `LeaveRoom`, `SendMessage`, `EditMessage`, `DeleteMessage` e `GetMessagesByRoom` existem na camada Application mas não têm endpoints HTTP correspondentes. A API é praticamente inutilizável como produto.
 - **Fix:** Implementar os endpoints restantes com `[Authorize]`.
 
@@ -225,20 +225,20 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### M1. `PerformanceBehavior` implementado mas não registrado no DI
-- **Arquivo:** `src/ChatApp.Application/DependencyInjection.cs`
+- **Arquivo:** `src/Chat.Application/DependencyInjection.cs`
 - **Fix:** `configuration.AddOpenBehavior(typeof(PerformanceBehavior<,>));`
 
 ---
 
 #### M2. `GetMessagesByRoomQueryHandler` usa Dapper diretamente — impossível testar unitariamente
-- **Arquivo:** `src/ChatApp.Application/UseCases/Messages/GetMessagesByRoom/GetMessagesByRoomQueryHandler.cs`
+- **Arquivo:** `src/Chat.Application/UseCases/Messages/GetMessagesByRoom/GetMessagesByRoomQueryHandler.cs`
 - **Problema:** Acessa banco via Dapper sem abstração. O teste correspondente já documenta isso com uma exceção intencional.
 - **Fix:** Extrair para `IMessageQueryRepository` e injetar no handler.
 
 ---
 
 #### M3. Rate limit muito restritivo para uma aplicação de chat
-- **Arquivo:** `src/ChatApp.Infrastructure/DependencyInjection.cs:114-128`
+- **Arquivo:** `src/Chat.Infrastructure/DependencyInjection.cs:114-128`
 - **Problema:** 10 requests/30s = 0.33 req/s. Um usuário digitando mensagens normalmente seria bloqueado.
 - **Fix:** Criar políticas separadas: uma mais permissiva para chat (`100/min`) e uma mais restritiva para auth (`5/min`).
 
@@ -252,13 +252,13 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### M5. `ExceptionHandlingMiddleware` trata apenas `Exception` genérica
-- **Arquivo:** `src/ChatApp.Api/Middlewares/ExceptionHandlingMiddleware.cs`
+- **Arquivo:** `src/Chat.Api/Middlewares/ExceptionHandlingMiddleware.cs`
 - **Fix:** Adicionar cases para `ValidationException` (400), `UnauthorizedAccessException` (403), `ArgumentException` (400).
 
 ---
 
 #### M6. CORS com origens hardcoded no código
-- **Arquivo:** `src/ChatApp.Api/Program.cs:22-30`
+- **Arquivo:** `src/Chat.Api/Program.cs:22-30`
 - **Fix:** Ler origens permitidas de `appsettings.json` via `configuration.GetSection("Cors:AllowedOrigins")`.
 
 ---
@@ -278,13 +278,13 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### M9. Username com `MaxLength(200)` — excessivo e sem sentido
-- **Arquivo:** `src/ChatApp.Infrastructure/Database/EntityFramework/Mappings/UserMapping.cs:21`
+- **Arquivo:** `src/Chat.Infrastructure/Database/EntityFramework/Mappings/UserMapping.cs:21`
 - **Fix:** `HasMaxLength(50)`.
 
 ---
 
 #### M10. Password de sala de chat provavelmente armazenado em plaintext
-- **Arquivo:** `src/ChatApp.Infrastructure/Database/EntityFramework/Mappings/ChatRoomMapping.cs:20-22` · `MaxLength(30)`
+- **Arquivo:** `src/Chat.Infrastructure/Database/EntityFramework/Mappings/ChatRoomMapping.cs:20-22` · `MaxLength(30)`
 - **Problema:** Se a senha da sala é hasheada (bcrypt ~60 chars), o campo de 30 chars trunca o hash. Se é plaintext, é inseguro.
 - **Fix:** Decidir estratégia: hashear senha de sala ou usar um modelo diferente de controle de acesso.
 
@@ -305,7 +305,7 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### M13. `ChatRoomRepository.GetById` não é `async` mas retorna `Task`
-- **Arquivo:** `src/ChatApp.Infrastructure/Database/EntityFramework/Repositories/ChatRoomRepository.cs:27-31`
+- **Arquivo:** `src/Chat.Infrastructure/Database/EntityFramework/Repositories/ChatRoomRepository.cs:27-31`
 - **Problema:** Método não é `async` mas retorna `Task` — estilo inconsistente.
 - **Fix:** Usar `async/await` padrão.
 
@@ -345,12 +345,12 @@ A direção de dependências está correta. A injeção de dependência está be
 ---
 
 #### B6. Sem testes para TODO implementado em ChatMessageTest.cs
-- `test/ChatApp.UnitTests/Domain/Messages/ChatMessageTest.cs` tem método `Nao_deveria_permitir_deletar_mensagem_apos_limite_de_tempo` com apenas um comentário TODO.
+- `test/Chat.UnitTests/Domain/Messages/ChatMessageTest.cs` tem método `Nao_deveria_permitir_deletar_mensagem_apos_limite_de_tempo` com apenas um comentário TODO.
 
 ---
 
 #### B7. JWT expira em 1 hora sem refresh token
-- `src/ChatApp.Infrastructure/Authentication/AuthenticationService.cs:33`
+- `src/Chat.Infrastructure/Authentication/AuthenticationService.cs:33`
 - Usuário precisa se logar novamente a cada hora. Considerar refresh token ou aumentar para 24h com rotação.
 
 ---

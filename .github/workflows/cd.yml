@@ -44,7 +44,7 @@ jobs:
           IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
         run: |
           IMAGE_URI="${ECR_REGISTRY}/chatapp-dev:${IMAGE_TAG}"
-          docker build -t "$IMAGE_URI" -f app/src/ChatApp.Api/Dockerfile .
+          docker build -t "$IMAGE_URI" -f apps/chat-service/src/Chat.Api/Dockerfile .
           docker push "$IMAGE_URI"
 
       - name: Deploy no ECS
@@ -85,7 +85,7 @@ jobs:
           IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
         run: |
           IMAGE_URI="${ECR_REGISTRY}/chatapp-prod:${IMAGE_TAG}"
-          docker build -t "$IMAGE_URI" -f app/src/ChatApp.Api/Dockerfile .
+          docker build -t "$IMAGE_URI" -f apps/chat-service/src/Chat.Api/Dockerfile .
           docker push "$IMAGE_URI"
 
       - name: Deploy no ECS

@@ -20,6 +20,9 @@ jobs:
   analyze:
     name: Analisar C#
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/chat-service
 
     steps:
       - name: Checkout do código
@@ -46,8 +49,8 @@ jobs:
 
       - name: Restaurar e compilar para análise
         run: |
-          dotnet restore ChatApp.sln
-          dotnet build --no-restore ChatApp.sln
+          dotnet restore Chat.sln
+          dotnet build --no-restore Chat.sln
 
       - name: Executar análise CodeQL
         uses: github/codeql-action/analyze@v3

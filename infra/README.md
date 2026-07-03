@@ -1,4 +1,4 @@
-# Infraestrutura — ChatApp (Terraform + AWS)
+# Infraestrutura — Chat (Terraform + AWS)
 
 ## Estrutura
 
@@ -52,7 +52,7 @@ aws ecr get-login-password --region us-east-1 | \
   docker login --username AWS --password-stdin \
   <account-id>.dkr.ecr.us-east-1.amazonaws.com
 
-docker build -t chatapp-dev ./app/src/ChatApp.Api
+docker build -t chatapp-dev ./apps/chat-service/src/Chat.Api
 docker tag chatapp-dev:latest <account-id>.dkr.ecr.us-east-1.amazonaws.com/chatapp-dev:<tag>
 docker push <account-id>.dkr.ecr.us-east-1.amazonaws.com/chatapp-dev:<tag>
 
