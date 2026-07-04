@@ -1,0 +1,17 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/Chat.Api/Chat.Api.csproj" />
+    <Project Path="src/Chat.Application/Chat.Application.csproj" />
+    <Project Path="src/Chat.Domain/Chat.Domain.csproj" />
+    <Project Path="src/Chat.Infrastructure/Chat.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Chat.IntegrationTests/Chat.IntegrationTests.csproj" />
+    <Project Path="tests/Chat.UnitTests/Chat.UnitTests.csproj" />
+  </Folder>
+</Solution>
