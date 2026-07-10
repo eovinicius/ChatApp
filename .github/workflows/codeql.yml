@@ -28,7 +28,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Para adicionar um novo alvo à análise, basta incluir mais uma entrada aqui.
         include:
           - name: chatapp
             working-directory: .

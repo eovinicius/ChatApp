@@ -23,36 +23,46 @@ permissions:
   id-token: write
 
 jobs:
-  apply:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # auto: true roda automaticamente em todo push em main que toque infra/**
-          # (comportamento idêntico ao atual). Dev/staging só aplicam via
-          # "Run workflow" até existir uma branch/gatilho de auto-apply para eles.
-          - label: prod
-            environment: production
-            role-secret: AWS_ROLE_ARN_PROD
-            auto: true
-          - label: dev
-            environment: development
-            role-secret: AWS_ROLE_ARN_DEV
-            auto: false
-          - label: staging
-            environment: staging
-            role-secret: AWS_ROLE_ARN_STAGING
-            auto: false
+  # prod aplica automaticamente em todo push em main que toque infra/**,
+  # e também via "Run workflow" escolhendo prod.
+  apply-prod:
     if: >
-      (github.event_name == 'push' && matrix.auto == true) ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == matrix.label)
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
     uses: ./.github/workflows/reusable/terraform.yml
     with:
-      environment: ${{ matrix.environment }}
-      label: ${{ matrix.label }}
-      working-directory: infra/environments/${{ matrix.label }}
+      environment: production
+      label: prod
+      working-directory: infra/environments/prod
       action: apply
     secrets:
-      aws-role-arn: ${{ secrets[matrix.role-secret] }}
+      aws-role-arn: ${{ secrets.AWS_ROLE_ARN_PROD }}
+      aws-region: ${{ secrets.AWS_REGION }}
+      jwt-secret-key: ${{ secrets.TF_VAR_JWT_SECRET_KEY }}
+
+  # dev/staging só aplicam manualmente via "Run workflow".
+  apply-dev:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev'
+    uses: ./.github/workflows/reusable/terraform.yml
+    with:
+      environment: development
+      label: dev
+      working-directory: infra/environments/dev
+      action: apply
+    secrets:
+      aws-role-arn: ${{ secrets.AWS_ROLE_ARN_DEV }}
+      aws-region: ${{ secrets.AWS_REGION }}
+      jwt-secret-key: ${{ secrets.TF_VAR_JWT_SECRET_KEY }}
+
+  apply-staging:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging'
+    uses: ./.github/workflows/reusable/terraform.yml
+    with:
+      environment: staging
+      label: staging
+      working-directory: infra/environments/staging
+      action: apply
+    secrets:
+      aws-role-arn: ${{ secrets.AWS_ROLE_ARN_STAGING }}
       aws-region: ${{ secrets.AWS_REGION }}
       jwt-secret-key: ${{ secrets.TF_VAR_JWT_SECRET_KEY }}

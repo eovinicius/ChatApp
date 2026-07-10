@@ -3,53 +3,94 @@ name: Reusable - .NET CI
 on:
   workflow_call:
     inputs:
-      working-directory:
-        description: "Diretório raiz do serviço (contém a .sln)"
+      solution-file:
+        description: "Caminho da solution (.slnx/.sln) a compilar e testar."
         required: true
         type: string
-      solution-file:
-        description: "Nome do arquivo .sln, relativo a working-directory"
-        required: true
+      working-directory:
+        description: "Diretório onde os comandos dotnet rodam."
+        required: false
+        default: "."
         type: string
       dotnet-version:
+        description: "Versão do SDK (ignorada se houver global.json na raiz)."
         required: false
-        type: string
         default: "10.x"
+        type: string
+      configuration:
+        description: "Configuração de build (Release em CI)."
+        required: false
+        default: "Release"
+        type: string
 
 permissions:
   contents: read
 
+env:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
 jobs:
   build-test:
-    name: Build e Test
+    name: Build & Test
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Integração usa Testcontainers (Docker), já presente no runner ubuntu-latest.
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
 
     steps:
-      - name: Checkout do código
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configurar .NET
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
 
-      - name: Cache de dependências NuGet
+      - name: Cache de pacotes NuGet
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json', '**/Directory.Packages.props', '**/*.csproj', 'global.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Restaurar dependências
-        run: dotnet restore ${{ inputs.solution-file }}
+      - name: Restore
+        run: dotnet restore "${{ inputs.solution-file }}"
 
-      - name: Compilar projeto principal
-        run: dotnet build --no-restore ${{ inputs.solution-file }}
+      - name: Build
+        run: >
+          dotnet build "${{ inputs.solution-file }}"
+          --configuration ${{ inputs.configuration }}
+          --no-restore
+          -p:ContinuousIntegrationBuild=true
 
-      - name: Executar testes
-        run: dotnet test --no-build --no-restore ${{ inputs.solution-file }}
+      - name: Test (unit + integração) com cobertura
+        run: >
+          dotnet test "${{ inputs.solution-file }}"
+          --configuration ${{ inputs.configuration }}
+          --no-build
+          --logger "trx"
+          --logger "console;verbosity=minimal"
+          --collect "XPlat Code Coverage"
+          --results-directory ./TestResults
+
+      - name: Upload dos resultados de teste (TRX)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "${{ inputs.working-directory }}/TestResults/**/*.trx"
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload da cobertura (Cobertura XML)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: "${{ inputs.working-directory }}/TestResults/**/coverage.cobertura.xml"
+          if-no-files-found: warn
+          retention-days: 7

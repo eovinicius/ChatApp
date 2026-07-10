@@ -1,0 +1,49 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
+      - development
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-development:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'development'
+    uses: ./.github/workflows/reusable/docker-cd.yml
+    with:
+      dockerfile: app/Api/ChatApp.Api/Dockerfile
+      context: .
+      ecr-repository: chatapp-dev
+      ecs-cluster: chatapp-dev
+      ecs-service: chatapp-dev
+      environment-name: development
+      sha: ${{ github.event.workflow_run.head_sha }}
+    secrets:
+      aws-role-arn: ${{ secrets.AWS_ROLE_ARN_DEV }}
+      aws-region: ${{ secrets.AWS_REGION }}
+
+  deploy-production:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    uses: ./.github/workflows/reusable/docker-cd.yml
+    with:
+      dockerfile: app/Api/ChatApp.Api/Dockerfile
+      context: .
+      ecr-repository: chatapp-prod
+      ecs-cluster: chatapp-prod
+      ecs-service: chatapp-prod
+      environment-name: production
+      sha: ${{ github.event.workflow_run.head_sha }}
+    secrets:
+      aws-role-arn: ${{ secrets.AWS_ROLE_ARN_PROD }}
+      aws-region: ${{ secrets.AWS_REGION }}

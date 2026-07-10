@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - development
+    paths:
+      - "app/**"
+      - "tests/**"
+      - "ChatApp.slnx"
+      - "global.json"
+      - "NuGet.Config"
+      - "Directory.Build.props"
+      - "Directory.Build.targets"
+      - "Directory.Packages.props"
+      - "**/Dockerfile"
+      - ".github/workflows/**"
+  pull_request:
+    branches:
+      - main
+      - staging
+      - development
+    paths:
+      - "app/**"
+      - "tests/**"
+      - "ChatApp.slnx"
+      - "global.json"
+      - "NuGet.Config"
+      - "Directory.Build.props"
+      - "Directory.Build.targets"
+      - "Directory.Packages.props"
+      - "**/Dockerfile"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build-test:
+    name: Build & Test
+    uses: ./.github/workflows/reusable/dotnet-ci.yml
+    with:
+      working-directory: .
+      solution-file: ChatApp.slnx
