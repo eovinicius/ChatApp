@@ -14,24 +14,31 @@ dotnet test
 dotnet test --filter "FullyQualifiedName~CreateRoomTests"
 
 # Run the API (Swagger at http://localhost:5110/swagger/index.html)
-dotnet run --project .\apps\chat-service\src\Chat.Api\Chat.Api.csproj
+dotnet run --project .\app\Api\ChatApp.Api\ChatApp.Api.csproj
 
 # Start only the database (required before running locally)
 docker-compose up -d --build chat-db
 
 # EF migrations
-dotnet ef migrations add <MigrationName> --project .\apps\chat-service\src\Chat.Infrastructure\Chat.Infrastructure.csproj --startup-project .\apps\chat-service\src\Chat.Api\
-dotnet ef database update --project .\apps\chat-service\src\Chat.Infrastructure\ --startup-project .\apps\chat-service\src\Chat.Api\
+dotnet ef migrations add <MigrationName> --project .\app\Modules\Chat\src\Chat.Infrastructure\Chat.Infrastructure.csproj --startup-project .\app\Api\ChatApp.Api\
+dotnet ef database update --project .\app\Modules\Chat\src\Chat.Infrastructure\ --startup-project .\app\Api\ChatApp.Api\
 ```
 
 ## Architecture
 
-Clean Architecture with four layers. Dependencies flow inward: **API → Application → Domain** (Infrastructure implements Application interfaces).
+**Modular Monolith** with Clean Architecture per module and **Minimal APIs** (no Controllers). The solution file `ChatApp.slnx` is at the repo root; code lives under `app/`:
 
-- **Domain** (`Chat.Domain`): Entities, value objects, repository interfaces. No framework dependencies. Entities use private setters and static factory methods (`ChatRoom.Create()`, `ChatMessage.Create()`).
+- `app/Api/ChatApp.Api` — single host that only **composes** modules (`AddChatModule` + `MapChatEndpoints`, plus Identity/Notification stubs). No business logic; owns cross-cutting middleware (Serilog, CORS, versioning, Swagger, rate limiter, auth, `ApplyMigrations`).
+- `app/Modules/{Chat,Identity,Notification}` — each module has its own `src/` (four layers: `Domain`, `Application`, `Infrastructure`, `Presentation`) and `tests/`. Only **Chat** is implemented; Identity and Notification are structured scaffolds (compile + compose, no logic yet).
+- `app/Shared/SharedKernel` — `Result`, `Error`, `Entity`, `AggregateRoot`, `IDomainEvent` (shared across modules).
+- `app/Shared/BuildingBlocks` — CQRS messaging (`ICommand`/`IQuery`/handlers), pipeline behaviors, `IDateTimeProvider`.
+
+Chat module layers (dependencies flow inward: **Presentation/API → Application → Domain**; Infrastructure implements Application interfaces):
+
+- **Domain** (`Chat.Domain`): Entities, value objects, repository interfaces. Entities use private setters and static factory methods (`ChatRoom.Create()`, `ChatMessage.Create()`).
 - **Application** (`Chat.Application`): CQRS use cases via MediatR, organized under `UseCases/{Feature}/{UseCase}/`. Defines abstractions (`IUserRepository`, `IChatHub`, etc.) that Infrastructure implements.
 - **Infrastructure** (`Chat.Infrastructure`): EF Core + PostgreSQL, SignalR hub, JWT auth, AWS S3 file storage, rate limiting. Registered in `DependencyInjection.cs`.
-- **API** (`Chat.Api`): Controllers dispatch commands/queries via `ISender`. Middlewares: exception handling, IP logging, request context logging (correlation ID).
+- **Presentation** (`Chat.Presentation`): Minimal API endpoint classes (`Endpoints/`, `Requests/`) that dispatch commands/queries via `ISender`; `ChatModule` exposes `AddChatModule`/`MapChatEndpoints` (which also maps the SignalR hub).
 
 ## Key Patterns
 
@@ -51,7 +58,9 @@ SignalR hub at `/chatHub`. The `IChatHub` interface (in Application) is implemen
 
 ## Testing
 
-Unit tests only (`Chat.UnitTests`). Stack: **xUnit + NSubstitute + FluentAssertions**. Test names are written in Portuguese. Tests mock all dependencies via `NSubstitute.Substitute.For<T>()` and instantiate the handler directly — no DI container in tests.
+Each module keeps its own tests under `app/Modules/<Module>/tests/` — for **Chat**: `Chat.UnitTests` (unit) and `Chat.IntegrationTests` (integration, boots the host via `WebApplicationFactory` against a Testcontainers Postgres). The repo-root `tests/` folder is reserved for cross-cutting **architecture** and **end-to-end** tests.
+
+Stack: **xUnit + NSubstitute + FluentAssertions**. Test names are written in Portuguese. Unit tests mock all dependencies via `NSubstitute.Substitute.For<T>()` and instantiate the handler directly — no DI container.
 
 ## Configuration
 

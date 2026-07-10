@@ -37,14 +37,16 @@ Chat é uma API REST + WebSocket de chat em tempo real construída com .NET 10 e
 
 ## 🏛 Arquitetura
 
-Chat segue o padrão **Clean Architecture** com quatro camadas. As dependências sempre apontam para o centro: `API → Application → Domain` (Infrastructure implementa interfaces de Application).
+O projeto é um **Monólito Modular**: a API principal (`ChatApp.Api`) apenas **compõe** módulos independentes (`Chat`, `Identity`, `Notification`), cada um com sua própria Clean Architecture (`Domain`, `Application`, `Infrastructure`, `Presentation`) e expondo seus endpoints via **Minimal APIs**. Primitivas compartilhadas ficam em `Shared/SharedKernel` e `Shared/BuildingBlocks`.
 
 ```mermaid
 graph LR
-    A["Chat.Api\nControllers · Middlewares · Hubs"] --> B["Chat.Application\nUse Cases · CQRS · Abstrações"]
-    B --> C["Chat.Domain\nEntidades · Value Objects · Erros"]
+    API["ChatApp.Api\ncomposição dos módulos"] --> P["Chat.Presentation\nMinimal API Endpoints · Hub"]
+    P --> B["Chat.Application\nUse Cases · CQRS"]
+    B --> C["Chat.Domain\nEntidades · Value Objects"]
     D["Chat.Infrastructure\nEF Core · SignalR · JWT · S3"] --> B
-    D --> C
+    B --> S["Shared\nSharedKernel · BuildingBlocks"]
+    C --> S
 ```
 
 > Veja [docs/architecture.md](docs/architecture.md) para detalhes sobre padrões e fluxo de dados.
@@ -57,7 +59,6 @@ graph LR
 # 1. Clone o repositório
 git clone https://github.com/eovinicius/ChatApp.git
 cd ChatApp
-cd apps/chat-service
 
 # 2. Suba o banco de dados
 docker-compose up -d --build chat-db
@@ -65,16 +66,16 @@ docker-compose up -d --build chat-db
 # 3. Configure as variáveis (veja docs/configuration.md)
 dotnet user-secrets set "ConnectionStrings:Database" \
   "Host=localhost;Port=5432;Database=chat;Username=postgres;Password=postgres" \
-  --project .\src\Chat.Api\
-dotnet user-secrets set "JwtSettings:SecretKey" "dev-secret-key-min-32-characters" --project .\src\Chat.Api\
-dotnet user-secrets set "JwtSettings:Issuer" "Chat" --project .\src\Chat.Api\
-dotnet user-secrets set "JwtSettings:Audience" "Chat" --project .\src\Chat.Api\
+  --project .\app\Api\ChatApp.Api\
+dotnet user-secrets set "JwtSettings:SecretKey" "dev-secret-key-min-32-characters" --project .\app\Api\ChatApp.Api\
+dotnet user-secrets set "JwtSettings:Issuer" "Chat" --project .\app\Api\ChatApp.Api\
+dotnet user-secrets set "JwtSettings:Audience" "Chat" --project .\app\Api\ChatApp.Api\
 
 # 4. Execute as migrações
-dotnet ef database update --project .\src\Chat.Infrastructure\ --startup-project .\src\Chat.Api\
+dotnet ef database update --project .\app\Modules\Chat\src\Chat.Infrastructure\ --startup-project .\app\Api\ChatApp.Api\
 
 # 5. Rode a API
-dotnet run --project .\src\Chat.Api\Chat.Api.csproj
+dotnet run --project .\app\Api\ChatApp.Api\ChatApp.Api.csproj
 ```
 
 Acesse a interface Swagger em **http://localhost:5110/swagger/index.html**
@@ -99,10 +100,10 @@ dotnet test
 dotnet test --filter "FullyQualifiedName~CreateRoomTests"
 
 # Apenas unit tests
-dotnet test tests/Chat.UnitTests/
+dotnet test app/Modules/Chat/tests/Chat.UnitTests/
 
 # Apenas integration tests
-dotnet test tests/Chat.IntegrationTests/
+dotnet test app/Modules/Chat/tests/Chat.IntegrationTests/
 ```
 
 ## 📄 Licença

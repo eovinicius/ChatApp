@@ -28,12 +28,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Para adicionar um novo serviço do monorepo à análise, basta incluir
-        # mais uma entrada aqui (ex: notification-service / Notification.sln).
+        # Para adicionar um novo alvo à análise, basta incluir mais uma entrada aqui.
         include:
-          - name: chat-service
-            working-directory: apps/chat-service
-            solution: Chat.sln
+          - name: chatapp
+            working-directory: .
+            solution: ChatApp.slnx
             language: csharp
     defaults:
       run:

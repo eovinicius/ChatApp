@@ -1,0 +1,59 @@
+using SharedKernel;
+
+using FluentAssertions;
+
+namespace Chat.UnitTests.Domain.Abstractions;
+
+public class EntityTest
+{
+    private sealed class TestDomainEvent : IDomainEvent;
+
+    private sealed class TestEntity : AggregateRoot
+    {
+        public TestEntity(Guid id) : base(id) { }
+        public void Raise(IDomainEvent e) => RaiseDomainEvent(e);
+    }
+
+    [Fact]
+    public void RaiseDomainEvent_Deveria_Adicionar_Evento_A_Lista()
+    {
+        var entity = new TestEntity(Guid.NewGuid());
+        var domainEvent = new TestDomainEvent();
+
+        entity.Raise(domainEvent);
+
+        entity.GetDomainEvents().Should().ContainSingle().Which.Should().Be(domainEvent);
+    }
+
+    [Fact]
+    public void ClearDomainEvents_Deveria_Remover_Todos_Os_Eventos()
+    {
+        var entity = new TestEntity(Guid.NewGuid());
+        entity.Raise(new TestDomainEvent());
+        entity.Raise(new TestDomainEvent());
+
+        entity.ClearDomainEvents();
+
+        entity.GetDomainEvents().Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GetDomainEvents_Sem_Eventos_Deve_Retornar_Lista_Vazia()
+    {
+        var entity = new TestEntity(Guid.NewGuid());
+
+        entity.GetDomainEvents().Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GetDomainEvents_Deveria_Retornar_Snapshot_Que_Nao_E_Afetado_Por_ClearDomainEvents()
+    {
+        var entity = new TestEntity(Guid.NewGuid());
+        entity.Raise(new TestDomainEvent());
+
+        var eventsBeforeClear = entity.GetDomainEvents();
+        entity.ClearDomainEvents();
+
+        eventsBeforeClear.Should().ContainSingle();
+    }
+}

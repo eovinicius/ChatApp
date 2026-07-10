@@ -6,12 +6,14 @@ on:
       - main
       - development
     paths:
-      - "apps/chat-service/**"
+      - "app/**"
+      - "tests/**"
   pull_request:
     branches:
       - main
     paths:
-      - "apps/chat-service/**"
+      - "app/**"
+      - "tests/**"
 
 permissions:
   contents: read
@@ -24,5 +26,5 @@ jobs:
   build-test:
     uses: ./.github/workflows/reusable/dotnet-ci.yml
     with:
-      working-directory: apps/chat-service
-      solution-file: Chat.sln
+      working-directory: .
+      solution-file: ChatApp.slnx

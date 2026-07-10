@@ -70,24 +70,24 @@
 
 ```bash
 # Habilitar user secrets no projeto (executar uma vez)
-dotnet user-secrets init --project .\src\Chat.Api\
+dotnet user-secrets init --project .\app\Api\ChatApp.Api\
 
 # Configurar as secrets
 dotnet user-secrets set "ConnectionStrings:Database" \
   "Host=localhost;Port=5432;Database=chat;Username=postgres;Password=postgres" \
-  --project .\src\Chat.Api\
+  --project .\app\Api\ChatApp.Api\
 
 dotnet user-secrets set "JwtSettings:SecretKey" "dev-secret-key-at-least-32-characters!!" \
-  --project .\src\Chat.Api\
+  --project .\app\Api\ChatApp.Api\
 
-dotnet user-secrets set "JwtSettings:Issuer" "Chat" --project .\src\Chat.Api\
-dotnet user-secrets set "JwtSettings:Audience" "Chat" --project .\src\Chat.Api\
+dotnet user-secrets set "JwtSettings:Issuer" "Chat" --project .\app\Api\ChatApp.Api\
+dotnet user-secrets set "JwtSettings:Audience" "Chat" --project .\app\Api\ChatApp.Api\
 
 # Para funcionalidade de upload de arquivo (opcional em dev):
-dotnet user-secrets set "AwsSettings:S3:BucketName" "meu-bucket-dev" --project .\src\Chat.Api\
-dotnet user-secrets set "AwsSettings:S3:Region" "us-east-1" --project .\src\Chat.Api\
-dotnet user-secrets set "AwsSettings:S3:AccessKey" "sua-access-key" --project .\src\Chat.Api\
-dotnet user-secrets set "AwsSettings:S3:SecretKey" "sua-secret-key" --project .\src\Chat.Api\
+dotnet user-secrets set "AwsSettings:S3:BucketName" "meu-bucket-dev" --project .\app\Api\ChatApp.Api\
+dotnet user-secrets set "AwsSettings:S3:Region" "us-east-1" --project .\app\Api\ChatApp.Api\
+dotnet user-secrets set "AwsSettings:S3:AccessKey" "sua-access-key" --project .\app\Api\ChatApp.Api\
+dotnet user-secrets set "AwsSettings:S3:SecretKey" "sua-secret-key" --project .\app\Api\ChatApp.Api\
 ```
 
 As user secrets sobrescrevem `appsettings.json` apenas em ambiente `Development`.
@@ -121,4 +121,4 @@ Por padrão, a API permite requisições das seguintes origens:
 | `http://localhost:5173` | Vite (React, Vue, Svelte) |
 | `http://localhost:4200` | Angular CLI |
 
-As origens permitidas são lidas em tempo de execução a partir da chave `Cors:AllowedOrigins` no `appsettings.json` (ou no arquivo de ambiente correspondente, como `appsettings.Development.json`). Para adicionar ou remover origens, edite esse array em `src/Chat.Api/appsettings.Development.json` (desenvolvimento) ou via variável de ambiente `Cors__AllowedOrigins` em produção.
+As origens permitidas são lidas em tempo de execução a partir da chave `Cors:AllowedOrigins` no `appsettings.json` (ou no arquivo de ambiente correspondente, como `appsettings.Development.json`). Para adicionar ou remover origens, edite esse array em `app/Api/ChatApp.Api/appsettings.Development.json` (desenvolvimento) ou via variável de ambiente `Cors__AllowedOrigins` em produção.

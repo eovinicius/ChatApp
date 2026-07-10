@@ -1,10 +1,10 @@
 services:
   chat.api:
     image: ${DOCKER_REGISTRY-}chatapi
-    container_name: Chat.Api
+    container_name: ChatApp.Api
     build:
       context: .
-      dockerfile: apps/chat-service/src/Chat.Api/Dockerfile
+      dockerfile: app/Api/ChatApp.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:

@@ -2,12 +2,13 @@
 
 ## Visão Geral
 
-Chat segue o padrão **Clean Architecture**, separando o sistema em quatro camadas com dependências que sempre apontam para o centro. Nenhuma camada interna conhece detalhes das camadas externas.
+O sistema é um **Monólito Modular**: `ChatApp.Api` apenas compõe módulos independentes (`Chat`, `Identity`, `Notification`). Cada módulo segue **Clean Architecture** em quatro camadas (`Domain`, `Application`, `Infrastructure`, `Presentation`), expondo endpoints via **Minimal APIs**. Primitivas compartilhadas ficam em `Shared/SharedKernel` e `Shared/BuildingBlocks`. O diagrama abaixo detalha o módulo **Chat**:
 
 ```mermaid
 graph TD
     subgraph Externas
-        API["Chat.Api\nControllers · Middlewares · Hubs"]
+        Host["ChatApp.Api\ncomposição dos módulos"]
+        Pres["Chat.Presentation\nMinimal API Endpoints · Hub"]
         Infra["Chat.Infrastructure\nEF Core · SignalR · JWT · S3"]
     end
     subgraph Internas
@@ -15,7 +16,8 @@ graph TD
         Domain["Chat.Domain\nEntidades · Value Objects · Erros"]
     end
 
-    API -->|"ISender (MediatR)"| App
+    Host --> Pres
+    Pres -->|"ISender (MediatR)"| App
     Infra -->|"implementa interfaces"| App
     App --> Domain
     Infra --> Domain
@@ -28,7 +30,8 @@ graph TD
 | **Domain** | `Chat.Domain` | Entidades, value objects, interfaces de repositórios. Sem dependências de framework. |
 | **Application** | `Chat.Application` | Use cases via CQRS (MediatR). Define abstrações (`IUserRepository`, `IChatHub`, etc.) que Infrastructure implementa. |
 | **Infrastructure** | `Chat.Infrastructure` | EF Core + PostgreSQL, SignalR, JWT, AWS S3. Implementações concretas das abstrações de Application. |
-| **API** | `Chat.Api` | Controllers, middlewares, configuração. Despacha comandos/queries via `ISender`. |
+| **Presentation** | `Chat.Presentation` | Endpoints Minimal API (`Endpoints/`, `Requests/`). Despacha comandos/queries via `ISender`; expõe `AddChatModule`/`MapChatEndpoints`. |
+| **Host** | `ChatApp.Api` | Composição dos módulos + middlewares/configuração transversal (Serilog, CORS, versionamento, Swagger, rate limiter, auth, migrations). |
 
 ## Fluxo de uma Request HTTP
 

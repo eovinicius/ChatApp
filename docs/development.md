@@ -14,7 +14,6 @@
 ```bash
 git clone https://github.com/eovinicius/ChatApp.git
 cd ChatApp
-cd apps/chat-service
 ```
 
 ### 2. Suba o banco de dados
@@ -28,17 +27,17 @@ Aguarde o PostgreSQL subir. Verifique com `docker-compose ps`.
 ### 3. Configure as secrets
 
 ```bash
-dotnet user-secrets init --project .\src\Chat.Api\
+dotnet user-secrets init --project .\app\Api\ChatApp.Api\
 
 dotnet user-secrets set "ConnectionStrings:Database" \
   "Host=localhost;Port=5432;Database=chat;Username=postgres;Password=postgres" \
-  --project .\src\Chat.Api\
+  --project .\app\Api\ChatApp.Api\
 
 dotnet user-secrets set "JwtSettings:SecretKey" "dev-secret-key-at-least-32-characters!!" \
-  --project .\src\Chat.Api\
+  --project .\app\Api\ChatApp.Api\
 
-dotnet user-secrets set "JwtSettings:Issuer" "Chat" --project .\src\Chat.Api\
-dotnet user-secrets set "JwtSettings:Audience" "Chat" --project .\src\Chat.Api\
+dotnet user-secrets set "JwtSettings:Issuer" "Chat" --project .\app\Api\ChatApp.Api\
+dotnet user-secrets set "JwtSettings:Audience" "Chat" --project .\app\Api\ChatApp.Api\
 ```
 
 > Para funcionalidade de upload de mídia, configure também `AwsSettings:S3:*`. Veja [configuration.md](configuration.md).
@@ -47,14 +46,14 @@ dotnet user-secrets set "JwtSettings:Audience" "Chat" --project .\src\Chat.Api\
 
 ```bash
 dotnet ef database update \
-  --project .\src\Chat.Infrastructure\ \
-  --startup-project .\src\Chat.Api\
+  --project .\app\Modules\Chat\src\Chat.Infrastructure\ \
+  --startup-project .\app\Api\ChatApp.Api\
 ```
 
 ### 5. Rode a API
 
 ```bash
-dotnet run --project .\src\Chat.Api\Chat.Api.csproj
+dotnet run --project .\app\Api\ChatApp.Api\ChatApp.Api.csproj
 ```
 
 Swagger disponível em **http://localhost:5110/swagger/index.html**
@@ -84,18 +83,18 @@ dotnet test tests/Chat.IntegrationTests/
 
 # Adicionar nova migration
 dotnet ef migrations add <NomeDaMigration> \
-  --project .\src\Chat.Infrastructure\ \
-  --startup-project .\src\Chat.Api\
+  --project .\app\Modules\Chat\src\Chat.Infrastructure\ \
+  --startup-project .\app\Api\ChatApp.Api\
 
 # Aplicar migrations pendentes
 dotnet ef database update \
-  --project .\src\Chat.Infrastructure\ \
-  --startup-project .\src\Chat.Api\
+  --project .\app\Modules\Chat\src\Chat.Infrastructure\ \
+  --startup-project .\app\Api\ChatApp.Api\
 
 # Remover última migration (apenas se não aplicada)
 dotnet ef migrations remove \
-  --project .\src\Chat.Infrastructure\ \
-  --startup-project .\src\Chat.Api\
+  --project .\app\Modules\Chat\src\Chat.Infrastructure\ \
+  --startup-project .\app\Api\ChatApp.Api\
 
 # Subir apenas o banco
 docker-compose up -d --build chat-db

@@ -1,12 +1,12 @@
 # CI/CD — Estrutura de Workflows (Monorepo)
 
-Este repositório é um monorepo. Hoje existe apenas `apps/chat-service`, mas a estrutura de workflows já está preparada para novos serviços (`notification-service`, `identity-service`, `gateway`, `media-service`, etc.) sem duplicar lógica.
+Este repositório é um **monólito modular** sob `src/` (módulos `Chat`, `Identity`, `Notification` compostos por `ChatApp.Api`). A estrutura de workflows usa jobs reutilizáveis, prontos para crescer sem duplicar lógica.
 
 ## Estrutura
 
 ```
 .github/workflows/
-├── chat-ci.yml              # CI do Chat: build + test, dispara só em apps/chat-service/**
+├── chat-ci.yml              # CI: build + test da solution, dispara em src/** e tests/**
 ├── chat-cd.yml               # CD do Chat: build de imagem, push ECR, deploy ECS (dev/prod)
 ├── codeql.yml                 # Análise de segurança CodeQL — matrix por serviço
 ├── terraform-plan.yml        # Terraform plan (PR) — matrix por ambiente (dev/staging/prod)

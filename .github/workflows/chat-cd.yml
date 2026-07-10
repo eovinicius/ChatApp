@@ -36,7 +36,7 @@ jobs:
       github.event.workflow_run.head_branch == matrix.branch
     uses: ./.github/workflows/reusable/docker-cd.yml
     with:
-      dockerfile: apps/chat-service/src/Chat.Api/Dockerfile
+      dockerfile: app/Api/ChatApp.Api/Dockerfile
       context: .
       ecr-repository: ${{ matrix.ecr-repository }}
       ecs-cluster: ${{ matrix.ecs-cluster }}

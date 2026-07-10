@@ -1,0 +1,36 @@
+<Solution>
+  <Folder Name="/app/" />
+  <Folder Name="/app/Api/">
+    <Project Path="app/Api/ChatApp.Api/ChatApp.Api.csproj" />
+  </Folder>
+  <Folder Name="/app/Modules/" />
+  <Folder Name="/app/Modules/Chat/" />
+  <Folder Name="/app/Modules/Chat/src/">
+    <Project Path="app/Modules/Chat/src/Chat.Application/Chat.Application.csproj" />
+    <Project Path="app/Modules/Chat/src/Chat.Domain/Chat.Domain.csproj" />
+    <Project Path="app/Modules/Chat/src/Chat.Infrastructure/Chat.Infrastructure.csproj" />
+    <Project Path="app/Modules/Chat/src/Chat.Presentation/Chat.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/app/Modules/Chat/tests/">
+    <Project Path="app/Modules/Chat/tests/Chat.IntegrationTests/Chat.IntegrationTests.csproj" />
+    <Project Path="app/Modules/Chat/tests/Chat.UnitTests/Chat.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/app/Modules/Identity/" />
+  <Folder Name="/app/Modules/Identity/src/">
+    <Project Path="app/Modules/Identity/src/Identity.Application/Identity.Application.csproj" />
+    <Project Path="app/Modules/Identity/src/Identity.Domain/Identity.Domain.csproj" />
+    <Project Path="app/Modules/Identity/src/Identity.Infrastructure/Identity.Infrastructure.csproj" />
+    <Project Path="app/Modules/Identity/src/Identity.Presentation/Identity.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/app/Modules/Notification/" />
+  <Folder Name="/app/Modules/Notification/src/">
+    <Project Path="app/Modules/Notification/src/Notification.Application/Notification.Application.csproj" />
+    <Project Path="app/Modules/Notification/src/Notification.Domain/Notification.Domain.csproj" />
+    <Project Path="app/Modules/Notification/src/Notification.Infrastructure/Notification.Infrastructure.csproj" />
+    <Project Path="app/Modules/Notification/src/Notification.Presentation/Notification.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/app/Shared/">
+    <Project Path="app/Shared/BuildingBlocks/BuildingBlocks.csproj" />
+    <Project Path="app/Shared/SharedKernel/SharedKernel.csproj" />
+  </Folder>
+</Solution>
