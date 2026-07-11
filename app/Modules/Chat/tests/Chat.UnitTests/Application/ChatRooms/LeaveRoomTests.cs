@@ -16,7 +16,6 @@ namespace Chat.UnitTests.Application.ChatRooms;
 
 public class LeaveRoomTests
 {
-
     private static readonly LeaveRoomCommand Command = new(Guid.NewGuid());
 
     private readonly LeaveRoomCommandHandler _handler;

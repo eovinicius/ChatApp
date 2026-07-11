@@ -1,6 +1,6 @@
 using Asp.Versioning;
 
-using Chat.Presentation;
+using Chat.Presentation.DependencyInjection;
 
 using ChatApp.Api.Extensions;
 

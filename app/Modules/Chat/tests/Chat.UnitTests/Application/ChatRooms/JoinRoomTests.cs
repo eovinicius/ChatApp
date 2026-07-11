@@ -14,7 +14,6 @@ namespace Chat.UnitTests.Application.ChatRooms;
 
 public class JoinRoomTests
 {
-
     private static readonly JoinRoomCommand Command = new(Guid.NewGuid(), "123");
 
     private readonly JoinRoomCommandHandler _handler;

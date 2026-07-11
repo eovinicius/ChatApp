@@ -11,9 +11,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
-namespace Chat.Presentation;
+namespace Chat.Presentation.DependencyInjection;
 
 public static class ChatModule
 {
