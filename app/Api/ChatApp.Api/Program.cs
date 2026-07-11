@@ -11,8 +11,6 @@ using Identity.Presentation;
 
 using Notification.Presentation;
 
-using Serilog;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDefaultCorrelationId(options =>
@@ -75,11 +73,6 @@ app.UseCorrelationId();
 app.UseCustomExceptionHandler();
 
 app.UseRequestContextLogging();
-
-app.UseSerilogRequestLogging(options =>
-{
-    options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.00} ms";
-});
 
 app.UseCors();
 

@@ -2,11 +2,7 @@ using Chat.Infrastructure.Database.EntityFramework;
 
 using ChatApp.Api.Middlewares;
 
-using CorrelationId.Abstractions;
-
 using Microsoft.EntityFrameworkCore;
-
-using Serilog;
 
 namespace ChatApp.Api.Extensions;
 
@@ -33,23 +29,5 @@ public static class ApplicationBuilderExtensions
     public static void UseIpAddressLogging(this IApplicationBuilder app)
     {
         app.UseMiddleware<IPAddressLoggingMiddleware>();
-    }
-
-    public static void UseHttpRequestLogging(this IApplicationBuilder app)
-    {
-        app.UseSerilogRequestLogging(options =>
-        {
-            options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.00} ms";
-
-            options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
-            {
-                var accessor = httpContext.RequestServices.GetService<ICorrelationContextAccessor>();
-                var correlationId = accessor?.CorrelationContext?.CorrelationId;
-                if (!string.IsNullOrWhiteSpace(correlationId))
-                {
-                    diagnosticContext.Set("CorrelationId", correlationId);
-                }
-            };
-        });
     }
 }
