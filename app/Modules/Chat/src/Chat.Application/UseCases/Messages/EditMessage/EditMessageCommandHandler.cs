@@ -1,11 +1,13 @@
-using Chat.Application.Abstractions.Authentication;
 using BuildingBlocks.Clock;
-using Chat.Application.Abstractions.Data;
 using BuildingBlocks.Messaging;
-using SharedKernel;
+
+using Chat.Application.Abstractions.Authentication;
+using Chat.Application.Abstractions.Data;
 using Chat.Domain.Entities.Messages;
 using Chat.Domain.Entities.Users;
 using Chat.Domain.Repositories;
+
+using SharedKernel;
 
 namespace Chat.Application.UseCases.Messages.EditMessage;
 

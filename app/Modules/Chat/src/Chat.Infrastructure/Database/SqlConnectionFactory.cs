@@ -1,7 +1,10 @@
 using System.Data;
-using Npgsql;
+
 using Chat.Application.Abstractions.Data;
+
 using Microsoft.Extensions.Configuration;
+
+using Npgsql;
 
 namespace Chat.Infrastructure.Database;
 

@@ -1,6 +1,7 @@
-using SharedKernel;
 using Chat.Domain.Entities.Users;
 using Chat.Domain.Events;
+
+using SharedKernel;
 
 namespace Chat.Domain.Entities.ChatRooms;
 

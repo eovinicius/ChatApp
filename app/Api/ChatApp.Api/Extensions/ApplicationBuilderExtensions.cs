@@ -1,9 +1,12 @@
-using ChatApp.Api.Middlewares;
 using Chat.Infrastructure.Database.EntityFramework;
 
-using Microsoft.EntityFrameworkCore;
-using Serilog;
+using ChatApp.Api.Middlewares;
+
 using CorrelationId.Abstractions;
+
+using Microsoft.EntityFrameworkCore;
+
+using Serilog;
 
 namespace ChatApp.Api.Extensions;
 

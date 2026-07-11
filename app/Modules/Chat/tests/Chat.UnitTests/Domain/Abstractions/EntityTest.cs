@@ -1,6 +1,6 @@
-using SharedKernel;
-
 using FluentAssertions;
+
+using SharedKernel;
 
 namespace Chat.UnitTests.Domain.Abstractions;
 

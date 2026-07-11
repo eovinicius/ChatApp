@@ -1,7 +1,8 @@
 using Chat.Application.Abstractions.Data;
-using SharedKernel;
 
 using MediatR;
+
+using SharedKernel;
 
 namespace Chat.Infrastructure.Database.EntityFramework.Data;
 

@@ -2,22 +2,25 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
 
+using Amazon;
+using Amazon.Runtime;
+using Amazon.S3;
+
+using BuildingBlocks.Clock;
+
 using Chat.Application.Abstractions.Authentication;
 using Chat.Application.Abstractions.Data;
 using Chat.Application.Abstractions.Services;
 using Chat.Application.Abstractions.Storage;
 using Chat.Domain.Repositories;
 using Chat.Infrastructure.Authentication;
+using Chat.Infrastructure.Database;
 using Chat.Infrastructure.Database.EntityFramework;
 using Chat.Infrastructure.Database.EntityFramework.Data;
 using Chat.Infrastructure.Database.EntityFramework.Repositories;
+using Chat.Infrastructure.Database.Repositories;
 using Chat.Infrastructure.Services;
 using Chat.Infrastructure.Storage;
-using Amazon;
-using Amazon.S3;
-using Amazon.Runtime;
-using Chat.Infrastructure.Database;
-using Chat.Infrastructure.Database.Repositories;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -28,7 +31,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using BuildingBlocks.Clock;
 
 namespace Chat.Infrastructure;
 

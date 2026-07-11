@@ -1,13 +1,15 @@
 using Asp.Versioning;
 
-using ChatApp.Api.Extensions;
-
 using Chat.Presentation;
-using Identity.Presentation;
-using Notification.Presentation;
+
+using ChatApp.Api.Extensions;
 
 using CorrelationId;
 using CorrelationId.DependencyInjection;
+
+using Identity.Presentation;
+
+using Notification.Presentation;
 
 using Serilog;
 

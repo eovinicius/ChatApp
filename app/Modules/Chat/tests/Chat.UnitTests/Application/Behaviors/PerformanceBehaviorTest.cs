@@ -1,6 +1,5 @@
 using BuildingBlocks.Behaviors;
 using BuildingBlocks.Clock;
-using SharedKernel;
 
 using FluentAssertions;
 
@@ -10,6 +9,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using NSubstitute;
+
+using SharedKernel;
 
 namespace Chat.UnitTests.Application.Behaviors;
 

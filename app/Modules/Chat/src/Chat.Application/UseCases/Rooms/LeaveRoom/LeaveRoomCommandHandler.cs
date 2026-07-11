@@ -1,11 +1,13 @@
+using BuildingBlocks.Messaging;
+
 using Chat.Application.Abstractions.Authentication;
 using Chat.Application.Abstractions.Data;
-using BuildingBlocks.Messaging;
 using Chat.Application.Abstractions.Services;
-using SharedKernel;
 using Chat.Domain.Entities.ChatRooms;
 using Chat.Domain.Entities.Users;
 using Chat.Domain.Repositories;
+
+using SharedKernel;
 
 namespace Chat.Application.UseCases.Rooms.LeaveRoom;
 

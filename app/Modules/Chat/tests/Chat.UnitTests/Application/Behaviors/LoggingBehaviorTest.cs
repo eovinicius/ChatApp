@@ -1,5 +1,4 @@
 using BuildingBlocks.Behaviors;
-using SharedKernel;
 
 using FluentAssertions;
 
@@ -8,6 +7,8 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 
 using NSubstitute;
+
+using SharedKernel;
 
 namespace Chat.UnitTests.Application.Behaviors;
 

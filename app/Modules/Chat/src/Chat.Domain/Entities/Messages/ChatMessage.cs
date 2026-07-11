@@ -1,5 +1,6 @@
-using SharedKernel;
 using Chat.Domain.Events;
+
+using SharedKernel;
 
 namespace Chat.Domain.Entities.Messages;
 

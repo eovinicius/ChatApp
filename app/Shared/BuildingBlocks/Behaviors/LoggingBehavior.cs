@@ -1,12 +1,12 @@
 using System.Diagnostics;
 
-using SharedKernel;
-
 using MediatR;
 
 using Microsoft.Extensions.Logging;
 
 using Serilog.Context;
+
+using SharedKernel;
 
 namespace BuildingBlocks.Behaviors;
 

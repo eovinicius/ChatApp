@@ -1,6 +1,6 @@
-using SharedKernel;
-
 using MediatR;
+
+using SharedKernel;
 
 namespace BuildingBlocks.Messaging;
 

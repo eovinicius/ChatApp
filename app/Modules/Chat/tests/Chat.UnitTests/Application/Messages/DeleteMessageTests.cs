@@ -1,5 +1,6 @@
-using Chat.Application.Abstractions.Authentication;
 using BuildingBlocks.Clock;
+
+using Chat.Application.Abstractions.Authentication;
 using Chat.Application.Abstractions.Data;
 using Chat.Application.Abstractions.Storage;
 using Chat.Application.UseCases.Messages.DeleteMessage;

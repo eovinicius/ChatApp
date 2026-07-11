@@ -2,7 +2,6 @@ using Chat.Application.Abstractions.Authentication;
 using Chat.Application.Abstractions.Data;
 using Chat.Application.Abstractions.Services;
 using Chat.Application.UseCases.Rooms.CreateRoom;
-using SharedKernel;
 using Chat.Domain.Entities.ChatRooms;
 using Chat.Domain.Entities.Users;
 using Chat.Domain.Repositories;
@@ -10,6 +9,8 @@ using Chat.Domain.Repositories;
 using FluentAssertions;
 
 using NSubstitute;
+
+using SharedKernel;
 
 namespace Chat.UnitTests.Application.ChatRooms;
 
