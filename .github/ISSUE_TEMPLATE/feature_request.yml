@@ -1,18 +1,42 @@
-name: Feature Request
-description: Sugira uma nova funcionalidade ou melhoria para o Chat
-labels: ["enhancement"]
+name: 💡 Feature request
+description: Sugira uma nova funcionalidade ou melhoria para o ChatApp
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        Obrigado pela sugestão! Descreva a funcionalidade que gostaria de ver.
+        Obrigado pela sugestão! Quanto mais claro o **problema** e o **resultado esperado**, mais rápido conseguimos avaliar.
+
+  - type: checkboxes
+    id: prechecks
+    attributes:
+      label: Checagens iniciais
+      options:
+        - label: Procurei em issues abertas/fechadas e esta sugestão ainda não existe.
+          required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: Módulo afetado
+      description: Qual parte do monólito modular esta feature toca?
+      options:
+        - Chat
+        - Identity
+        - Notification
+        - Shared / Infra (BuildingBlocks, SharedKernel, API host)
+        - Não sei / múltiplos
+      default: 0
+    validations:
+      required: true
 
   - type: textarea
     id: problem
     attributes:
       label: Problema a resolver
-      description: Qual limitação ou problema essa funcionalidade aborda?
-      placeholder: "Exemplo: Atualmente não é possível editar mensagens após 1 hora..."
+      description: Qual limitação ou dor essa funcionalidade resolve? Foque no problema, não na solução.
+      placeholder: "Ex.: hoje não é possível editar uma mensagem depois de 1 hora, mesmo por engano recente…"
     validations:
       required: true
 
@@ -20,15 +44,26 @@ body:
     id: solution
     attributes:
       label: Solução proposta
-      description: Como você imagina que a funcionalidade funcionaria?
+      description: Como você imagina que funcionaria? Inclua endpoints, contratos ou fluxo, se aplicável.
     validations:
       required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios de aceite
+      description: Como saberemos que está pronto? Liste comportamentos verificáveis.
+      placeholder: |
+        - [ ] Dado ..., quando ..., então ...
+        - [ ] ...
+    validations:
+      required: false
 
   - type: textarea
     id: alternatives
     attributes:
       label: Alternativas consideradas
-      description: Outras formas de resolver o problema e por que essa é preferível.
+      description: Outras abordagens que você pensou e por que esta é preferível.
     validations:
       required: false
 
@@ -36,6 +71,6 @@ body:
     id: context
     attributes:
       label: Contexto adicional
-      description: Links, referências, mockups ou qualquer informação adicional.
+      description: Links, referências, mockups, prints ou qualquer detalhe extra.
     validations:
       required: false

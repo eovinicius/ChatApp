@@ -1,0 +1,3 @@
+# Mantém a opção de abrir uma issue em branco (ex.: reportar um bug ou tirar
+# dúvida) mesmo sem um template dedicado de bug.
+blank_issues_enabled: true
