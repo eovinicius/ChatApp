@@ -12,7 +12,6 @@ using FluentAssertions;
 
 using NSubstitute;
 
-
 namespace Chat.UnitTests.Application.Messages;
 
 public class SendMessageTests

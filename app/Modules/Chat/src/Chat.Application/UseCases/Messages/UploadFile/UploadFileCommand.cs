@@ -8,7 +8,6 @@ public record UploadFileCommand(
     Stream Content,
     string Extension) : ICommand<UploadFileCommandResponse>;
 
-
 public record UploadFileCommandResponse(
     string FileUrl
 );

@@ -49,7 +49,6 @@ public class DeleteMessageTests
         );
     }
 
-
     [Fact]
     public async Task Deveria_deletar_mensagem_com_sucesso()
     {

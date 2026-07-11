@@ -31,7 +31,6 @@ internal class S3FileStorageService : IFileStorageService
         await _s3.PutObjectAsync(request, cancellationToken);
     }
 
-
     public string GeneratePresignedUrl(string key, TimeSpan expiration)
     {
         var request = new GetPreSignedUrlRequest
