@@ -46,7 +46,6 @@ sequenceDiagram
 
     C->>M: sender.Send(command)
     M->>B: LoggingBehavior
-    B->>B: PerformanceBehavior
     B->>H: Handle(command, ct)
     H->>R: repository.GetByIdAsync(id)
     R->>DB: SELECT ...
@@ -95,7 +94,7 @@ UseCases/
         └── GetMessagesByRoomQueryHandler.cs
 ```
 
-O pipeline MediatR executa `LoggingBehavior` e `PerformanceBehavior` em toda request, transparentemente.
+O pipeline MediatR executa `LoggingBehavior` em toda request, transparentemente.
 
 ### IUserContext
 
