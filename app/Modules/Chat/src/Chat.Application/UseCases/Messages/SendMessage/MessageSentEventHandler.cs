@@ -15,8 +15,7 @@ public sealed class MessageSentEventHandler : IDomainEventHandler<MessageSentEve
 
     public Task Handle(MessageSentEvent notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Mensagem enviada: {MessageId} na sala {ChatRoomId} por {SenderId}",
-            notification.MessageId, notification.ChatRoomId, notification.SenderId);
+        _logger.LogInformation("{MessageSentEvent} - Event processed successfully", nameof(MessageSentEvent));
 
         return Task.CompletedTask;
     }

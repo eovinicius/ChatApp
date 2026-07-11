@@ -15,8 +15,7 @@ public sealed class UserRegisteredEventHandler : IDomainEventHandler<UserRegiste
 
     public Task Handle(UserRegisteredEvent notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Usuário registrado: {Username} (Id: {UserId})",
-            notification.Username, notification.UserId);
+        _logger.LogInformation("{UserRegisteredEvent} - Event processed successfully", nameof(UserRegisteredEvent));
 
         return Task.CompletedTask;
     }

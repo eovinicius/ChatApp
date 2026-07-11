@@ -15,8 +15,7 @@ public sealed class RoomCreatedEventHandler : IDomainEventHandler<RoomCreatedEve
 
     public Task Handle(RoomCreatedEvent notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Sala criada: {RoomName} (Id: {RoomId}, Owner: {OwnerId})",
-            notification.RoomName, notification.RoomId, notification.OwnerId);
+        _logger.LogInformation("{RoomCreatedEvent} - Event processed successfully", nameof(RoomCreatedEvent));
 
         return Task.CompletedTask;
     }
