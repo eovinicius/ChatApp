@@ -44,7 +44,7 @@ public static class DependencyInjection
         AddPersistence(services, configuration);
         AddAuthentication(services, configuration);
         AddServicesProviders(services, configuration);
-        if (!environment.IsEnvironment("Testing"))
+        if (!environment.IsEnvironment("Development"))
             AddRateLimiter(services);
         return services;
     }

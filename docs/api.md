@@ -19,7 +19,7 @@ Para obter um token, faça login via `POST /api/user/login`. O token expira em *
 
 Excedido o limite: **HTTP 429 Too Many Requests**.
 
-> Rate limiting é desabilitado no ambiente de testes (`Testing`).
+> Rate limiting é desabilitado no ambiente de desenvolvimento (`Development`).
 
 ## Formato de Resposta
 

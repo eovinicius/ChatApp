@@ -76,7 +76,7 @@ app.UseRequestContextLogging();
 
 app.UseCors();
 
-if (!app.Environment.IsEnvironment("Testing"))
+if (!app.Environment.IsEnvironment("Development"))
     app.UseRateLimiter();
 
 app.UseAuthentication();
