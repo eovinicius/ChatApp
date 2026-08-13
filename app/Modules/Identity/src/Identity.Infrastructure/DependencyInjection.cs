@@ -23,6 +23,9 @@ namespace Identity.Infrastructure;
 
 public static class DependencyInjection
 {
+    // O hub SignalR fica nesta rota; o handshake WebSocket manda o JWT na query string.
+    private const string ChatHubPath = "/chatHub";
+
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         AddPersistence(services, configuration);
@@ -81,6 +84,24 @@ public static class DependencyInjection
                 ValidAudience = jwtAudience,
                 NameClaimType = ClaimTypes.NameIdentifier,
                 RoleClaimType = ClaimTypes.Role,
+            };
+
+            // O cliente SignalR não consegue mandar o header Authorization no handshake
+            // WebSocket; sem isto o hub simplesmente não autentica.
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    var accessToken = context.Request.Query["access_token"];
+
+                    if (!string.IsNullOrEmpty(accessToken) &&
+                        context.HttpContext.Request.Path.StartsWithSegments(ChatHubPath))
+                    {
+                        context.Token = accessToken;
+                    }
+
+                    return Task.CompletedTask;
+                }
             };
         });
     }
