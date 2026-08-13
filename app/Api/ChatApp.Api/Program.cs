@@ -51,9 +51,12 @@ builder.Services.AddApiVersioning(options =>
 
 // Composição dos módulos do monólito modular.
 builder.Services
-    .AddChatModule(builder.Configuration, builder.Environment)
     .AddIdentityModule(builder.Configuration)
+    .AddChatModule(builder.Configuration)
     .AddNotificationModule(builder.Configuration);
+
+if (!builder.Environment.IsEnvironment("Development"))
+    builder.Services.AddCustomRateLimiter();
 
 builder.Services.AddCustomSwagger();
 
