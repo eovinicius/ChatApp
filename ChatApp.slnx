@@ -18,9 +18,13 @@
   <Folder Name="/app/Modules/Identity/" />
   <Folder Name="/app/Modules/Identity/src/">
     <Project Path="app/Modules/Identity/src/Identity.Application/Identity.Application.csproj" />
+    <Project Path="app/Modules/Identity/src/Identity.Contracts/Identity.Contracts.csproj" />
     <Project Path="app/Modules/Identity/src/Identity.Domain/Identity.Domain.csproj" />
     <Project Path="app/Modules/Identity/src/Identity.Infrastructure/Identity.Infrastructure.csproj" />
     <Project Path="app/Modules/Identity/src/Identity.Presentation/Identity.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/app/Modules/Identity/tests/">
+    <Project Path="app/Modules/Identity/tests/Identity.UnitTests/Identity.UnitTests.csproj" />
   </Folder>
   <Folder Name="/app/Modules/Notification/" />
   <Folder Name="/app/Modules/Notification/src/">
@@ -31,6 +35,7 @@
   </Folder>
   <Folder Name="/app/Shared/">
     <Project Path="app/Shared/BuildingBlocks/BuildingBlocks.csproj" />
+    <Project Path="app/Shared/BuildingBlocks.Api/BuildingBlocks.Api.csproj" />
     <Project Path="app/Shared/SharedKernel/SharedKernel.csproj" />
   </Folder>
 </Solution>
