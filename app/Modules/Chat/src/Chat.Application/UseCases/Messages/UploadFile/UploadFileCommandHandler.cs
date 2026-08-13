@@ -47,6 +47,6 @@ public class UploadFileCommandHandler : ICommandHandler<UploadFileCommand, Uploa
 
         var url = _fileStorage.GeneratePresignedUrl(key, TimeSpan.FromMinutes(10));
 
-        return Result.Success(new UploadFileCommandResponse(url));
+        return new UploadFileCommandResponse(url, key, request.FileName, request.Content.Length);
     }
 }

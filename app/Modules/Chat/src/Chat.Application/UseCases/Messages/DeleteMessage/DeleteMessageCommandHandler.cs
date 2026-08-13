@@ -1,11 +1,10 @@
+using BuildingBlocks.Authentication;
 using BuildingBlocks.Clock;
 using BuildingBlocks.Messaging;
 
-using Chat.Application.Abstractions.Authentication;
 using Chat.Application.Abstractions.Data;
 using Chat.Application.Abstractions.Storage;
-using Chat.Domain.Entities.Messages;
-using Chat.Domain.Entities.Users;
+using Chat.Domain.Messages;
 using Chat.Domain.Repositories;
 
 using SharedKernel;
@@ -14,54 +13,45 @@ namespace Chat.Application.UseCases.Messages.DeleteMessage;
 
 public class DeleteMessageCommandHandler : ICommandHandler<DeleteMessageCommand>
 {
-    private readonly IChatMessageRepository _messageRepository;
+    private readonly IMessageRepository _messageRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserContext _userContext;
+    private readonly IFileStorageService _fileStorage;
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly IUserRepository _userRepository;
-    private readonly IFileStorageService _fileStorageService;
 
-    public DeleteMessageCommandHandler(IChatMessageRepository messageRepository, IUnitOfWork unitOfWork, IUserContext userContext, IDateTimeProvider dateTimeProvider, IUserRepository userRepository, IFileStorageService fileStorageService)
+    public DeleteMessageCommandHandler(
+        IMessageRepository messageRepository,
+        IUnitOfWork unitOfWork,
+        IUserContext userContext,
+        IFileStorageService fileStorage,
+        IDateTimeProvider dateTimeProvider)
     {
         _messageRepository = messageRepository;
         _unitOfWork = unitOfWork;
         _userContext = userContext;
+        _fileStorage = fileStorage;
         _dateTimeProvider = dateTimeProvider;
-        _userRepository = userRepository;
-        _fileStorageService = fileStorageService;
     }
 
     public async Task<Result> Handle(DeleteMessageCommand request, CancellationToken cancellationToken)
     {
-        var currentUserId = _userContext.UserId;
-
-        var user = await _userRepository.GetById(currentUserId, cancellationToken);
-
-        if (user is null)
-        {
-            return UserErrors.NotFound;
-        }
-
         var message = await _messageRepository.GetById(request.MessageId, cancellationToken);
-
         if (message is null)
-        {
-            return ChatMessageErrors.NotFound;
-        }
+            return MessageErrors.NotFound;
 
-        if (!message.CanBeDeletedBy(currentUserId, request.RoomId, _dateTimeProvider.UtcNow))
-        {
-            return ChatMessageErrors.Unauthorized;
-        }
+        var storageKey = message.Content.StorageKey;
 
-        await _messageRepository.Delete(message, cancellationToken);
+        var deleteResult = message.Delete(_userContext.UserId, _dateTimeProvider.UtcNow);
+        if (deleteResult.IsFailure)
+            return deleteResult;
 
-        if (message.ContentType != ContentType.Text)
-        {
-            await _fileStorageService.Delete(message.Content, cancellationToken);
-        }
-
+        _messageRepository.Update(message);
         await _unitOfWork.Commit(cancellationToken);
+
+        // Agora usa a chave real do objeto. Antes passava a URL pré-assinada como key,
+        // então o arquivo nunca era removido do bucket.
+        if (!string.IsNullOrWhiteSpace(storageKey))
+            await _fileStorage.Delete(storageKey, cancellationToken);
 
         return Result.Success();
     }
