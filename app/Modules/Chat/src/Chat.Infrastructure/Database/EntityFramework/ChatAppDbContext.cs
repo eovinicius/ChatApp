@@ -1,6 +1,5 @@
-using Chat.Domain.Entities.ChatRooms;
-using Chat.Domain.Entities.Messages;
-using Chat.Domain.Entities.Users;
+using Chat.Domain.Conversations;
+using Chat.Domain.Messages;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -8,17 +7,17 @@ namespace Chat.Infrastructure.Database.EntityFramework;
 
 public class ChatAppDbContext : DbContext
 {
-    public DbSet<ChatRoom> ChatRooms { get; set; } = null!;
-    public DbSet<User> Users { get; set; } = null!;
-    public DbSet<ChatMessage> Messages { get; set; } = null!;
+    public const string Schema = "chat";
 
-    public ChatAppDbContext(DbContextOptions options)
-        : base(options) { }
+    public DbSet<Conversation> Conversations { get; set; } = null!;
+    public DbSet<Message> Messages { get; set; } = null!;
+
+    public ChatAppDbContext(DbContextOptions<ChatAppDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ChatAppDbContext).Assembly);
-
         base.OnModelCreating(modelBuilder);
     }
 }
