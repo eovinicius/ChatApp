@@ -75,6 +75,8 @@ app.UseCorrelationId();
 
 app.UseCustomExceptionHandler();
 
+app.UseCustomStatusCodeHandler();
+
 app.UseRequestContextLogging();
 
 app.UseCors();

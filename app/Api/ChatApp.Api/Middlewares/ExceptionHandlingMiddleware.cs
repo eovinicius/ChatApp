@@ -1,4 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
+using BuildingBlocks.Api;
+
+using SharedKernel;
 
 namespace ChatApp.Api.Middlewares;
 
@@ -25,54 +27,41 @@ public class ExceptionHandlingMiddleware
         {
             _logger.LogError(exception, "Ocorreu uma exceção: {Message}", exception.Message);
 
-            var exceptionDetails = GetExceptionDetails(exception);
+            // Se já começamos a escrever, não dá para trocar o corpo: deixa a
+            // exceção subir para o servidor abortar a conexão.
+            if (context.Response.HasStarted)
+                throw;
 
-            var problemDetails = new ProblemDetails
-            {
-                Status = exceptionDetails.Status,
-                Type = exceptionDetails.Type,
-                Title = exceptionDetails.Title,
-                Detail = exceptionDetails.Detail,
-            };
+            context.Response.Clear();
 
-            context.Response.StatusCode = exceptionDetails.Status;
-            context.Response.ContentType = "application/problem+json";
-
-            await context.Response.WriteAsJsonAsync(problemDetails);
+            // Mesmo caminho de construção dos erros dos endpoints — o formato não
+            // pode divergir só porque a falha veio de uma exceção.
+            await ApiResults.Problem(ToError(exception)).ExecuteAsync(context);
         }
     }
 
-    private static ExceptionDetails GetExceptionDetails(Exception exception)
+    private static Error ToError(Exception exception) => exception switch
     {
-        return exception switch
-        {
-            UnauthorizedAccessException => new ExceptionDetails(
-                StatusCodes.Status403Forbidden,
-                "Forbidden",
-                "Acesso negado",
-                "Você não tem permissão para realizar esta ação",
-                null),
+        UnauthorizedAccessException => new Error(
+            "Auth.Forbidden",
+            "Você não tem permissão para realizar esta ação.",
+            ErrorType.Forbidden),
 
-            ArgumentException argEx => new ExceptionDetails(
-                StatusCodes.Status400BadRequest,
-                "Bad Request",
-                "Argumento inválido",
-                argEx.Message,
-                null),
+        // Corpo ilegível/JSON malformado: o Minimal API lança isso antes do handler.
+        BadHttpRequestException => new Error(
+            "Http.MalformedRequest",
+            "A requisição não pôde ser lida. Verifique o corpo enviado.",
+            ErrorType.Validation),
 
-            _ => new ExceptionDetails(
-                StatusCodes.Status500InternalServerError,
-                "Server Error",
-                "Erro interno do servidor",
-                "Ocorreu um erro inesperado",
-                null)
-        };
-    }
+        ArgumentException argumentException => new Error(
+            "Request.InvalidArgument",
+            argumentException.Message,
+            ErrorType.Validation),
 
-    internal record ExceptionDetails(
-        int Status,
-        string Type,
-        string Title,
-        string Detail,
-        IEnumerable<object>? Errors);
+        // A mensagem real fica só no log — nunca no corpo da resposta.
+        _ => new Error(
+            "Server.Unexpected",
+            "Ocorreu um erro inesperado.",
+            ErrorType.Failure)
+    };
 }

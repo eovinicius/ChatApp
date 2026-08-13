@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Shared\BuildingBlocks.Api\BuildingBlocks.Api.csproj" />
     <ProjectReference Include="..\..\Modules\Chat\src\Chat.Presentation\Chat.Presentation.csproj" />
     <ProjectReference Include="..\..\Modules\Chat\src\Chat.Infrastructure\Chat.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Identity\src\Identity.Presentation\Identity.Presentation.csproj" />
