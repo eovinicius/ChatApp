@@ -2,6 +2,4 @@ using BuildingBlocks.Messaging;
 
 namespace Chat.Application.UseCases.Messages.EditMessage;
 
-public record EditMessageCommand(Guid MessageId, MessageContent Content, Guid RoomId) : ICommand { }
-
-public record MessageContent(string Type, string Data);
+public record EditMessageCommand(Guid MessageId, string Content) : ICommand;

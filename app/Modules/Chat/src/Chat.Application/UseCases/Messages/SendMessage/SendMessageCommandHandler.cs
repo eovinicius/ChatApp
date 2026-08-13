@@ -1,80 +1,80 @@
+using BuildingBlocks.Authentication;
 using BuildingBlocks.Clock;
 using BuildingBlocks.Messaging;
 
-using Chat.Application.Abstractions.Authentication;
 using Chat.Application.Abstractions.Data;
-using Chat.Domain.Entities.ChatRooms;
-using Chat.Domain.Entities.Messages;
-using Chat.Domain.Entities.Users;
+using Chat.Domain.Conversations;
+using Chat.Domain.Messages;
 using Chat.Domain.Repositories;
 
 using SharedKernel;
 
 namespace Chat.Application.UseCases.Messages.SendMessage;
 
-public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageCommand, Guid>
+public class SendMessageCommandHandler : ICommandHandler<SendMessageCommand, Guid>
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IUserContext _userContext;
-    private readonly IChatRoomRepository _chatRoomRepository;
-    private readonly IChatMessageRepository _chatMessageRepository;
+    private readonly IConversationRepository _conversationRepository;
+    private readonly IMessageRepository _messageRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContext _userContext;
     private readonly IDateTimeProvider _dateTimeProvider;
 
     public SendMessageCommandHandler(
-        IUserRepository userRepository,
-        IUserContext userContext,
-        IChatRoomRepository chatRoomRepository,
-        IChatMessageRepository chatMessageRepository,
+        IConversationRepository conversationRepository,
+        IMessageRepository messageRepository,
         IUnitOfWork unitOfWork,
+        IUserContext userContext,
         IDateTimeProvider dateTimeProvider)
     {
-        _userRepository = userRepository;
-        _userContext = userContext;
-        _chatRoomRepository = chatRoomRepository;
-        _chatMessageRepository = chatMessageRepository;
+        _conversationRepository = conversationRepository;
+        _messageRepository = messageRepository;
         _unitOfWork = unitOfWork;
+        _userContext = userContext;
         _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<Result<Guid>> Handle(SendMessageCommand request, CancellationToken cancellationToken)
     {
-        var currentUserId = _userContext.UserId;
+        var senderId = _userContext.UserId;
 
-        var user = await _userRepository.GetById(currentUserId, cancellationToken);
-        if (user is null)
-        {
-            return UserErrors.NotFound;
-        }
+        var conversation = await _conversationRepository.GetByIdWithParticipants(request.ConversationId, cancellationToken);
+        if (conversation is null)
+            return ConversationErrors.NotFound;
 
-        var room = await _chatRoomRepository.GetById(request.RoomId, cancellationToken);
-        if (room is null)
-        {
-            return ChatRoomErrors.NotFound;
-        }
+        var canPost = conversation.EnsureCanPost(senderId);
+        if (canPost.IsFailure)
+            return canPost.Error;
 
-        if (!room.IsUserInRoom(user))
-        {
-            return ChatRoomErrors.NotMember;
-        }
+        var contentTypeResult = ContentType.From(request.ContentType);
+        if (contentTypeResult.IsFailure)
+            return contentTypeResult.Error;
 
-        var messageResult = ChatMessage.Create(
-            room.Id,
-            ContentType.From(request.ContentType),
-            request.Content,
-            user.Id,
-            _dateTimeProvider.UtcNow
-        );
+        var contentType = contentTypeResult.Value;
 
+        var contentResult = contentType == ContentType.Text
+            ? MessageContent.CreateText(request.Content)
+            : MessageContent.CreateMedia(contentType, request.Content, request.StorageKey!, request.FileName, request.SizeBytes);
+
+        if (contentResult.IsFailure)
+            return contentResult.Error;
+
+        var sentAt = _dateTimeProvider.UtcNow;
+
+        var messageResult = Message.Create(conversation.Id, senderId, contentResult.Value, sentAt);
         if (messageResult.IsFailure)
             return messageResult.Error;
 
-        var chatMessage = messageResult.Value;
+        var message = messageResult.Value;
 
-        await _chatMessageRepository.Add(chatMessage, cancellationToken);
+        // Mantém a lista de conversas ordenada sem precisar agregar Messages.
+        conversation.RegisterActivity(sentAt);
 
+        // Quem envia já leu a própria mensagem.
+        conversation.MarkRead(senderId, message.Id, sentAt);
+
+        await _messageRepository.Add(message, cancellationToken);
         await _unitOfWork.Commit(cancellationToken);
 
-        return Result.Success(chatMessage.Id);
+        return message.Id;
     }
 }
