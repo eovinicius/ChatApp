@@ -11,7 +11,7 @@ namespace Chat.IntegrationTests.Messages;
 public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
 {
     private static async Task<JsonElement> GetMessagesAsync(TestUser user, Guid conversationId)
-        => await user.Client.GetFromJsonAsync<JsonElement>($"/api/v1/conversations/{conversationId}/messages");
+        => await GetDataAsync(user.Client, $"/api/v1/conversations/{conversationId}/messages");
 
     private static int UnreadFor(JsonElement conversations, Guid conversationId)
         => conversations.EnumerateArray()

@@ -318,7 +318,7 @@ public class RealTimeTests(ChatAppFactory factory) : IntegrationTestBase(factory
         await Await(tcs.Task);
 
         // Assert — quem guarda o "visto por último" é o módulo Identity, via IUserPresenceSink.
-        var me = await bob.Client.GetFromJsonAsync<System.Text.Json.JsonElement>("/api/v1/users/me");
+        var me = await GetDataAsync(bob.Client, "/api/v1/users/me");
         me.GetProperty("lastSeenAt").ValueKind.Should().NotBe(System.Text.Json.JsonValueKind.Null);
     }
 }

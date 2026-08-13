@@ -106,7 +106,7 @@ public class ConversationTests(ChatAppFactory factory) : IntegrationTestBase(fac
 
         // Act
         var groupId = await CreateGroupAsync(alice, "Time", bob.Id);
-        var details = await alice.Client.GetFromJsonAsync<JsonElement>($"/api/v1/conversations/{groupId}");
+        var details = await GetDataAsync(alice.Client, $"/api/v1/conversations/{groupId}");
 
         // Assert
         details.GetProperty("type").GetString().Should().Be("group");
@@ -149,7 +149,7 @@ public class ConversationTests(ChatAppFactory factory) : IntegrationTestBase(fac
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        var details = await alice.Client.GetFromJsonAsync<JsonElement>($"/api/v1/conversations/{groupId}");
+        var details = await GetDataAsync(alice.Client, $"/api/v1/conversations/{groupId}");
         details.GetProperty("participants").GetArrayLength().Should().Be(3);
     }
 

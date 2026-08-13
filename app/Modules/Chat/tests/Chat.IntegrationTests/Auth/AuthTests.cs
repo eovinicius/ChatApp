@@ -26,8 +26,7 @@ public class AuthTests(ChatAppFactory factory) : IntegrationTestBase(factory)
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
-        json.GetProperty("token").GetString().Should().NotBeNullOrWhiteSpace();
+        (await DataAsync(response)).GetProperty("token").GetString().Should().NotBeNullOrWhiteSpace();
     }
 
     [Fact]
@@ -80,7 +79,7 @@ public class AuthTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         var bob = await CreateUserAsync();
 
         // Act
-        var found = await alice.Client.GetFromJsonAsync<JsonElement>($"/api/v1/users?search={bob.Username}");
+        var found = await GetDataAsync(alice.Client, $"/api/v1/users?search={bob.Username}");
 
         // Assert
         found.EnumerateArray().Select(u => u.GetProperty("id").GetGuid()).Should().Contain(bob.Id);
@@ -93,7 +92,7 @@ public class AuthTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         var alice = await CreateUserAsync();
 
         // Act
-        var found = await alice.Client.GetFromJsonAsync<JsonElement>($"/api/v1/users?search={alice.Username}");
+        var found = await GetDataAsync(alice.Client, $"/api/v1/users?search={alice.Username}");
 
         // Assert
         found.EnumerateArray().Should().BeEmpty();
