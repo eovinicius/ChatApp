@@ -13,7 +13,7 @@ dotnet test
 # Run a specific test class
 dotnet test --filter "FullyQualifiedName~ConversationTest"
 
-# Run the API (Swagger at http://localhost:5110/swagger/index.html)
+# Run the API (Swagger at http://localhost:5000/swagger)
 dotnet run --project .\app\Api\ChatApp.Api\ChatApp.Api.csproj
 
 # Start only the database (required before running locally)
