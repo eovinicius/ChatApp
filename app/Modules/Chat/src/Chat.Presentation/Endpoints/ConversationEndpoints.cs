@@ -36,14 +36,14 @@ public static class ConversationEndpoints
         {
             var result = await sender.Send(new StartDirectConversationCommand(request.TargetUserId));
 
-            return result.ToHttpResult(id => Results.Created(ConversationPath(links, http, id), new { id }));
+            return result.ToCreatedResult(id => ConversationPath(links, http, id), id => new { id });
         }).AddEndpointFilter<ValidationFilter<StartDirectConversationRequest>>();
 
         group.MapPost("group", async (CreateGroupConversationRequest request, ISender sender, LinkGenerator links, HttpContext http) =>
         {
             var result = await sender.Send(new CreateGroupConversationCommand(request.Name, request.MemberIds));
 
-            return result.ToHttpResult(id => Results.Created(ConversationPath(links, http, id), new { id }));
+            return result.ToCreatedResult(id => ConversationPath(links, http, id), id => new { id });
         }).AddEndpointFilter<ValidationFilter<CreateGroupConversationRequest>>();
 
         // A tela inicial.
@@ -51,7 +51,7 @@ public static class ConversationEndpoints
         {
             var result = await sender.Send(new GetMyConversationsQuery(before, take ?? 30));
 
-            return result.ToHttpResult();
+            return result.ToPagedResult();
         });
 
         group.MapGet("{conversationId:guid}", async (Guid conversationId, ISender sender) =>
@@ -115,7 +115,7 @@ public static class ConversationEndpoints
         {
             var result = await sender.Send(new GetMessagesQuery(conversationId, before, take ?? 30));
 
-            return result.ToHttpResult();
+            return result.ToPagedResult();
         });
 
         group.MapPost("{conversationId:guid}/messages", async (Guid conversationId, SendMessageRequest request, ISender sender) =>
@@ -130,7 +130,8 @@ public static class ConversationEndpoints
 
             var result = await sender.Send(command);
 
-            return result.ToHttpResult(id => Results.Ok(new { id }));
+            // 201 sem Location: não existe rota GET para uma mensagem isolada.
+            return result.ToCreatedResult(id => new { id });
         }).AddEndpointFilter<ValidationFilter<SendMessageRequest>>();
 
         return app;

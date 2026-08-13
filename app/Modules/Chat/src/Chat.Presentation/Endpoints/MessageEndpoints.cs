@@ -56,13 +56,13 @@ public static class MessageEndpoints
 
             var result = await sender.Send(command);
 
-            return result.ToHttpResult(response => Results.Ok(new
+            return result.ToHttpResult(response => new
             {
                 url = response.FileUrl,
                 storageKey = response.StorageKey,
                 fileName = response.FileName,
                 sizeBytes = response.SizeBytes
-            }));
+            });
         }).DisableAntiforgery();
 
         return app;

@@ -28,14 +28,14 @@ public static class AuthEndpoints
         {
             var result = await sender.Send(new RegisterUserCommand(request.Name, request.Username, request.Password));
 
-            return result.ToHttpResult(token => Results.Ok(new { token }));
+            return result.ToHttpResult(token => new { token });
         }).AddEndpointFilter<ValidationFilter<UserRegisterRequest>>();
 
         group.MapPost("login", async (UserLoginRequest request, ISender sender) =>
         {
             var result = await sender.Send(new LoginCommand(request.Username, request.Password));
 
-            return result.ToHttpResult(token => Results.Ok(new { token }));
+            return result.ToHttpResult(token => new { token });
         }).AddEndpointFilter<ValidationFilter<UserLoginRequest>>();
 
         return app;
