@@ -2,11 +2,11 @@ using System.ComponentModel.DataAnnotations;
 
 using Microsoft.AspNetCore.Http;
 
-namespace Chat.Presentation;
+namespace BuildingBlocks.Api;
 
 // Valida (via DataAnnotations) o argumento do tipo T recebido pelo endpoint,
 // preservando o comportamento de auto-validação que os Controllers [ApiController] tinham.
-internal sealed class ValidationFilter<T> : IEndpointFilter where T : class
+public sealed class ValidationFilter<T> : IEndpointFilter where T : class
 {
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {

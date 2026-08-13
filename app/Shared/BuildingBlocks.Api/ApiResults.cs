@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Http;
 
 using SharedKernel;
 
-namespace Chat.Presentation;
+namespace BuildingBlocks.Api;
 
-internal static class ApiResults
+public static class ApiResults
 {
     public static IResult Problem(Error error) =>
         Results.Problem(
