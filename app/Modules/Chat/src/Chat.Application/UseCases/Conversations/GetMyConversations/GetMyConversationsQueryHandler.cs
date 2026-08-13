@@ -1,5 +1,6 @@
 using BuildingBlocks.Authentication;
 using BuildingBlocks.Messaging;
+using BuildingBlocks.Pagination;
 
 using Chat.Application.Abstractions.Data;
 using Chat.Domain.Conversations;
@@ -10,7 +11,7 @@ using SharedKernel;
 
 namespace Chat.Application.UseCases.Conversations.GetMyConversations;
 
-public class GetMyConversationsQueryHandler : IQueryHandler<GetMyConversationsQuery, IReadOnlyList<GetMyConversationsResponse>>
+public class GetMyConversationsQueryHandler : IQueryHandler<GetMyConversationsQuery, Page<GetMyConversationsResponse>>
 {
     private const int MaxTake = 100;
     private const string DeletedMessagePlaceholder = "Esta mensagem foi apagada";
@@ -29,16 +30,20 @@ public class GetMyConversationsQueryHandler : IQueryHandler<GetMyConversationsQu
         _userDirectory = userDirectory;
     }
 
-    public async Task<Result<IReadOnlyList<GetMyConversationsResponse>>> Handle(
+    public async Task<Result<Page<GetMyConversationsResponse>>> Handle(
         GetMyConversationsQuery request,
         CancellationToken cancellationToken)
     {
         var take = Math.Clamp(request.Take, 1, MaxTake);
 
-        var items = await _conversationDao.GetForUser(_userContext.UserId, request.Before, take, cancellationToken);
+        // take + 1: o item extra só serve para saber se há próxima página.
+        var fetched = await _conversationDao.GetForUser(_userContext.UserId, request.Before, take + 1, cancellationToken);
+
+        // Recorta antes de hidratar, senão buscaríamos um usuário a mais por página.
+        var page = Page.From(fetched, take, item => item.LastActivityAt);
 
         // Hidratação em lote dos títulos das conversas 1x1.
-        var otherUserIds = items
+        var otherUserIds = page.Items
             .Where(item => item.OtherUserId is not null)
             .Select(item => item.OtherUserId!.Value)
             .Distinct()
@@ -50,11 +55,7 @@ public class GetMyConversationsQueryHandler : IQueryHandler<GetMyConversationsQu
 
         var usersById = users.ToDictionary(user => user.Id);
 
-        IReadOnlyList<GetMyConversationsResponse> response = items
-            .Select(item => Map(item, usersById))
-            .ToList();
-
-        return Result.Success(response);
+        return page.Map(item => Map(item, usersById));
     }
 
     private static GetMyConversationsResponse Map(ConversationListItem item, IReadOnlyDictionary<Guid, UserSummary> usersById)

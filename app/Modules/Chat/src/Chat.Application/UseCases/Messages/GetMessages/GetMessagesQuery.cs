@@ -1,9 +1,10 @@
 using BuildingBlocks.Messaging;
+using BuildingBlocks.Pagination;
 
 namespace Chat.Application.UseCases.Messages.GetMessages;
 
 public record GetMessagesQuery(Guid ConversationId, DateTime? Before = null, int Take = 30)
-    : IQuery<IReadOnlyList<GetMessagesResponse>>;
+    : IQuery<Page<GetMessagesResponse>>;
 
 public sealed record GetMessagesResponse(
     Guid Id,

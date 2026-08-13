@@ -1,10 +1,11 @@
 using BuildingBlocks.Messaging;
+using BuildingBlocks.Pagination;
 
 namespace Chat.Application.UseCases.Conversations.GetMyConversations;
 
 // A tela inicial: conversas do usuário ordenadas por atividade, com prévia e não-lidas.
 public record GetMyConversationsQuery(DateTime? Before = null, int Take = 30)
-    : IQuery<IReadOnlyList<GetMyConversationsResponse>>;
+    : IQuery<Page<GetMyConversationsResponse>>;
 
 public sealed record GetMyConversationsResponse(
     Guid Id,

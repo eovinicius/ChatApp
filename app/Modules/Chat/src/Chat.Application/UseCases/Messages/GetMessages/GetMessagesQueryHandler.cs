@@ -1,5 +1,6 @@
 using BuildingBlocks.Authentication;
 using BuildingBlocks.Messaging;
+using BuildingBlocks.Pagination;
 
 using Chat.Application.Abstractions.Data;
 using Chat.Domain.Conversations;
@@ -9,7 +10,7 @@ using SharedKernel;
 
 namespace Chat.Application.UseCases.Messages.GetMessages;
 
-public class GetMessagesQueryHandler : IQueryHandler<GetMessagesQuery, IReadOnlyList<GetMessagesResponse>>
+public class GetMessagesQueryHandler : IQueryHandler<GetMessagesQuery, Page<GetMessagesResponse>>
 {
     private const int MaxTake = 100;
     private const string DeletedMessagePlaceholder = "Esta mensagem foi apagada";
@@ -28,7 +29,7 @@ public class GetMessagesQueryHandler : IQueryHandler<GetMessagesQuery, IReadOnly
         _userContext = userContext;
     }
 
-    public async Task<Result<IReadOnlyList<GetMessagesResponse>>> Handle(GetMessagesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<Page<GetMessagesResponse>>> Handle(GetMessagesQuery request, CancellationToken cancellationToken)
     {
         var conversation = await _conversationRepository.GetByIdWithParticipants(request.ConversationId, cancellationToken);
         if (conversation is null)
@@ -39,11 +40,10 @@ public class GetMessagesQueryHandler : IQueryHandler<GetMessagesQuery, IReadOnly
 
         var take = Math.Clamp(request.Take, 1, MaxTake);
 
-        var items = await _messageDao.GetByConversation(request.ConversationId, request.Before, take, cancellationToken);
+        // take + 1: o item extra só serve para saber se há próxima página.
+        var fetched = await _messageDao.GetByConversation(request.ConversationId, request.Before, take + 1, cancellationToken);
 
-        IReadOnlyList<GetMessagesResponse> response = items.Select(Map).ToList();
-
-        return Result.Success(response);
+        return Page.From(fetched, take, item => item.SentAt).Map(Map);
     }
 
     private static GetMessagesResponse Map(MessageListItem item) => new(
