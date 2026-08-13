@@ -92,6 +92,16 @@ Messages are **soft-deleted** (`DeletedAt`); a hard delete would put holes betwe
 
 **Read models** — list endpoints go through Dapper DAOs (`IConversationDao`, `IMessageDao`), not EF. Keyset pagination is always `ORDER BY "SentAt" DESC, "Id" DESC` (the `Id` is the tiebreaker) and `take` is clamped in the handler.
 
+## HTTP response contract
+
+Every response with a body uses one envelope — `{ data, error, meta }`. `data` and `error` are always both present, exactly one non-null; `meta` is omitted when empty. Void commands stay **204 with no body** — the only success without an envelope. Errors carry `code` (stable, the key clients branch on), `message` (pt-BR, user-facing), `type` (the `ErrorType` name, which also determines the status code), optional `details` for per-field validation, and `traceId`. There is no `application/problem+json` anywhere. Full contract in `docs/api.md`.
+
+**`ApiResults` is the only place a response is constructed** (`BuildingBlocks.Api/ApiResults.cs`) — `ToHttpResult`, `ToCreatedResult`, `ToPagedResult`, `Problem`. It deliberately exposes **no overload taking a ready-made `IResult`**: without one, an endpoint physically cannot emit a bespoke shape, so the standard holds by compilation rather than by discipline. Don't add such an overload back, and don't call `Results.Ok/Created/Problem` from an endpoint. `ExceptionHandlingMiddleware` and `UseCustomStatusCodeHandler` route through the same `ApiResults.Problem`, so exceptions and framework-generated 401/403/404/405/415/429 come back in the envelope too instead of with an empty body.
+
+**Validation** — `ValidationError` (SharedKernel) aggregates per-field `Error`s (`Code` = field, `Name` = message) into one `Error`, so DataAnnotations failures from `ValidationFilter<T>` and domain validation failures produce the same 400 shape. `Error` is unsealed only to allow this subclass.
+
+**Paginated lists** — handlers of paginated queries return `Page<T>` (`BuildingBlocks/Pagination/Page.cs`) and the endpoint calls `.ToPagedResult()`. The handler asks the DAO for `take + 1`; the extra row is what proves `hasMore` without a second `COUNT(*)`. Build it with `Page.From(fetched, take, cursorSelector)` over the **raw read model**, then `.Map(...)` to the DTO — trimming before projection is what keeps `IUserDirectory.GetByIds` from hydrating one row too many. Non-paginated lists (`SearchUsers`) return a plain list and carry no `meta`.
+
 ## Real-Time
 
 SignalR hub at `/chatHub`, typed as `Hub<IChatClient>`. Three rules:
