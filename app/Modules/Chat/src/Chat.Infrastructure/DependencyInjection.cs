@@ -1,51 +1,38 @@
-using System.Security.Claims;
-using System.Text;
-using System.Threading.RateLimiting;
-
 using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
 
 using BuildingBlocks.Clock;
 
-using Chat.Application.Abstractions.Authentication;
 using Chat.Application.Abstractions.Data;
-using Chat.Application.Abstractions.Services;
+using Chat.Application.Abstractions.RealTime;
 using Chat.Application.Abstractions.Storage;
 using Chat.Domain.Repositories;
-using Chat.Infrastructure.Authentication;
 using Chat.Infrastructure.Database;
 using Chat.Infrastructure.Database.EntityFramework;
 using Chat.Infrastructure.Database.EntityFramework.Data;
 using Chat.Infrastructure.Database.EntityFramework.Repositories;
 using Chat.Infrastructure.Database.Repositories;
+using Chat.Infrastructure.RealTime;
 using Chat.Infrastructure.Services;
 using Chat.Infrastructure.Storage;
 
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Chat.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        IWebHostEnvironment environment)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         AddPersistence(services, configuration);
-        AddAuthentication(services, configuration);
-        AddServicesProviders(services, configuration);
-        if (!environment.IsEnvironment("Development"))
-            AddRateLimiter(services);
+        AddRealTime(services);
+        AddStorage(services, configuration);
+
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+
         return services;
     }
 
@@ -62,22 +49,26 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString);
         });
 
-        services.AddScoped<IChatRoomRepository, ChatRoomRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
+        services.AddScoped<IConversationRepository, ConversationRepository>();
+        services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
+        services.AddScoped<IConversationDao, ConversationDao>();
         services.AddScoped<IMessageDao, MessageDao>();
     }
 
-    private static void AddServicesProviders(IServiceCollection services, IConfiguration configuration)
+    private static void AddRealTime(IServiceCollection services)
     {
-        services.AddScoped<IHashService, HashService>();
-        services.AddSingleton<IChatHub, SignalRChatRoomNotifier>();
         services.AddSignalR();
 
-        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        services.AddSingleton<IChatNotifier, SignalRChatNotifier>();
 
+        // Singleton porque o estado de conexões é do processo inteiro.
+        services.AddSingleton<IPresenceTracker, InMemoryPresenceTracker>();
+    }
+
+    private static void AddStorage(IServiceCollection services, IConfiguration configuration)
+    {
         var s3Section = configuration.GetRequiredSection("AwsSettings:S3");
         services.Configure<AmazonS3Settings>(s3Section);
 
@@ -98,58 +89,5 @@ public static class DependencyInjection
         }
 
         services.AddScoped<IFileStorageService, S3FileStorageService>();
-    }
-
-    private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddHttpContextAccessor();
-        services.AddScoped<IUserContext, UserContext>();
-        services.AddScoped<IAuthenticationService, AuthenticationService>();
-
-        var jwtSecretKey = configuration.GetSection("JwtSettings:SecretKey").Value
-            ?? throw new InvalidOperationException("JwtSettings:SecretKey não configurado no appsettings.json");
-
-        var jwtIssuer = configuration.GetSection("JwtSettings:Issuer").Value
-            ?? throw new InvalidOperationException("JwtSettings:Issuer não configurado.");
-        var jwtAudience = configuration.GetSection("JwtSettings:Audience").Value
-            ?? throw new InvalidOperationException("JwtSettings:Audience não configurado.");
-
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
-            ValidateIssuer = true,
-            ValidIssuer = jwtIssuer,
-            ValidateAudience = true,
-            ValidAudience = jwtAudience,
-            NameClaimType = ClaimTypes.NameIdentifier,
-            RoleClaimType = ClaimTypes.Role,
-        });
-    }
-
-    private static void AddRateLimiter(IServiceCollection services)
-    {
-        services.AddRateLimiter(options =>
-        {
-            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-
-            options.AddPolicy("auth", httpContext => RateLimitPartition.GetFixedWindowLimiter(
-                partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
-                factory: _ => new FixedWindowRateLimiterOptions
-                {
-                    PermitLimit = 5,
-                    Window = TimeSpan.FromMinutes(1),
-                    QueueLimit = 0,
-                }));
-
-            options.AddPolicy("chat", httpContext => RateLimitPartition.GetFixedWindowLimiter(
-                partitionKey: httpContext.User.Identity?.Name ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
-                factory: _ => new FixedWindowRateLimiterOptions
-                {
-                    PermitLimit = 100,
-                    Window = TimeSpan.FromMinutes(1),
-                    QueueLimit = 0,
-                }));
-        });
     }
 }
