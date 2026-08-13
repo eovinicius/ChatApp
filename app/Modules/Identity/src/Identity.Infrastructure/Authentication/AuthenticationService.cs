@@ -1,0 +1,48 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+
+using Identity.Application.Abstractions;
+using Identity.Domain.Entities.Users;
+
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+
+namespace Identity.Infrastructure.Authentication;
+
+public class AuthenticationService : IAuthenticationService
+{
+    private readonly IConfiguration _configuration;
+
+    public AuthenticationService(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
+    public string? GenerateToken(User user)
+    {
+        var handler = new JwtSecurityTokenHandler();
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username)
+            ]),
+            Issuer = _configuration.GetSection("JwtSettings:Issuer").Value
+                ?? throw new InvalidOperationException("JwtSettings:Issuer não configurado"),
+            Audience = _configuration.GetSection("JwtSettings:Audience").Value
+                ?? throw new InvalidOperationException("JwtSettings:Audience não configurado"),
+            Expires = DateTime.UtcNow.AddMinutes(15),
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("JwtSettings:SecretKey").Value
+                    ?? throw new InvalidOperationException("JwtSettings:SecretKey não configurado"))),
+                SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = handler.CreateToken(tokenDescriptor);
+        var tokenString = handler.WriteToken(token);
+        return tokenString;
+    }
+}
