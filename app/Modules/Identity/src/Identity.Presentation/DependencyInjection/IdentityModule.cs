@@ -1,22 +1,40 @@
+using Asp.Versioning;
+using Asp.Versioning.Builder;
+
+using Identity.Application;
+using Identity.Infrastructure;
+using Identity.Presentation.Endpoints;
+
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Identity.Presentation;
 
-// Scaffold do módulo Identity — estrutura pronta para composição pela API principal.
-// Ainda sem regras de negócio: apenas compõe o módulo de forma no-op.
+// Dono da autenticação da aplicação: registra o esquema JWT, o IUserContext e os
+// usuários. Os outros módulos só conhecem UserId + Identity.Contracts.
 public static class IdentityModule
 {
     public static IServiceCollection AddIdentityModule(this IServiceCollection services, IConfiguration configuration)
     {
-        // TODO: registrar dependências do módulo Identity
+        services.AddApplication();
+        services.AddInfrastructure(configuration);
+
         return services;
     }
 
     public static IEndpointRouteBuilder MapIdentityEndpoints(this IEndpointRouteBuilder app)
     {
-        // TODO: mapear endpoints do módulo Identity
+        ApiVersionSet versionSet = app
+            .NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1, 0))
+            .ReportApiVersions()
+            .Build();
+
+        app.MapAuthEndpoints(versionSet);
+        app.MapUserEndpoints(versionSet);
+
         return app;
     }
 }

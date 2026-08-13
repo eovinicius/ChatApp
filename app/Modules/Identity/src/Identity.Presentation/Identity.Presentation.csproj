@@ -11,7 +11,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Http" Version="10.0.0" />
+    <PackageReference Include="MediatR" Version="12.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../Identity.Infrastructure/Identity.Infrastructure.csproj" />
+    <ProjectReference Include="../../../../Shared/BuildingBlocks.Api/BuildingBlocks.Api.csproj" />
   </ItemGroup>
 
 </Project>
