@@ -10,7 +10,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
     protected readonly HttpClient Client;
     protected readonly ChatAppFactory Factory;
 
-    private static int _userCounter = 0;
+    private static int _userCounter;
 
     protected IntegrationTestBase(ChatAppFactory factory)
     {
@@ -22,23 +22,29 @@ public abstract class IntegrationTestBase : IAsyncLifetime
 
     public Task DisposeAsync() => Task.CompletedTask;
 
-    protected async Task<string> RegisterAndLoginAsync(string? username = null, string? password = "Senha@123")
+    protected sealed record TestUser(Guid Id, string Username, string Token, HttpClient Client);
+
+    protected async Task<TestUser> CreateUserAsync(string? password = "Senha@123")
     {
         var id = Interlocked.Increment(ref _userCounter);
-        username ??= $"testuser_{id}_{Guid.NewGuid():N}";
+        var username = $"testuser_{id}_{Guid.NewGuid():N}"[..30];
 
-        await Client.PostAsJsonAsync("/api/v1/user/register", new
+        var registerResponse = await Client.PostAsJsonAsync("/api/v1/auth/register", new
         {
             name = $"Test User {id}",
             username,
             password
         });
+        registerResponse.EnsureSuccessStatusCode();
 
-        var loginResponse = await Client.PostAsJsonAsync("/api/v1/user/login", new { username, password });
-        loginResponse.EnsureSuccessStatusCode();
+        var token = (await registerResponse.Content.ReadFromJsonAsync<JsonElement>())
+            .GetProperty("token").GetString()!;
 
-        var json = await loginResponse.Content.ReadFromJsonAsync<JsonElement>();
-        return json.GetProperty("token").GetString()!;
+        var client = CreateAuthenticatedClient(token);
+
+        var me = await client.GetFromJsonAsync<JsonElement>("/api/v1/users/me");
+
+        return new TestUser(me.GetProperty("id").GetGuid(), username, token, client);
     }
 
     protected HttpClient CreateAuthenticatedClient(string token)
@@ -48,32 +54,37 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         return client;
     }
 
-    protected async Task<Guid> CreateRoomAsync(HttpClient client, string roomName = "Sala de Teste")
+    protected static async Task<Guid> StartDirectAsync(TestUser user, Guid targetUserId)
     {
-        var response = await client.PostAsJsonAsync("/api/v1/chatroom", new
-        {
-            roomName,
-            isPrivate = false
-        });
+        var response = await user.Client.PostAsJsonAsync("/api/v1/conversations/direct", new { targetUserId });
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadFromJsonAsync<JsonElement>();
         return json.GetProperty("id").GetGuid();
     }
 
-    protected async Task<Guid> SendMessageAsync(HttpClient client, Guid roomId, string content = "Olá mundo")
+    protected static async Task<Guid> CreateGroupAsync(TestUser owner, string name, params Guid[] memberIds)
     {
-        var response = await client.PostAsJsonAsync("/api/v1/message", new
-        {
-            roomId,
-            content,
-            contentType = "text"
-        });
+        var response = await owner.Client.PostAsJsonAsync("/api/v1/conversations/group", new { name, memberIds });
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadFromJsonAsync<JsonElement>();
         return json.GetProperty("id").GetGuid();
     }
+
+    protected static async Task<Guid> SendMessageAsync(TestUser user, Guid conversationId, string content = "Olá mundo")
+    {
+        var response = await user.Client.PostAsJsonAsync(
+            $"/api/v1/conversations/{conversationId}/messages",
+            new { content, contentType = "text" });
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        return json.GetProperty("id").GetGuid();
+    }
+
+    protected static async Task<JsonElement> GetConversationsAsync(TestUser user)
+        => await user.Client.GetFromJsonAsync<JsonElement>("/api/v1/conversations");
 }
 
 [CollectionDefinition("Integration")]

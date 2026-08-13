@@ -10,137 +10,216 @@ namespace Chat.IntegrationTests.Messages;
 
 public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
 {
+    private static async Task<JsonElement> GetMessagesAsync(TestUser user, Guid conversationId)
+        => await user.Client.GetFromJsonAsync<JsonElement>($"/api/v1/conversations/{conversationId}/messages");
+
+    private static int UnreadFor(JsonElement conversations, Guid conversationId)
+        => conversations.EnumerateArray()
+            .First(c => c.GetProperty("id").GetGuid() == conversationId)
+            .GetProperty("unreadCount").GetInt32();
+
     [Fact]
-    public async Task SendMessage_Deve_Retornar_201_Com_MessageId()
+    public async Task Deveria_enviar_e_listar_mensagens()
     {
-        var token = await RegisterAndLoginAsync();
-        var client = CreateAuthenticatedClient(token);
-        var roomId = await CreateRoomAsync(client);
+        // Arrange
+        var alice = await CreateUserAsync();
+        var bob = await CreateUserAsync();
+        var conversationId = await StartDirectAsync(alice, bob.Id);
 
-        var response = await client.PostAsJsonAsync("/api/v1/message", new
-        {
-            roomId,
-            content = "Olá, mundo!",
-            contentType = "text"
-        });
+        // Act
+        await SendMessageAsync(alice, conversationId, "primeira");
+        await SendMessageAsync(alice, conversationId, "segunda");
+        var messages = await GetMessagesAsync(bob, conversationId);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
-        json.GetProperty("id").GetGuid().Should().NotBe(Guid.Empty);
+        // Assert — mais recentes primeiro, e com o Id, que o cliente precisa para editar/apagar.
+        var items = messages.EnumerateArray().ToList();
+        items.Should().HaveCount(2);
+        items[0].GetProperty("content").GetString().Should().Be("segunda");
+        items[0].GetProperty("id").GetGuid().Should().NotBe(Guid.Empty);
     }
 
     [Fact]
-    public async Task SendMessage_Sem_Autenticacao_Deve_Retornar_401()
+    public async Task Deveria_contar_mensagens_nao_lidas_do_destinatario()
     {
-        var response = await Client.PostAsJsonAsync("/api/v1/message", new
-        {
-            roomId = Guid.NewGuid(),
-            content = "Olá",
-            contentType = "text"
-        });
+        // Arrange
+        var alice = await CreateUserAsync();
+        var bob = await CreateUserAsync();
+        var conversationId = await StartDirectAsync(alice, bob.Id);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        // Act
+        await SendMessageAsync(alice, conversationId, "1");
+        await SendMessageAsync(alice, conversationId, "2");
+        await SendMessageAsync(alice, conversationId, "3");
+
+        var bobConversations = await GetConversationsAsync(bob);
+        var aliceConversations = await GetConversationsAsync(alice);
+
+        // Assert — quem enviou não tem não-lidas.
+        UnreadFor(bobConversations, conversationId).Should().Be(3);
+        UnreadFor(aliceConversations, conversationId).Should().Be(0);
     }
 
     [Fact]
-    public async Task SendMessage_Usuario_Nao_Membro_Deve_Retornar_403()
+    public async Task Deveria_zerar_nao_lidas_ao_marcar_como_lida()
     {
-        var ownerToken = await RegisterAndLoginAsync();
-        var ownerClient = CreateAuthenticatedClient(ownerToken);
-        var roomId = await CreateRoomAsync(ownerClient);
+        // Arrange
+        var alice = await CreateUserAsync();
+        var bob = await CreateUserAsync();
+        var conversationId = await StartDirectAsync(alice, bob.Id);
+        await SendMessageAsync(alice, conversationId, "1");
+        var lastMessageId = await SendMessageAsync(alice, conversationId, "2");
 
-        var outsiderToken = await RegisterAndLoginAsync();
-        var outsiderClient = CreateAuthenticatedClient(outsiderToken);
+        // Act
+        var response = await bob.Client.PostAsJsonAsync(
+            $"/api/v1/conversations/{conversationId}/read",
+            new { lastMessageId });
 
-        var response = await outsiderClient.PostAsJsonAsync("/api/v1/message", new
-        {
-            roomId,
-            content = "Não devia entrar",
-            contentType = "text"
-        });
-
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
-
-    [Fact]
-    public async Task EditMessage_Deve_Retornar_204()
-    {
-        var token = await RegisterAndLoginAsync();
-        var client = CreateAuthenticatedClient(token);
-        var roomId = await CreateRoomAsync(client);
-        var messageId = await SendMessageAsync(client, roomId);
-
-        var response = await client.PutAsJsonAsync($"/api/v1/message/{messageId}", new
-        {
-            roomId,
-            content = "Mensagem editada"
-        });
-
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        UnreadFor(await GetConversationsAsync(bob), conversationId).Should().Be(0);
     }
 
     [Fact]
-    public async Task EditMessage_Por_Outro_Usuario_Deve_Retornar_403()
+    public async Task Deveria_refletir_a_leitura_no_status_da_mensagem()
     {
-        var ownerToken = await RegisterAndLoginAsync();
-        var ownerClient = CreateAuthenticatedClient(ownerToken);
-        var roomId = await CreateRoomAsync(ownerClient);
-        var messageId = await SendMessageAsync(ownerClient, roomId);
+        // Arrange
+        var alice = await CreateUserAsync();
+        var bob = await CreateUserAsync();
+        var conversationId = await StartDirectAsync(alice, bob.Id);
+        var messageId = await SendMessageAsync(alice, conversationId, "oi");
 
-        var otherToken = await RegisterAndLoginAsync();
-        var otherClient = CreateAuthenticatedClient(otherToken);
-        await otherClient.PostAsJsonAsync($"/api/v1/chatroom/{roomId}/join", new { });
+        // Act
+        var antes = await GetMessagesAsync(alice, conversationId);
+        await bob.Client.PostAsJsonAsync($"/api/v1/conversations/{conversationId}/read", new { lastMessageId = messageId });
+        var depois = await GetMessagesAsync(alice, conversationId);
 
-        var response = await otherClient.PutAsJsonAsync($"/api/v1/message/{messageId}", new
-        {
-            roomId,
-            content = "Tentativa de edição"
-        });
+        // Assert — ✓ vira ✓✓ azul.
+        antes.EnumerateArray().First().GetProperty("status").GetString().Should().Be("sent");
+        depois.EnumerateArray().First().GetProperty("status").GetString().Should().Be("read");
+        depois.EnumerateArray().First().GetProperty("readByCount").GetInt32().Should().Be(1);
+    }
 
+    [Fact]
+    public async Task Deveria_mostrar_previa_da_ultima_mensagem_na_listagem()
+    {
+        // Arrange
+        var alice = await CreateUserAsync();
+        var bob = await CreateUserAsync();
+        var conversationId = await StartDirectAsync(alice, bob.Id);
+        await SendMessageAsync(alice, conversationId, "mensagem antiga");
+        await SendMessageAsync(alice, conversationId, "mensagem mais recente");
+
+        // Act
+        var conversations = await GetConversationsAsync(bob);
+
+        // Assert
+        var conversation = conversations.EnumerateArray().First(c => c.GetProperty("id").GetGuid() == conversationId);
+        conversation.GetProperty("lastMessage").GetProperty("content").GetString().Should().Be("mensagem mais recente");
+    }
+
+    [Fact]
+    public async Task Nao_deveria_enviar_mensagem_para_conversa_de_terceiros()
+    {
+        // Arrange
+        var alice = await CreateUserAsync();
+        var bob = await CreateUserAsync();
+        var intruso = await CreateUserAsync();
+        var conversationId = await StartDirectAsync(alice, bob.Id);
+
+        // Act
+        var response = await intruso.Client.PostAsJsonAsync(
+            $"/api/v1/conversations/{conversationId}/messages",
+            new { content = "invasão", contentType = "text" });
+
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact]
-    public async Task DeleteMessage_Deve_Retornar_204()
+    public async Task Nao_deveria_ler_mensagens_de_conversa_de_terceiros()
     {
-        var token = await RegisterAndLoginAsync();
-        var client = CreateAuthenticatedClient(token);
-        var roomId = await CreateRoomAsync(client);
-        var messageId = await SendMessageAsync(client, roomId);
+        // Arrange
+        var alice = await CreateUserAsync();
+        var bob = await CreateUserAsync();
+        var intruso = await CreateUserAsync();
+        var conversationId = await StartDirectAsync(alice, bob.Id);
+        await SendMessageAsync(alice, conversationId);
 
-        var response = await client.DeleteAsync($"/api/v1/message/{messageId}?roomId={roomId}");
+        // Act
+        var response = await intruso.Client.GetAsync($"/api/v1/conversations/{conversationId}/messages");
 
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Deveria_editar_a_propria_mensagem()
+    {
+        // Arrange
+        var alice = await CreateUserAsync();
+        var bob = await CreateUserAsync();
+        var conversationId = await StartDirectAsync(alice, bob.Id);
+        var messageId = await SendMessageAsync(alice, conversationId, "texto original");
+
+        // Act
+        var response = await alice.Client.PutAsJsonAsync($"/api/v1/messages/{messageId}", new { content = "texto editado" });
+
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var message = (await GetMessagesAsync(alice, conversationId)).EnumerateArray().First();
+        message.GetProperty("content").GetString().Should().Be("texto editado");
+        message.GetProperty("isEdited").GetBoolean().Should().BeTrue();
     }
 
     [Fact]
-    public async Task GetMessages_Deve_Retornar_200_Com_Lista()
+    public async Task Nao_deveria_editar_mensagem_de_outro_usuario()
     {
-        var token = await RegisterAndLoginAsync();
-        var client = CreateAuthenticatedClient(token);
-        var roomId = await CreateRoomAsync(client);
-        await SendMessageAsync(client, roomId, "Primeira mensagem");
-        await SendMessageAsync(client, roomId, "Segunda mensagem");
+        // Arrange
+        var alice = await CreateUserAsync();
+        var bob = await CreateUserAsync();
+        var conversationId = await StartDirectAsync(alice, bob.Id);
+        var messageId = await SendMessageAsync(alice, conversationId);
 
-        var response = await client.GetAsync($"/api/v1/message?roomId={roomId}");
+        // Act
+        var response = await bob.Client.PutAsJsonAsync($"/api/v1/messages/{messageId}", new { content = "invadido" });
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var messages = await response.Content.ReadFromJsonAsync<JsonElement>();
-        messages.GetArrayLength().Should().BeGreaterThanOrEqualTo(2);
-    }
-
-    [Fact]
-    public async Task GetMessages_Usuario_Nao_Membro_Deve_Retornar_403()
-    {
-        var ownerToken = await RegisterAndLoginAsync();
-        var ownerClient = CreateAuthenticatedClient(ownerToken);
-        var roomId = await CreateRoomAsync(ownerClient);
-
-        var outsiderToken = await RegisterAndLoginAsync();
-        var outsiderClient = CreateAuthenticatedClient(outsiderToken);
-
-        var response = await outsiderClient.GetAsync($"/api/v1/message?roomId={roomId}");
-
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Deveria_apagar_mensagem_de_forma_logica()
+    {
+        // Arrange
+        var alice = await CreateUserAsync();
+        var bob = await CreateUserAsync();
+        var conversationId = await StartDirectAsync(alice, bob.Id);
+        var messageId = await SendMessageAsync(alice, conversationId, "vai sumir");
+
+        // Act
+        var response = await alice.Client.DeleteAsync($"/api/v1/messages/{messageId}");
+
+        // Assert — a mensagem continua na lista, marcada como apagada.
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var message = (await GetMessagesAsync(bob, conversationId)).EnumerateArray().First();
+        message.GetProperty("isDeleted").GetBoolean().Should().BeTrue();
+        message.GetProperty("content").GetString().Should().Be("Esta mensagem foi apagada");
+    }
+
+    [Fact]
+    public async Task Deveria_rejeitar_tipo_de_conteudo_invalido()
+    {
+        // Arrange
+        var alice = await CreateUserAsync();
+        var bob = await CreateUserAsync();
+        var conversationId = await StartDirectAsync(alice, bob.Id);
+
+        // Act
+        var response = await alice.Client.PostAsJsonAsync(
+            $"/api/v1/conversations/{conversationId}/messages",
+            new { content = "x", contentType = "sticker" });
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 }

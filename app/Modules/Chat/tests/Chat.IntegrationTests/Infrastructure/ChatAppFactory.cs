@@ -1,6 +1,8 @@
 using Chat.Application.Abstractions.Storage;
 using Chat.Infrastructure.Database.EntityFramework;
 
+using Identity.Infrastructure.Database;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -30,8 +32,10 @@ public class ChatAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
         await _postgres.StartAsync();
 
         using var scope = Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ChatAppDbContext>();
-        await db.Database.MigrateAsync();
+
+        // Um DbContext por módulo, em schemas separados ("identity" e "chat").
+        await scope.ServiceProvider.GetRequiredService<IdentityDbContext>().Database.MigrateAsync();
+        await scope.ServiceProvider.GetRequiredService<ChatAppDbContext>().Database.MigrateAsync();
     }
 
     public new async Task DisposeAsync()
@@ -53,27 +57,30 @@ public class ChatAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
         builder.ConfigureServices(services =>
         {
-            // Remove all DbContext-related descriptors to ensure test container is used
-            services.RemoveAll<DbContextOptions<ChatAppDbContext>>();
-            services.RemoveAll<DbContextOptions>();
-            services.RemoveAll<ChatAppDbContext>();
+            ReplaceDbContext<ChatAppDbContext>(services);
+            ReplaceDbContext<IdentityDbContext>(services);
 
-            // Also remove any IDbContextOptionsConfiguration<ChatAppDbContext> that might exist
-            var configDescriptors = services
-                .Where(d => d.ServiceType.IsGenericType &&
-                            d.ServiceType.GenericTypeArguments.Length == 1 &&
-                            d.ServiceType.GenericTypeArguments[0] == typeof(ChatAppDbContext) &&
-                            d.ServiceType.Name.Contains("DbContextOptionsConfiguration"))
-                .ToList();
-            foreach (var d in configDescriptors)
-                services.Remove(d);
-
-            services.AddDbContext<ChatAppDbContext>(options =>
-                options.UseNpgsql(_postgres.GetConnectionString()));
-
-            // Replace S3 with mock to avoid real AWS calls
+            // Nunca chamar a AWS de verdade nos testes.
             services.RemoveAll<IFileStorageService>();
             services.AddSingleton(FileStorageMock);
         });
+    }
+
+    private void ReplaceDbContext<TContext>(IServiceCollection services) where TContext : DbContext
+    {
+        services.RemoveAll<DbContextOptions<TContext>>();
+        services.RemoveAll<TContext>();
+
+        var configDescriptors = services
+            .Where(d => d.ServiceType.IsGenericType &&
+                        d.ServiceType.GenericTypeArguments.Length == 1 &&
+                        d.ServiceType.GenericTypeArguments[0] == typeof(TContext) &&
+                        d.ServiceType.Name.Contains("DbContextOptionsConfiguration"))
+            .ToList();
+
+        foreach (var descriptor in configDescriptors)
+            services.Remove(descriptor);
+
+        services.AddDbContext<TContext>(options => options.UseNpgsql(_postgres.GetConnectionString()));
     }
 }
