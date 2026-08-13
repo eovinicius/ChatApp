@@ -1,11 +1,10 @@
+using BuildingBlocks.Authentication;
 using BuildingBlocks.Clock;
 
-using Chat.Application.Abstractions.Authentication;
 using Chat.Application.Abstractions.Data;
 using Chat.Application.UseCases.Messages.SendMessage;
-using Chat.Domain.Entities.ChatRooms;
-using Chat.Domain.Entities.Messages;
-using Chat.Domain.Entities.Users;
+using Chat.Domain.Conversations;
+using Chat.Domain.Messages;
 using Chat.Domain.Repositories;
 
 using FluentAssertions;
@@ -16,111 +15,127 @@ namespace Chat.UnitTests.Application.Messages;
 
 public class SendMessageTests
 {
-    private static readonly SendMessageCommand Command = new(
-        Guid.NewGuid(),
-        "Hello, world!",
-        "Text");
+    private static readonly DateTime Now = new(2026, 8, 12, 10, 0, 0, DateTimeKind.Utc);
+
+    private readonly IConversationRepository _conversationRepositoryMock = Substitute.For<IConversationRepository>();
+    private readonly IMessageRepository _messageRepositoryMock = Substitute.For<IMessageRepository>();
+    private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
+    private readonly IUserContext _userContextMock = Substitute.For<IUserContext>();
+    private readonly IDateTimeProvider _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
 
     private readonly SendMessageCommandHandler _handler;
-    private readonly IUserRepository _userRepositoryMock;
-    private readonly IUserContext _userContext;
-    private readonly IChatRoomRepository _chatRoomRepositoryMock;
-    private readonly IChatMessageRepository _chatMessageRepositoryMock;
-    private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly IDateTimeProvider _dateTimeProviderMock;
+
+    private readonly Guid _senderId = Guid.NewGuid();
+    private readonly Guid _otherId = Guid.NewGuid();
+    private readonly Conversation _conversation;
 
     public SendMessageTests()
     {
-        _userRepositoryMock = Substitute.For<IUserRepository>();
-        _userContext = Substitute.For<IUserContext>();
-        _chatRoomRepositoryMock = Substitute.For<IChatRoomRepository>();
-        _chatMessageRepositoryMock = Substitute.For<IChatMessageRepository>();
-        _unitOfWorkMock = Substitute.For<IUnitOfWork>();
-        _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
-
         _handler = new SendMessageCommandHandler(
-            _userRepositoryMock,
-            _userContext,
-            _chatRoomRepositoryMock,
-            _chatMessageRepositoryMock,
+            _conversationRepositoryMock,
+            _messageRepositoryMock,
             _unitOfWorkMock,
-            _dateTimeProviderMock
-        );
+            _userContextMock,
+            _dateTimeProviderMock);
+
+        _conversation = Conversation.CreateDirect(_senderId, _otherId, Now).Value;
+
+        _userContextMock.UserId.Returns(_senderId);
+        _dateTimeProviderMock.UtcNow.Returns(Now.AddMinutes(5));
+
+        _conversationRepositoryMock
+            .GetByIdWithParticipants(_conversation.Id, Arg.Any<CancellationToken>())
+            .Returns(_conversation);
     }
 
+    private SendMessageCommand TextCommand => new(_conversation.Id, "text", "olá");
+
     [Fact]
-    public async Task Deveria_enviar_mensagem_com_sucesso()
+    public async Task Deveria_enviar_mensagem_de_texto()
     {
-        // Arrange
-        var user = User.Create("John Doe", "username", "password").Value;
-        var room = ChatRoom.Create("sala", user, false).Value;
-
-        _userContext.UserId.Returns(user.Id);
-        _dateTimeProviderMock.UtcNow.Returns(DateTime.UtcNow);
-        _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
-        _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(room);
-
         // Act
-        var result = await _handler.Handle(Command, CancellationToken.None);
+        var result = await _handler.Handle(TextCommand, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        await _chatMessageRepositoryMock.Received(1).Add(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
+        result.Value.Should().NotBe(Guid.Empty);
+        await _messageRepositoryMock.Received(1).Add(Arg.Any<Message>(), Arg.Any<CancellationToken>());
         await _unitOfWorkMock.Received(1).Commit(Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Deveria_retornar_erro_quando_usuario_nao_existir()
+    public async Task Deveria_atualizar_a_ultima_atividade_da_conversa()
     {
-        // Arrange
-        _userContext.UserId.Returns(Guid.NewGuid());
-        _userRepositoryMock.GetById(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns((User?)null);
-
         // Act
-        var result = await _handler.Handle(Command, CancellationToken.None);
+        await _handler.Handle(TextCommand, CancellationToken.None);
 
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        await _chatMessageRepositoryMock.DidNotReceive().Add(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
-        await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
+        // Assert — é o que mantém a lista de conversas ordenada.
+        _conversation.LastActivityAt.Should().Be(Now.AddMinutes(5));
     }
 
     [Fact]
-    public async Task Deveria_retornar_erro_quando_chat_nao_existir()
+    public async Task Deveria_marcar_a_propria_mensagem_como_lida_pelo_remetente()
     {
-        // Arrange
-        var user = User.Create("John Doe", "username", "password").Value;
-
-        _userContext.UserId.Returns(user.Id);
-        _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
-        _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns((ChatRoom?)null);
-
         // Act
-        var result = await _handler.Handle(Command, CancellationToken.None);
+        await _handler.Handle(TextCommand, CancellationToken.None);
 
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        await _chatMessageRepositoryMock.DidNotReceive().Add(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
-        await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
+        // Assert — quem envia não deve ver a própria mensagem como não lida.
+        _conversation.FindParticipant(_senderId)!.LastReadMessageSentAt.Should().Be(Now.AddMinutes(5));
+        _conversation.FindParticipant(_otherId)!.LastReadMessageSentAt.Should().BeNull();
     }
 
     [Fact]
-    public async Task Deveria_retornar_erro_quando_usuario_nao_estiver_na_sala()
+    public async Task Nao_deveria_enviar_para_conversa_inexistente()
     {
         // Arrange
-        var user = User.Create("George", "username", "password").Value;
-        var room = ChatRoom.Create("sala", User.Create("John Doe", "username", "password").Value, false).Value;
-
-        _userContext.UserId.Returns(user.Id);
-        _userRepositoryMock.GetById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
-        _chatRoomRepositoryMock.GetById(Command.RoomId, Arg.Any<CancellationToken>()).Returns(room);
+        _conversationRepositoryMock
+            .GetByIdWithParticipants(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns((Conversation?)null);
 
         // Act
-        var result = await _handler.Handle(Command, CancellationToken.None);
+        var result = await _handler.Handle(new SendMessageCommand(Guid.NewGuid(), "text", "olá"), CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        await _chatMessageRepositoryMock.DidNotReceive().Add(Arg.Any<ChatMessage>(), Arg.Any<CancellationToken>());
-        await _unitOfWorkMock.DidNotReceive().Commit(Arg.Any<CancellationToken>());
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Conversation.NotFound");
+    }
+
+    [Fact]
+    public async Task Nao_deveria_enviar_se_nao_participa_da_conversa()
+    {
+        // Arrange
+        _userContextMock.UserId.Returns(Guid.NewGuid());
+
+        // Act
+        var result = await _handler.Handle(TextCommand, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Conversation.NotParticipant");
+        await _messageRepositoryMock.DidNotReceive().Add(Arg.Any<Message>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Nao_deveria_enviar_com_tipo_de_conteudo_invalido()
+    {
+        // Act
+        var result = await _handler.Handle(new SendMessageCommand(_conversation.Id, "sticker", "x"), CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Message.InvalidContentType");
+    }
+
+    [Fact]
+    public async Task Nao_deveria_enviar_midia_sem_chave_de_storage()
+    {
+        // Act
+        var result = await _handler.Handle(
+            new SendMessageCommand(_conversation.Id, "image", "https://cdn/x.png"),
+            CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Message.MissingStorageKey");
     }
 }
