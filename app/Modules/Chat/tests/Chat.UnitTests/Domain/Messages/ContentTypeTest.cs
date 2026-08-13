@@ -1,4 +1,4 @@
-using Chat.Domain.Entities.Messages;
+using Chat.Domain.Messages;
 
 using FluentAssertions;
 
@@ -11,25 +11,49 @@ public class ContentTypeTest
     [InlineData("image")]
     [InlineData("audio")]
     [InlineData("video")]
-    public void From_Deveria_Retornar_ContentType_Para_Valores_Validos(string value)
+    [InlineData("file")]
+    public void Deveria_converter_tipos_suportados(string value)
     {
+        // Act
         var result = ContentType.From(value);
 
-        result.Value.Should().Be(value);
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Value.Should().Be(value);
+    }
+
+    [Theory]
+    [InlineData("TEXT")]
+    [InlineData("  Image  ")]
+    public void Deveria_ignorar_caixa_e_espacos(string value)
+    {
+        // Act
+        var result = ContentType.From(value);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData("sticker")]
+    [InlineData("")]
+    [InlineData(null)]
+    public void Deveria_falhar_em_tipo_nao_suportado(string? value)
+    {
+        // Act
+        var result = ContentType.From(value);
+
+        // Assert — falha esperada vira Result, não exceção.
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Message.InvalidContentType");
     }
 
     [Fact]
-    public void From_Deveria_Ser_Case_Insensitive()
+    public void Deveria_identificar_midia()
     {
-        ContentType.From("TEXT").Should().Be(ContentType.Text);
-        ContentType.From("Image").Should().Be(ContentType.Image);
-    }
-
-    [Fact]
-    public void From_Deveria_Lancar_Excecao_Para_Tipo_Nao_Suportado()
-    {
-        var act = () => ContentType.From("document");
-
-        act.Should().Throw<NotSupportedException>();
+        // Assert
+        ContentType.Text.IsMedia.Should().BeFalse();
+        ContentType.Image.IsMedia.Should().BeTrue();
+        ContentType.Audio.IsMedia.Should().BeTrue();
     }
 }
