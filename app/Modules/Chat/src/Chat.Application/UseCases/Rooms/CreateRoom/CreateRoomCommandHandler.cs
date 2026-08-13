@@ -41,14 +41,14 @@ public sealed class CreateChatroomCommandHandler : ICommandHandler<CreateChatroo
         var user = await _userRepository.GetById(_userContext.UserId, cancellationToken);
         if (user is null)
         {
-            return Result.Failure<Guid>(UserErrors.NotFound);
+            return UserErrors.NotFound;
         }
 
         var hashedPassword = request.Password is not null ? _hashService.Hash(request.Password) : null;
 
         var roomResult = ChatRoom.Create(request.Name, user, request.IsPrivate, hashedPassword);
         if (roomResult.IsFailure)
-            return Result.Failure<Guid>(roomResult.Error);
+            return roomResult.Error;
 
         var chatRoom = roomResult.Value;
 

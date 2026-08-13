@@ -35,19 +35,19 @@ public class EditMessageCommandHandler : ICommandHandler<EditMessageCommand>
         var user = await _userRepository.GetById(currentUserId, cancellationToken);
         if (user is null)
         {
-            return Result.Failure(UserErrors.NotFound);
+            return UserErrors.NotFound;
         }
 
         var message = await _messageRepository.GetById(request.MessageId, cancellationToken);
 
         if (message is null)
         {
-            return Result.Failure(ChatMessageErrors.NotFound);
+            return ChatMessageErrors.NotFound;
         }
 
         if (message.SenderId != currentUserId)
         {
-            return Result.Failure(ChatMessageErrors.Unauthorized);
+            return ChatMessageErrors.Unauthorized;
         }
 
         var result = message.Edit(request.Content.Data, _dateTimeProvider.UtcNow);

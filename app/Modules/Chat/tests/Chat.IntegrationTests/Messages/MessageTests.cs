@@ -43,7 +43,7 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
     }
 
     [Fact]
-    public async Task SendMessage_Usuario_Nao_Membro_Deve_Retornar_400()
+    public async Task SendMessage_Usuario_Nao_Membro_Deve_Retornar_403()
     {
         var ownerToken = await RegisterAndLoginAsync();
         var ownerClient = CreateAuthenticatedClient(ownerToken);
@@ -59,7 +59,7 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
             contentType = "text"
         });
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact]
@@ -80,7 +80,7 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
     }
 
     [Fact]
-    public async Task EditMessage_Por_Outro_Usuario_Deve_Retornar_400()
+    public async Task EditMessage_Por_Outro_Usuario_Deve_Retornar_403()
     {
         var ownerToken = await RegisterAndLoginAsync();
         var ownerClient = CreateAuthenticatedClient(ownerToken);
@@ -97,7 +97,7 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
             content = "Tentativa de edição"
         });
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
     }
 
     [Fact]
-    public async Task GetMessages_Usuario_Nao_Membro_Deve_Retornar_400()
+    public async Task GetMessages_Usuario_Nao_Membro_Deve_Retornar_403()
     {
         var ownerToken = await RegisterAndLoginAsync();
         var ownerClient = CreateAuthenticatedClient(ownerToken);
@@ -141,6 +141,6 @@ public class MessageTests(ChatAppFactory factory) : IntegrationTestBase(factory)
 
         var response = await outsiderClient.GetAsync($"/api/v1/message?roomId={roomId}");
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }

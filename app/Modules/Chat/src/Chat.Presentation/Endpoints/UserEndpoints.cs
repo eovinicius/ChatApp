@@ -26,18 +26,14 @@ public static class UserEndpoints
         {
             var result = await sender.Send(new RegisterUserCommand(request.Name, request.Username, request.Password));
 
-            return result.IsFailure
-                ? ApiResults.Problem(result.Error)
-                : Results.Ok(new { token = result.Value });
+            return result.ToHttpResult(token => Results.Ok(new { token }));
         }).AddEndpointFilter<ValidationFilter<UserRegisterRequest>>();
 
         group.MapPost("login", async (UserLoginRequest request, ISender sender) =>
         {
             var result = await sender.Send(new LoginCommand(request.Username, request.Password));
 
-            return result.IsFailure
-                ? ApiResults.Problem(result.Error)
-                : Results.Ok(new { token = result.Value });
+            return result.ToHttpResult(token => Results.Ok(new { token }));
         }).AddEndpointFilter<ValidationFilter<UserLoginRequest>>();
 
         return app;

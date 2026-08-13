@@ -31,7 +31,7 @@ public class ChatMessage : AggregateRoot
     public static Result<ChatMessage> Create(Guid chatRoomId, ContentType contentType, string content, Guid senderId, DateTime sendAt)
     {
         if (contentType == ContentType.Text && string.IsNullOrWhiteSpace(content))
-            return Result.Failure<ChatMessage>(ChatMessageErrors.EmptyContent);
+            return ChatMessageErrors.EmptyContent;
 
         var message = new ChatMessage(chatRoomId, contentType, content, senderId, sendAt);
         message.RaiseDomainEvent(new MessageSentEvent(message.Id, chatRoomId, senderId));
@@ -55,13 +55,13 @@ public class ChatMessage : AggregateRoot
     public Result Edit(string newContent, DateTime utcNow)
     {
         if (!IsWithinTimeLimit(utcNow, MessageEditTimeLimitInHours))
-            return Result.Failure(ChatMessageErrors.EditWindowExpired);
+            return ChatMessageErrors.EditWindowExpired;
 
         if (!IsTextMessage)
-            return Result.Failure(ChatMessageErrors.NotTextMessage);
+            return ChatMessageErrors.NotTextMessage;
 
         if (string.IsNullOrWhiteSpace(newContent))
-            return Result.Failure(ChatMessageErrors.EmptyContent);
+            return ChatMessageErrors.EmptyContent;
 
         Content = newContent;
         EditedAt = utcNow;

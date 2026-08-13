@@ -28,27 +28,21 @@ public static class ChatRoomEndpoints
         {
             var result = await sender.Send(new CreateChatroomCommand(request.RoomName, request.IsPrivate, request.Password));
 
-            return result.IsFailure
-                ? ApiResults.Problem(result.Error)
-                : Results.Created($"/api/v1/ChatRoom/{result.Value}", new { id = result.Value });
+            return result.ToHttpResult(id => Results.Created($"/api/v1/ChatRoom/{id}", new { id }));
         });
 
         group.MapPost("{roomId:guid}/join", async (Guid roomId, JoinRoomRequest? request, ISender sender) =>
         {
             var result = await sender.Send(new JoinRoomCommand(roomId, request?.Password));
 
-            return result.IsFailure
-                ? ApiResults.Problem(result.Error)
-                : Results.Ok();
+            return result.ToHttpResult(() => Results.Ok());
         });
 
         group.MapDelete("{roomId:guid}/leave", async (Guid roomId, ISender sender) =>
         {
             var result = await sender.Send(new LeaveRoomCommand(roomId));
 
-            return result.IsFailure
-                ? ApiResults.Problem(result.Error)
-                : Results.NoContent();
+            return result.ToHttpResult();
         });
 
         return app;

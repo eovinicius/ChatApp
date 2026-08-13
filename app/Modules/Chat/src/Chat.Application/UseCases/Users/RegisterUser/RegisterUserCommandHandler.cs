@@ -31,14 +31,14 @@ public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, s
 
         if (userAlreadyExists is not null)
         {
-            return Result.Failure<string?>(UserErrors.UsernameAlreadyTaken);
+            return UserErrors.UsernameAlreadyTaken;
         }
 
         var passwordHash = _hashService.Hash(request.Password);
 
         var userResult = User.Create(request.Name, request.Username, passwordHash);
         if (userResult.IsFailure)
-            return Result.Failure<string?>(userResult.Error);
+            return userResult.Error;
 
         var user = userResult.Value;
 

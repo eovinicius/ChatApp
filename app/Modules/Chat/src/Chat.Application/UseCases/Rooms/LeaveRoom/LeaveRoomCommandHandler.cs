@@ -33,13 +33,13 @@ public class LeaveRoomCommandHandler : ICommandHandler<LeaveRoomCommand>
         var user = await _userRepository.GetById(_userContext.UserId, cancellationToken);
         if (user is null)
         {
-            return Result.Failure(UserErrors.NotFound);
+            return UserErrors.NotFound;
         }
 
         var room = await _chatRoomRepository.GetById(request.RoomId, cancellationToken);
         if (room is null)
         {
-            return Result.Failure(ChatRoomErrors.NotFound);
+            return ChatRoomErrors.NotFound;
         }
 
         room.Leave(user);

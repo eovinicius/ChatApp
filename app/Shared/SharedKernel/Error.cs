@@ -1,7 +1,8 @@
 namespace SharedKernel;
 
-public record Error(string Code, string Name)
+public sealed record Error(string Code, string Name, ErrorType Type)
 {
-    public static Error None = new Error(string.Empty, string.Empty);
-    public static Error NullValue = new Error("Error.NullValue", "Null value was provided");
+    public static readonly Error None = new(string.Empty, string.Empty, ErrorType.Failure);
+
+    public static readonly Error NullValue = new("Error.NullValue", "Null value was provided", ErrorType.Validation);
 }

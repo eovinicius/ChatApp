@@ -23,13 +23,13 @@ public sealed class User : AggregateRoot
     public static Result<User> Create(string name, string username, string password)
     {
         if (string.IsNullOrWhiteSpace(name))
-            return Result.Failure<User>(UserErrors.EmptyName);
+            return UserErrors.EmptyName;
 
         if (string.IsNullOrWhiteSpace(username))
-            return Result.Failure<User>(UserErrors.EmptyUsername);
+            return UserErrors.EmptyUsername;
 
         if (string.IsNullOrWhiteSpace(password))
-            return Result.Failure<User>(UserErrors.EmptyPassword);
+            return UserErrors.EmptyPassword;
 
         var user = new User(name, username, password);
         user.RaiseDomainEvent(new UserRegisteredEvent(user.Id, user.Username));

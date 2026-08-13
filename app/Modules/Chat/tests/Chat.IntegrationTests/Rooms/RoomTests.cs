@@ -71,7 +71,7 @@ public class RoomTests(ChatAppFactory factory) : IntegrationTestBase(factory)
     }
 
     [Fact]
-    public async Task JoinRoom_Ja_Membro_Deve_Retornar_400()
+    public async Task JoinRoom_Ja_Membro_Deve_Retornar_409()
     {
         var token = await RegisterAndLoginAsync();
         var client = CreateAuthenticatedClient(token);
@@ -80,7 +80,7 @@ public class RoomTests(ChatAppFactory factory) : IntegrationTestBase(factory)
         // Tenta entrar novamente (já é membro por ser o criador)
         var response = await client.PostAsJsonAsync($"/api/v1/chatroom/{roomId}/join", new { });
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
 
     [Fact]

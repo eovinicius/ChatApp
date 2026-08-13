@@ -28,12 +28,12 @@ public class LoginCommandHandler : ICommandHandler<LoginCommand, string>
 
         if (user is null)
         {
-            return Result.Failure<string>(UserErrors.InvalidCredentials);
+            return UserErrors.InvalidCredentials;
         }
 
         if (!_hashService.Compare(request.Password, user.Password))
         {
-            return Result.Failure<string>(UserErrors.InvalidCredentials);
+            return UserErrors.InvalidCredentials;
         }
 
         var token = _authenticationService.GenerateToken(user);

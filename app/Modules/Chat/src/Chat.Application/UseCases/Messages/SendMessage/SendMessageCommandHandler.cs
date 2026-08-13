@@ -44,18 +44,18 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
         var user = await _userRepository.GetById(currentUserId, cancellationToken);
         if (user is null)
         {
-            return Result.Failure<Guid>(UserErrors.NotFound);
+            return UserErrors.NotFound;
         }
 
         var room = await _chatRoomRepository.GetById(request.RoomId, cancellationToken);
         if (room is null)
         {
-            return Result.Failure<Guid>(ChatRoomErrors.NotFound);
+            return ChatRoomErrors.NotFound;
         }
 
         if (!room.IsUserInRoom(user))
         {
-            return Result.Failure<Guid>(ChatRoomErrors.NotMember);
+            return ChatRoomErrors.NotMember;
         }
 
         var messageResult = ChatMessage.Create(
@@ -67,7 +67,7 @@ public sealed class SendMessageCommandHandler : ICommandHandler<SendMessageComma
         );
 
         if (messageResult.IsFailure)
-            return Result.Failure<Guid>(messageResult.Error);
+            return messageResult.Error;
 
         var chatMessage = messageResult.Value;
 

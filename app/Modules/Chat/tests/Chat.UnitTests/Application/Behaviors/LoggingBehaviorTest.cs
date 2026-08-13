@@ -35,7 +35,7 @@ public class LoggingBehaviorTest
     {
         var behavior = new LoggingBehavior<LoggingTestCommand, Result>(_loggerMock);
         var command = new LoggingTestCommand();
-        var error = new Error("Test.Fail", "Falhou");
+        var error = new Error("Test.Fail", "Falhou", ErrorType.Failure);
 
         var result = await behavior.Handle(command, _ => Task.FromResult(Result.Failure(error)), CancellationToken.None);
 

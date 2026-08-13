@@ -28,7 +28,7 @@ public class AuthTests(ChatAppFactory factory) : IntegrationTestBase(factory)
     }
 
     [Fact]
-    public async Task Register_Com_Username_Duplicado_Deve_Retornar_400()
+    public async Task Register_Com_Username_Duplicado_Deve_Retornar_409()
     {
         var username = $"dup_{Guid.NewGuid():N}";
 
@@ -46,7 +46,7 @@ public class AuthTests(ChatAppFactory factory) : IntegrationTestBase(factory)
             password = "Senha@123"
         });
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public class AuthTests(ChatAppFactory factory) : IntegrationTestBase(factory)
     }
 
     [Fact]
-    public async Task Login_Com_Senha_Errada_Deve_Retornar_400()
+    public async Task Login_Com_Senha_Errada_Deve_Retornar_401()
     {
         var username = $"wrongpwd_{Guid.NewGuid():N}";
         await Client.PostAsJsonAsync("/api/v1/user/register", new
@@ -88,11 +88,11 @@ public class AuthTests(ChatAppFactory factory) : IntegrationTestBase(factory)
             password = "SenhaErrada"
         });
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
-    public async Task Login_Com_Usuario_Inexistente_Deve_Retornar_400()
+    public async Task Login_Com_Usuario_Inexistente_Deve_Retornar_401()
     {
         var response = await Client.PostAsJsonAsync("/api/v1/user/login", new
         {
@@ -100,6 +100,6 @@ public class AuthTests(ChatAppFactory factory) : IntegrationTestBase(factory)
             password = "Senha@123"
         });
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 }

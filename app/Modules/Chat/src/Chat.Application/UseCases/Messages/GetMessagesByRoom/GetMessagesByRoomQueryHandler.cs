@@ -33,19 +33,19 @@ public class GetMessagesByRoomQueryHandler : IQueryHandler<GetMessagesByRoomQuer
 
         if (user is null)
         {
-            return Result.Failure<IEnumerable<GetMessagesByRoomResponse>>(UserErrors.NotFound);
+            return UserErrors.NotFound;
         }
 
         var chatRoom = await _chatRoomRepository.GetById(request.RoomId, cancellationToken);
 
         if (chatRoom is null)
         {
-            return Result.Failure<IEnumerable<GetMessagesByRoomResponse>>(ChatRoomErrors.NotFound);
+            return ChatRoomErrors.NotFound;
         }
 
         if (!chatRoom.IsUserInRoom(user))
         {
-            return Result.Failure<IEnumerable<GetMessagesByRoomResponse>>(ChatRoomErrors.NotMember);
+            return ChatRoomErrors.NotMember;
         }
 
         var messages = await _messageDao.GetByRoom(request.RoomId, request.Before, request.Take, cancellationToken);

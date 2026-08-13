@@ -41,18 +41,18 @@ public sealed class JoinRoomCommandHandler : ICommandHandler<JoinRoomCommand>
         var user = await _userRepository.GetById(_userContext.UserId, cancellationToken);
         if (user is null)
         {
-            return Result.Failure(UserErrors.NotFound);
+            return UserErrors.NotFound;
         }
 
         var room = await _chatRoomRepository.GetById(request.RoomId, cancellationToken);
         if (room is null)
         {
-            return Result.Failure(ChatRoomErrors.NotFound);
+            return ChatRoomErrors.NotFound;
         }
 
         if (room.IsPrivate && (request.Password is null || !_hashService.Compare(request.Password, room.Password)))
         {
-            return Result.Failure(ChatRoomErrors.InvalidPassword);
+            return ChatRoomErrors.InvalidPassword;
         }
 
         var joinResult = room.Join(user);

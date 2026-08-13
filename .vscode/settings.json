@@ -4,5 +4,6 @@
     "**/obj": true,
     "**/bin": true,
     "**/*.csproj": true
-  }
+  },
+  "dotnet.defaultSolution": "ChatApp.slnx"
 }

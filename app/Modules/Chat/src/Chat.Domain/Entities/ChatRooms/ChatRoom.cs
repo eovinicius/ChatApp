@@ -33,10 +33,10 @@ public sealed class ChatRoom : AggregateRoot
     public static Result<ChatRoom> Create(string name, User user, bool isPrivate, string? password = null)
     {
         if (string.IsNullOrWhiteSpace(name))
-            return Result.Failure<ChatRoom>(ChatRoomErrors.EmptyName);
+            return ChatRoomErrors.EmptyName;
 
         if (isPrivate && string.IsNullOrWhiteSpace(password))
-            return Result.Failure<ChatRoom>(ChatRoomErrors.PrivateRoomRequiresPassword);
+            return ChatRoomErrors.PrivateRoomRequiresPassword;
 
         var room = new ChatRoom(name, user.Id, isPrivate, password);
         room.RaiseDomainEvent(new RoomCreatedEvent(room.Id, room.Name, room.OwnerId));
@@ -48,10 +48,10 @@ public sealed class ChatRoom : AggregateRoot
     public Result Join(User user)
     {
         if (IsUserInRoom(user))
-            return Result.Failure(ChatRoomErrors.AlreadyMember);
+            return ChatRoomErrors.AlreadyMember;
 
         if (MaxMembersReached())
-            return Result.Failure(ChatRoomErrors.RoomFull);
+            return ChatRoomErrors.RoomFull;
 
         var chatRoomUser = ChatRoomUser.Create(Id, user.Id);
 

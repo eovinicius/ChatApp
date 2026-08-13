@@ -30,52 +30,39 @@ public static class MessageEndpoints
         {
             var result = await sender.Send(new GetMessagesByRoomQuery(roomId, before, take));
 
-            return result.IsFailure
-                ? ApiResults.Problem(result.Error)
-                : Results.Ok(result.Value);
+            return result.ToHttpResult();
         });
 
         group.MapPost("", async (SendMessageRequest request, ISender sender) =>
         {
             var result = await sender.Send(new SendMessageCommand(request.RoomId, request.Content, request.ContentType));
 
-            return result.IsFailure
-                ? ApiResults.Problem(result.Error)
-                : Results.Created($"/api/v1/Message/{result.Value}", new { id = result.Value });
+            return result.ToHttpResult(id => Results.Created($"/api/v1/Message/{id}", new { id }));
         });
 
         group.MapPut("{messageId:guid}", async (Guid messageId, EditMessageRequest request, ISender sender) =>
         {
             var result = await sender.Send(new EditMessageCommand(messageId, new MessageContent("text", request.Content), request.RoomId));
 
-            return result.IsFailure
-                ? ApiResults.Problem(result.Error)
-                : Results.NoContent();
+            return result.ToHttpResult();
         });
 
         group.MapDelete("{messageId:guid}", async (Guid messageId, Guid roomId, ISender sender) =>
         {
             var result = await sender.Send(new DeleteMessageCommand(messageId, roomId));
 
-            return result.IsFailure
-                ? ApiResults.Problem(result.Error)
-                : Results.NoContent();
+            return result.ToHttpResult();
         });
 
         group.MapPost("upload", async (IFormFile file, ISender sender) =>
         {
             if (file is null || file.Length == 0)
-                return Results.Problem(
-                    statusCode: StatusCodes.Status400BadRequest,
-                    title: "UploadFile.EmptyFile",
-                    detail: "Nenhum arquivo enviado.");
+                return ApiResults.Problem(UploadFileErrors.EmptyFile);
 
             var extension = Path.GetExtension(file.FileName);
             var result = await sender.Send(new UploadFileCommand(file.FileName, file.ContentType, file.OpenReadStream(), extension));
 
-            return result.IsFailure
-                ? ApiResults.Problem(result.Error)
-                : Results.Ok(new { url = result.Value.FileUrl });
+            return result.ToHttpResult(response => Results.Ok(new { url = response.FileUrl }));
         }).DisableAntiforgery();
 
         return app;

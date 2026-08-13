@@ -39,19 +39,19 @@ public class DeleteMessageCommandHandler : ICommandHandler<DeleteMessageCommand>
 
         if (user is null)
         {
-            return Result.Failure(UserErrors.NotFound);
+            return UserErrors.NotFound;
         }
 
         var message = await _messageRepository.GetById(request.MessageId, cancellationToken);
 
         if (message is null)
         {
-            return Result.Failure(ChatMessageErrors.NotFound);
+            return ChatMessageErrors.NotFound;
         }
 
         if (!message.CanBeDeletedBy(currentUserId, request.RoomId, _dateTimeProvider.UtcNow))
         {
-            return Result.Failure(ChatMessageErrors.Unauthorized);
+            return ChatMessageErrors.Unauthorized;
         }
 
         await _messageRepository.Delete(message, cancellationToken);

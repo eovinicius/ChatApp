@@ -30,16 +30,16 @@ public class UploadFileCommandHandler : ICommandHandler<UploadFileCommand, Uploa
     public async Task<Result<UploadFileCommandResponse>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
     {
         if (request.Content.Length == 0)
-            return Result.Failure<UploadFileCommandResponse>(UploadFileErrors.EmptyFile);
+            return UploadFileErrors.EmptyFile;
 
         if (request.Content.Length > MaxFileSizeInBytes)
-            return Result.Failure<UploadFileCommandResponse>(UploadFileErrors.FileTooLarge);
+            return UploadFileErrors.FileTooLarge;
 
         if (!AllowedContentTypePrefixes.Any(prefix => request.ContentType.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
-            return Result.Failure<UploadFileCommandResponse>(UploadFileErrors.InvalidContentType);
+            return UploadFileErrors.InvalidContentType;
 
         if (!AllowedExtensions.Contains(request.Extension))
-            return Result.Failure<UploadFileCommandResponse>(UploadFileErrors.InvalidExtension);
+            return UploadFileErrors.InvalidExtension;
 
         var key = $"messages/{Guid.NewGuid()}{request.Extension}";
 
