@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Chat.Domain\Chat.Domain.csproj" />
+    <ProjectReference Include="..\..\..\Identity\src\Identity.Contracts\Identity.Contracts.csproj" />
     <ProjectReference Include="..\..\..\..\Shared\SharedKernel\SharedKernel.csproj" />
     <ProjectReference Include="..\..\..\..\Shared\BuildingBlocks\BuildingBlocks.csproj" />
   </ItemGroup>
