@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 using Microsoft.AspNetCore.Http;
 
+using SharedKernel;
+
 namespace BuildingBlocks.Api;
 
 // Valida (via DataAnnotations) o argumento do tipo T recebido pelo endpoint,
@@ -19,16 +21,18 @@ public sealed class ValidationFilter<T> : IEndpointFilter where T : class
 
             if (!Validator.TryValidateObject(argument, validationContext, results, validateAllProperties: true))
             {
+                // Uma falha por (campo, mensagem) — o mesmo Error que o domínio
+                // usa, para que os 400 tenham todos a mesma forma.
                 var errors = results
                     .SelectMany(
                         result => result.MemberNames.DefaultIfEmpty(string.Empty),
-                        (result, member) => (Member: member, result.ErrorMessage))
-                    .GroupBy(entry => entry.Member)
-                    .ToDictionary(
-                        group => group.Key,
-                        group => group.Select(entry => entry.ErrorMessage ?? "Valor inválido").ToArray());
+                        (result, member) => new Error(
+                            member,
+                            result.ErrorMessage ?? "Valor inválido",
+                            ErrorType.Validation))
+                    .ToList();
 
-                return Results.ValidationProblem(errors);
+                return ApiResults.Problem(new ValidationError(errors));
             }
         }
 
