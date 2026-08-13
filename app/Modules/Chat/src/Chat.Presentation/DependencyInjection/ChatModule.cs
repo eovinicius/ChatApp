@@ -7,7 +7,6 @@ using Chat.Infrastructure.RealTime;
 using Chat.Presentation.Endpoints;
 
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,13 +15,10 @@ namespace Chat.Presentation.DependencyInjection;
 
 public static class ChatModule
 {
-    public static IServiceCollection AddChatModule(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        IWebHostEnvironment environment)
+    public static IServiceCollection AddChatModule(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddApplication();
-        services.AddInfrastructure(configuration, environment);
+        services.AddInfrastructure(configuration);
 
         return services;
     }
@@ -35,8 +31,7 @@ public static class ChatModule
             .ReportApiVersions()
             .Build();
 
-        app.MapUserEndpoints(versionSet);
-        app.MapChatRoomEndpoints(versionSet);
+        app.MapConversationEndpoints(versionSet);
         app.MapMessageEndpoints(versionSet);
 
         app.MapHub<ChatHub>("/chatHub");

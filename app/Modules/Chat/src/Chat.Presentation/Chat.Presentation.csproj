@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Chat.Application\Chat.Application.csproj" />
     <ProjectReference Include="..\Chat.Infrastructure\Chat.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\..\Shared\BuildingBlocks.Api\BuildingBlocks.Api.csproj" />
   </ItemGroup>
 
 </Project>
